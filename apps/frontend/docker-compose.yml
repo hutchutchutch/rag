@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  frontend:
+    build: .
+    container_name: frontend
+    ports:
+      - "5173:5173"  # Vite dev server
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: pnpm dev

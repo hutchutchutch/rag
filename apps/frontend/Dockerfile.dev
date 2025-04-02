@@ -1,0 +1,26 @@
+# Dockerfile.dev for Frontend (Vite) -- Full Monorepo Copy
+
+FROM node:18-alpine
+
+# Create work dir
+WORKDIR /app
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Copy the entire monorepo into the container.
+# (Assumes you run `docker build` from the monorepo root.)
+COPY . . 
+
+# Install dependencies, but filter to the frontend if you prefer.
+# This step references your monorepo's pnpm-workspace.yaml in /app.
+RUN pnpm install --filter=./apps/frontend...
+
+# Switch into the frontend directory
+WORKDIR /app/apps/frontend
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Default command: run dev
+CMD ["pnpm", "dev"]
