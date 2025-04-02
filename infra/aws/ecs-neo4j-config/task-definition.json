@@ -1,0 +1,140 @@
+{
+  "family": "neo4j-ecs",
+  "executionRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/neo4j-task-role",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "neo4j",
+      "image": "neo4j:5.12.0-enterprise",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 7474,
+          "hostPort": 7474,
+          "protocol": "tcp"
+        },
+        {
+          "containerPort": 7687,
+          "hostPort": 7687,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NEO4J_AUTH",
+          "value": "neo4j/${NEO4J_PASSWORD}"
+        },
+        {
+          "name": "NEO4J_ACCEPT_LICENSE_AGREEMENT",
+          "value": "yes"
+        },
+        {
+          "name": "NEO4J_apoc_export_file_enabled",
+          "value": "true"
+        },
+        {
+          "name": "NEO4J_apoc_import_file_enabled",
+          "value": "true"
+        },
+        {
+          "name": "NEO4J_apoc_import_file_use__neo4j__config",
+          "value": "true"
+        },
+        {
+          "name": "NEO4J_dbms_security_procedures_unrestricted",
+          "value": "apoc.*,vectorize.*"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "NEO4J_PASSWORD",
+          "valueFrom": "arn:aws:ssm:YOUR_REGION:YOUR_ACCOUNT_ID:parameter/neo4j/password"
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "neo4j-data",
+          "containerPath": "/data",
+          "readOnly": false
+        },
+        {
+          "sourceVolume": "neo4j-plugins",
+          "containerPath": "/plugins",
+          "readOnly": false
+        },
+        {
+          "sourceVolume": "neo4j-import",
+          "containerPath": "/import",
+          "readOnly": false
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/neo4j",
+          "awslogs-region": "YOUR_REGION",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "wget -O - http://localhost:7474 || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ],
+  "volumes": [
+    {
+      "name": "neo4j-data",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-YOUR_EFS_ID",
+        "rootDirectory": "/data",
+        "transitEncryption": "ENABLED",
+        "authorizationConfig": {
+          "iam": "ENABLED"
+        }
+      }
+    },
+    {
+      "name": "neo4j-plugins",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-YOUR_EFS_ID",
+        "rootDirectory": "/plugins",
+        "transitEncryption": "ENABLED",
+        "authorizationConfig": {
+          "iam": "ENABLED"
+        }
+      }
+    },
+    {
+      "name": "neo4j-import",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-YOUR_EFS_ID",
+        "rootDirectory": "/import",
+        "transitEncryption": "ENABLED",
+        "authorizationConfig": {
+          "iam": "ENABLED"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "tags": [
+    {
+      "key": "Environment",
+      "value": "Production"
+    },
+    {
+      "key": "Service",
+      "value": "Neo4j"
+    }
+  ]
+}

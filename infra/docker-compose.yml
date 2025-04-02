@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ../apps/frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../apps/frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ../apps/backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../apps/backend:/app
+      - /app/node_modules
+      - ../apps/backend/uploads:/app/uploads
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - S3_BUCKET_NAME=local-s3-bucket
+      - GOOGLE_CLIENT_ID=your-client-id
+      - GOOGLE_CLIENT_SECRET=your-client-secret
+      - GEMINI_API_KEY=your-gemini-api-key
+    depends_on:
+      - neo4j
+
+  neo4j:
+    image: neo4j:5.12.0-community
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - ../infra/neo4j/plugins:/plugins
+      - ../infra/neo4j/import:/import
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,vectorize.*
+
+volumes:
+  neo4j_data:
