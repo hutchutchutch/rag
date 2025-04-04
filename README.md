@@ -1,6 +1,16 @@
-# Turbo Monorepo with pnpm, Docker, AWS ECS (Neo4j), and S3
+# Multi-Vector Store RAG System
 
-This repository showcases a **Turborepo**-style monorepo using **pnpm** for package management, **Docker** for containerizing both development and production builds, and integration with various AWS services (ECS, S3, OpenSearch) and **Neo4j**. The **frontend** uses Vite (e.g. React), while the **backend** is Express + LangGraph. We also provide connectivity to **Google Drive** for uploading documents into S3. Lastly, we integrate with **Gemini** embeddings (LLM) and use Amazon OpenSearch + Neo4j as vector stores for advanced retrieval.
+This repository demonstrates a comprehensive **Retrieval-Augmented Generation (RAG)** system using multiple vector stores. It's built as a **Turborepo**-style monorepo with **pnpm** for package management and **Docker** for containerization. 
+
+The system stores document embeddings in both **Neo4j** and **PostgreSQL with pgvector**, uploads files to **AWS S3**, and uses **Google Gemini** for creating embeddings. The RAG pipeline is orchestrated using **LangGraph** in the Express.js backend, with a **React/Vite** frontend for interacting with the system.
+
+## RAG System Features
+
+1. **Dual Vector Storage** - Stores embeddings in both Neo4j graph database and PostgreSQL with pgvector extension
+2. **S3 Document Storage** - Uploads and retrieves markdown documents from S3
+3. **Gemini Embeddings** - Uses Google's Gemini embedding model for vector representation
+4. **LangGraph Pipeline** - Orchestrates the retrieval-augmented generation process
+5. **React Frontend** - Provides an intuitive user interface for document upload and chat
 
 ---
 
@@ -166,13 +176,80 @@ my-app/
 
 ---
 
+## Getting Started with the RAG System
+
+### Prerequisites
+
+- Node.js v18+ and pnpm
+- Docker and Docker Compose
+- Google Gemini API key
+- OpenAI API key
+
+### Setup
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd rag
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Environment variables**
+
+   Create a `.env` file in the backend directory based on the `.env.example`:
+
+   ```bash
+   cp apps/backend/.env.example apps/backend/.env
+   ```
+
+   Add your Google Gemini API key and OpenAI API key to the `.env` file.
+
+4. **Start the development environment**
+
+   ```bash
+   docker-compose -f infra/docker-compose-dev.yml up
+   ```
+
+   This will start:
+   - Neo4j database
+   - PostgreSQL with pgvector
+   - LocalStack for S3 emulation
+   - Backend Express server
+   - Frontend Vite server
+
+5. **Access the application**
+
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:3000
+   - Neo4j Browser: http://localhost:7474
+
+### Using the RAG System
+
+1. **Upload Documents**
+   - Use the sidebar to upload the `ansi.md` file
+   - The system will process it through the RAG pipeline
+
+2. **Chat Interface**
+   - Ask questions about the uploaded document
+   - The system retrieves relevant context and generates answers
+
+3. **Vector Store Visualization**
+   - View document chunks and their vector representations
+
 ## Conclusion
 
-This Turbo monorepo unites:
-- Frontend (Vite) with dev/production Dockerfiles
-- Backend (Express + LangGraph) for advanced agent workflows
-- AWS ECS for hosting your Neo4j instance (and possibly other containers)
-- S3 for object storage (user uploads from Google Drive or direct)
-- OpenSearch or Neo4j as vector databases, combined with Gemini embeddings
+This RAG system demonstrates a practical implementation of:
 
-By following this structure, you can develop locally with Docker Compose or dev servers, then seamlessly build/push container images to ECS for production. This approach offers maximum flexibility in building advanced retrieval-augmented applications, harnessing the synergy of LangGraph for multi-step logic and AWS for robust hosting and data services.
+- Multi-vector store architecture with Neo4j and PostgreSQL/pgvector
+- LangGraph for orchestrating the RAG workflow
+- S3 integration for document storage
+- Gemini embeddings for vector creation
+- React/Vite frontend for user interaction
+
+By following this implementation, you can build sophisticated RAG systems that combine the strengths of graph databases and vector search for improved retrieval capabilities.
