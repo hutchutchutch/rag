@@ -1,16 +1,6 @@
-# Multi-Vector Store RAG System
+# Multi-Vector Store RAG System: Turbo Monorepo with pnpm, Docker, AWS ECS (Neo4j), and S3
 
-This repository demonstrates a comprehensive **Retrieval-Augmented Generation (RAG)** system using multiple vector stores. It's built as a **Turborepo**-style monorepo with **pnpm** for package management and **Docker** for containerization. 
-
-The system stores document embeddings in both **Neo4j** and **PostgreSQL with pgvector**, uploads files to **AWS S3**, and uses **Google Gemini** for creating embeddings. The RAG pipeline is orchestrated using **LangGraph** in the Express.js backend, with a **React/Vite** frontend for interacting with the system.
-
-## RAG System Features
-
-1. **Dual Vector Storage** - Stores embeddings in both Neo4j graph database and PostgreSQL with pgvector extension
-2. **S3 Document Storage** - Uploads and retrieves markdown documents from S3
-3. **Gemini Embeddings** - Uses Google's Gemini embedding model for vector representation
-4. **LangGraph Pipeline** - Orchestrates the retrieval-augmented generation process
-5. **React Frontend** - Provides an intuitive user interface for document upload and chat
+This repository demonstrates a comprehensive **Retrieval-Augmented Generation (RAG)** system using multiple vector stores. It's built as a **Turborepo**-style monorepo, using **pnpm** for package management and **Docker** for both development and production builds. It integrates with **AWS ECS** for hosting Neo4j, **S3** for document storage, **PostgreSQL with pgvector** for vector-based searching, and **LangGraph** for multi-step logic in the **backend**. The **frontend** is built with Vite (React) and provides an intuitive user interface for document upload and chat interaction.
 
 ---
 
@@ -19,90 +9,122 @@ The system stores document embeddings in both **Neo4j** and **PostgreSQL with pg
 ```
 my-app/
 ├── apps/
-│   ├── frontend/              # Vite-based frontend
-│   │   ├── Dockerfile         # Production Dockerfile
-│   │   ├── Dockerfile.dev     # Dev Dockerfile (hot reload)
+│   ├── frontend/           # Vite-based frontend
+│   │   ├── Dockerfile      # Production Dockerfile
+│   │   ├── Dockerfile.dev  # Dev Dockerfile (hot reload)
+│   │   ├── src/
+│   │   │   ├── pages/      # Upload page, chat interface, vector store visualization
+│   │   │   ├── components/ # Shared UI components (sidebar, chat window, document viewer)
+│   │   │   ├── hooks/      # React hooks
+│   │   │   └── ...
 │   │   └── ...
-│   └── backend/               # Express.js backend w/ LangGraph
+│   └── backend/            # Express.js + LangGraph
 │       ├── Dockerfile
 │       ├── Dockerfile.dev
+│       ├── src/
+│       │   ├── routes/     # API routes for documents, embeddings, chat
+│       │   ├── controllers/ # Handlers for document processing, embedding generation
+│       │   ├── services/   # Business logic, e.g. vector storage, retrieval
+│       │   ├── langgraph/  # Agents using LangGraph for RAG workflow (retrieval, summarization)
+│       │   └── ...
 │       └── ...
-├── infra/                     # Infrastructure resources
-│   ├── docker-compose.yml     # For local dev environment
+├── infra/                  # Infrastructure for Neo4j, Docker Compose, AWS config
+│   ├── docker-compose.yml  # Orchestrates local dev environment
 │   ├── aws/
-│   │   ├── ecs-neo4j-config/  # Configuration for ECS tasks running Neo4j
-│   │   ├── s3-setup.md        # Steps or scripts for S3 bucket creation
-│   │   ├── google-drive-docs/ # Scripts or docs for Google Drive integration
+│   │   ├── ecs-neo4j-config/ # ECS Task Definitions or scripts for hosting Neo4j
+│   │   ├── s3-setup.md     # Steps/scripts for S3 config
+│   │   ├── google-drive-docs/ # Scripts for Google Drive integration
 │   │   └── ...
 │   └── ...
-├── packages/                  # Shared libraries across apps (optional)
-│   ├── shared-lib/            # e.g. reusable domain models, utils
+├── packages/               # Shared libraries across apps (optional)
+│   ├── shared-lib/         # e.g. reusable domain models, utils
 │   └── ...
-├── scripts/                   # Helper scripts / CLI automation
-│   ├── seed-neo4j.ts
-│   ├── google-drive-import.ts # Possibly script for testing drive import
+├── scripts/                # Helper scripts/CLI automation
+│   ├── seed-neo4j.ts       # Initialize database with schema constraints
+│   ├── google-drive-import.ts # Script for testing drive import
 │   └── ...
-├── turbo.json                 # Turborepo config for pipeline tasks
-├── pnpm-workspace.yaml        # pnpm workspace definition
-├── package.json               # Root-level scripts & devDependencies
-└── README.md                  # This file
+├── turbo.json              # Turborepo config for pipeline tasks
+├── pnpm-workspace.yaml     # pnpm workspace definition
+├── package.json            # Root-level scripts and devDependencies
+└── README.md               # This file
 ```
 
 ### Key Directories
 
 1. **`apps/frontend/`**  
-   - Uses **Vite** for the UI, Dockerfiles for dev & prod.  
-   - Connects to the backend's API for data, including drive import and file management.
+   - **Vite** for the UI with React and TypeScript.
+   - **Dockerfiles**:
+     - `Dockerfile.dev` for local dev with hot reload.
+     - `Dockerfile` for production builds.
+   - Pages include:
+     - **Document Upload**: Interface for uploading markdown documents or importing from Google Drive.
+     - **Chat Interface**: Allows users to ask questions about uploaded documents.
+     - **Vector Store Visualization**: View document chunks and their vector representations.
+   - Services layer for API communication with the backend.
+   - Type definitions that mirror backend data models.
 
 2. **`apps/backend/`**  
    - **Express.js** with TypeScript.  
-   - **LangGraph** integration for multi-step agent flows (e.g., retrieval, summarization, etc.).  
-   - Connects to AWS S3 (object storage) for uploaded docs, Google Drive for fetching user files, and Amazon OpenSearch + Neo4j for vector search and graph-based queries.
+   - **Neo4j Integration**:
+     - Connection management with the Neo4j database.
+     - Models for documents, chunks, embeddings, and relationships.
+     - Complex graph queries for document retrieval.
+   - **PostgreSQL/pgvector Integration**:
+     - Secondary vector storage for comparison and backup.
+     - Vector similarity search capabilities.
+   - **RESTful API**:
+     - Endpoints for document uploading and processing.
+     - Embedding generation and storage.
+     - Chat conversation handling.
+   - Integrates **LangGraph** for multi-step workflows, e.g. document chunking, embedding generation, retrieval, and answer generation.  
+   - Connects to:
+     - **AWS S3** for document storage (markdown files).
+     - **Neo4j** on ECS for storing document relationships and vector embeddings.
+     - **PostgreSQL with pgvector** for additional vector storage and search.
+     - **Google Gemini** for creating embeddings and text generation.
 
 3. **`infra/`**  
-   - Contains **docker-compose.yml** for local dev, spinning up backend, frontend, and a local test environment for Neo4j if desired.  
-   - **`aws/`** subdirectory holds resources for deploying **Neo4j** on ECS, S3 config, Google Drive integration notes, etc.  
-   - AWS ECS configuration for **Neo4j** helps you run self-managed instances or cluster on ECS Fargate/EC2.  
-   - S3 scripts for bucket creation, policy setup, etc.
+   - **docker-compose.yml**: For local dev, spins up Neo4j, PostgreSQL, LocalStack (S3 emulation), the backend, and the frontend.  
+   - **`aws/ecs-neo4j-config/`**: Defines how we run Neo4j in AWS ECS (Fargate or EC2-based tasks).  
+   - **`aws/s3-setup.md`**: Docs for creating S3 buckets for storing documents.  
+   - **`aws/google-drive-docs/`**: Scripts and documentation for Google Drive integration.
 
 4. **`packages/`** (optional)  
-   - If you have shared code or libs used by multiple apps, store them here.  
-   - If you're purely referencing everything from the root, `pnpm` handles synergy, but many prefer a `packages/` folder to keep shared items clear.
+   - If you have shared code (utilities, embedding algorithms, or retrieval strategies), place them in subfolders.  
+   - **pnpm** automatically handles linking across your workspace.
 
 5. **`scripts/`**  
-   - Helper or CLI tasks like `seed-neo4j.ts` to push initial data or graph constraints, `google-drive-import.ts` for testing Google integration, or one-off scripts for admin tasks.
+   - **`seed-neo4j.ts`**: Seeds the database with schema constraints and initial data.  
+   - **`google-drive-import.ts`**: Script for testing Google Drive integration.
 
 ---
 
 ## Intent & Features
 
 1. **Docker-based Development**  
-   - Each app (frontend, backend) has a `Dockerfile.dev` for hot reload in local dev, plus a production `Dockerfile`.  
-   - The `infra/docker-compose.yml` can orchestrate local dev with a single command: `docker compose up --build`.
+   - Each app has a dev Dockerfile for immediate reloading.  
+   - `infra/docker-compose.yml` can run the entire stack: Neo4j, PostgreSQL, the backend, and the frontend.
 
 2. **AWS ECS for Neo4j**  
-   - Instead of hosting Neo4j locally in production, we define ECS tasks that run the official Neo4j image or a customized build (with plugins, e.g. APOC).  
-   - The ECS config (like a `task-definition.json` or Terraform script) is stored in `infra/aws/ecs-neo4j-config`. This includes networking details, storage volumes, cluster setup, etc.
+   - We use AWS ECS to run a **self-hosted Neo4j** container. This is essential for storing document relationships and vector embeddings.  
+   - The `ecs-neo4j-config/` folder helps define or store the ECS task definition.
 
-3. **AWS S3 Object Storage**  
-   - The **backend** uses S3 for storing user-uploaded documents. The config (credentials, region, bucket name) can be placed in environment variables or in a config file under `apps/backend`.  
-   - `infra/aws/s3-setup.md` might outline how to create the S3 bucket, attach IAM policies, etc.
+3. **S3 for Document Storage**  
+   - Markdown documents are stored in **S3**.  
+   - The backend manages these uploads, storing metadata in Neo4j or PostgreSQL.
 
-4. **Google Drive Integration**  
-   - The backend can connect to users' Google accounts, retrieving drive files they want to process. The user's documents can then be stored or backed up to S3.  
-   - Scripts or docs for this are in `infra/aws/google-drive-docs` or a `scripts/google-drive-import.ts`.
+4. **Dual Vector Storage**  
+   - Primary storage in **Neo4j** for graph-based relationships and retrieval.
+   - Secondary storage in **PostgreSQL with pgvector** for comparison and backup.
+   - Uses **Google Gemini** to create embeddings for vector representation.
 
-5. **Vector Search**  
-   - We are using **Gemini embeddings** for our vector transformations.  
-   - The backend can connect to **Amazon OpenSearch** for vector search capabilities or **Neo4j** if we store vectors in the graph. This allows multiple retrieval patterns:
-     - **Graph-based** queries in Neo4j
-     - **Vector-based** queries in OpenSearch or Neo4j's native vector indexing
-     - Combine both as needed
+5. **Google Drive Integration**  
+   - Allow users to import documents from their Drive.
+   - Integration details in `infra/aws/google-drive-docs/`.
 
-6. **LangGraph in the Backend**  
-   - `apps/backend` will have the typical structure for **LangGraph**:
-     - `configuration.ts`, `graph.ts`, `prompts.ts`, `state.ts`, `utils.ts` or similar  
-   - This orchestrates reading from S3, calling Google Drive APIs, embedding text with Gemini, and searching in OpenSearch/Neo4j.
+6. **LangGraph** (Backend)  
+   - The backend orchestrates the RAG workflow (chunking, embedding, retrieval, generation) with **LangGraph**.  
+   - Code in `apps/backend/src/langgraph/`, with typical files (`graph.ts`, `prompts.ts`, etc.).
 
 ---
 
@@ -112,78 +134,113 @@ my-app/
    ```bash
    pnpm install
    ```
-   Installs all dependencies across the monorepo, linking shared libraries if any exist in packages/.
+   Installs dependencies across the entire monorepo.
 
-2. **Local Docker**
-
-   From infra/, run:
+2. **Local Docker**  
+   In `infra/`, run:
    ```bash
    docker compose up --build
    ```
-   This can spin up Neo4j, backend (Express + LangGraph), and frontend (Vite).
+   This spins up Neo4j, PostgreSQL, LocalStack (S3 emulation), backend (Express + LangGraph), frontend (Vite).
 
-   Alternatively, each app can be run individually, e.g.:
+   Alternatively, run them separately:
    ```bash
    pnpm --filter=backend dev
    pnpm --filter=frontend dev
    ```
-   Make sure you have a local or Docker-based instance of Neo4j if the backend depends on it.
 
-3. **AWS ECS Deployment**
+3. **AWS ECS Deployment**  
+   The folder `infra/aws/ecs-neo4j-config/` or any Terraform/Copilot scripts define how to host Neo4j in ECS.
 
-   `infra/aws/ecs-neo4j-config/` or a Terraform module might define how to deploy Neo4j on ECS.
+   The backend and frontend each have Dockerfiles you can build/push to ECR, then define ECS services.
 
-   The backend and frontend can each be built/pushed to ECR and run as ECS services.
+   S3, PostgreSQL, and other resources can be configured via AWS console or IaC in the same folder.
 
-   S3 and any other services (like Amazon OpenSearch) also get configured here or in your separate IaC repo.
-
-4. **Credentials & Environment Variables**
-
-   Store AWS credentials, S3 bucket name, Google OAuth client secrets, and Neo4j connection info in a .env or pass them in from CI secrets / ECS Task Definitions.
-
-   For dev, you might have a .env in apps/backend or pass them to Docker Compose. For production, use ECS secrets or Parameter Store.
+4. **Credentials & Env Variables**  
+   Manage environment variables (S3 buckets, Google OAuth secrets, Gemini API keys) through `.env` in dev and ECS secrets in production.
 
 5. **Google Drive to S3 Flow**
    - User authenticates with Google
    - Backend retrieves a list of drive files
    - User selects files to upload
-   - Backend pulls selected files, optionally chunking or analyzing them, then stores them in S3
-   - Optionally, LangGraph nodes handle chunking + embedding, storing vectors in OpenSearch or Neo4j
+   - Backend pulls selected files, chunks them, and stores in S3
+   - LangGraph nodes handle chunking + embedding, storing vectors in Neo4j and PostgreSQL
 
-6. **How Vector Search & Gemini Embeddings Fit In**
-   - Gemini provides embeddings for user documents or queries.
-   - The backend calls an API to transform text to vector form.
-   - OpenSearch or Neo4j can store these vectors. The backend's retrieval logic might do:
-     - Convert user query to vector
-     - Compare with document vectors in OpenSearch or in Neo4j's vector store
-     - Combine results with graph-based relationships or re-rank them for the user
+---
+
+## RAG System Features
+
+1. **Document Processing**:
+   - Upload markdown documents directly or import from Google Drive.
+   - Automatic chunking of documents for efficient processing.
+   - Storage in S3 with metadata in Neo4j.
+
+2. **Dual Vector Storage**:
+   - Store embeddings in both Neo4j graph database and PostgreSQL with pgvector extension.
+   - Compare retrieval results from both sources for improved accuracy.
+
+3. **Gemini Embeddings**:
+   - Generate high-quality embeddings using Google's Gemini model.
+   - Store and retrieve embeddings from dual vector stores.
+
+4. **Chat Interface**:
+   - Ask questions about uploaded documents.
+   - System retrieves relevant context from vector stores.
+   - LangGraph orchestrates the retrieval and answer generation process.
+
+5. **Vector Store Visualization**:
+   - View document chunks and their vector representations.
+   - Visualize similarity between chunks for better understanding.
 
 ---
 
 ## Production Considerations
 
 1. **Dockerfiles**
-   - Each app has a dev (Dockerfile.dev) and a production (Dockerfile).
-   - Production often uses multi-stage builds for minimal images.
+   - Each app's Dockerfile (production) is likely multi-stage, building minimal images for ECS.
 
 2. **ECS**
-   - We push each Docker image (frontend, backend, possibly a custom Neo4j) to ECR, then define ECS tasks/services.
-   - `infra/aws/ecs-neo4j-config/` manages persistent volumes or EFS for Neo4j data.
+   - Push images to ECR, define tasks for backend, frontend, plus the Neo4j container.
+   - Store document data in S3, connect to PostgreSQL for secondary vector storage.
 
 3. **Security**
-   - Storing secrets in ECS Task Definitions or AWS Secrets Manager, not in .env committed to the repo.
-   - Proper IAM roles for S3, OpenSearch, etc.
+   - Keep secrets in AWS Secrets Manager or ECS Task Definition secrets.
+   - Use IAM roles to allow the backend container to read/write S3, query databases, etc.
 
 ---
 
-## Getting Started with the RAG System
+## Technology Stack
+
+This RAG system uses:
+
+- **Frontend**: 
+  - React with TypeScript for type-safe components
+  - Vite for fast development and optimized builds
+  - React Router for navigation between features
+  - Axios for API communication with the backend
+
+- **Backend**:
+  - Express.js with TypeScript for a robust API server
+  - Neo4j database for graph-based data relationships
+  - PostgreSQL with pgvector for secondary vector storage
+  - RESTful API design with structured controllers and models
+  - Google Gemini for embeddings and text generation
+
+- **Infrastructure**:
+  - Turborepo + pnpm for consolidated multi-app dev
+  - Docker for local dev/prod builds
+  - Neo4j on AWS ECS to store document relationships and embeddings
+  - S3 for storing document files
+  - PostgreSQL with pgvector for comparison vector storage
+  - LangGraph in the backend to orchestrate the RAG workflow
+
+## Getting Started
 
 ### Prerequisites
 
 - Node.js v18+ and pnpm
 - Docker and Docker Compose
 - Google Gemini API key
-- OpenAI API key
 
 ### Setup
 
@@ -191,7 +248,7 @@ my-app/
 
    ```bash
    git clone <repository-url>
-   cd rag
+   cd my-app
    ```
 
 2. **Install dependencies**
@@ -208,12 +265,13 @@ my-app/
    cp apps/backend/.env.example apps/backend/.env
    ```
 
-   Add your Google Gemini API key and OpenAI API key to the `.env` file.
+   Add your Google Gemini API key to the `.env` file.
 
 4. **Start the development environment**
 
    ```bash
-   docker-compose -f infra/docker-compose-dev.yml up
+   cd infra
+   docker compose up
    ```
 
    This will start:
@@ -229,27 +287,8 @@ my-app/
    - Backend API: http://localhost:3000
    - Neo4j Browser: http://localhost:7474
 
-### Using the RAG System
-
-1. **Upload Documents**
-   - Use the sidebar to upload the `ansi.md` file
-   - The system will process it through the RAG pipeline
-
-2. **Chat Interface**
-   - Ask questions about the uploaded document
-   - The system retrieves relevant context and generates answers
-
-3. **Vector Store Visualization**
-   - View document chunks and their vector representations
-
 ## Conclusion
 
-This RAG system demonstrates a practical implementation of:
+This RAG system provides a comprehensive solution for document processing and question answering. By leveraging dual vector stores, it combines the strengths of graph databases and traditional vector search for improved retrieval capabilities. The LangGraph-orchestrated workflow ensures a smooth pipeline from document upload to answer generation.
 
-- Multi-vector store architecture with Neo4j and PostgreSQL/pgvector
-- LangGraph for orchestrating the RAG workflow
-- S3 integration for document storage
-- Gemini embeddings for vector creation
-- React/Vite frontend for user interaction
-
-By following this implementation, you can build sophisticated RAG systems that combine the strengths of graph databases and vector search for improved retrieval capabilities.
+By following this architecture, you can easily build robust RAG applications that scale seamlessly in AWS. It's flexible for both local development and production-ready container deployments. Enjoy building your Multi-Vector Store RAG System!
