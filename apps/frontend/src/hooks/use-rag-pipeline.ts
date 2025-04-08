@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { EmbeddingConfig, uploadDocument, searchDocuments, sendChatMessage, ChatMessage } from '../lib/rag';
+import { EmbeddingConfig, uploadDocument, searchDocuments, sendChatMessage, ChatMessage } from '@lib/rag';
 
 interface Chunk {
   chunk_index: number;

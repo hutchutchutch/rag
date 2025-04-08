@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Upload, File, Settings, Loader2, ChevronDown, Database, Search, Cloud } from 'lucide-react';
-import { useRagPipeline } from '../hooks/use-rag-pipeline';
-import GoogleDrivePanel from './GoogleDrivePanel';
+import { useRagPipeline } from '@hooks/use-rag-pipeline';
+import GoogleDrivePanel from '@components/GoogleDrivePanel';
 
 interface SidebarProps {
   position: 'left' | 'right';

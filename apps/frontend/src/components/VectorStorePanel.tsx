@@ -3,9 +3,9 @@ import { Upload, FileText, Trash2, Search, Settings, ChevronDown, Info } from 'l
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useBookContext } from "../contexts/book-context";
-import { useRagPipeline } from "../hooks/use-rag-pipeline";
-import { ChunkingStrategy, CleanerType, EmbeddingConfig } from "../lib/rag";
+import { useBookContext } from "@contexts/book-context";
+import { useRagPipeline } from "@hooks/use-rag-pipeline";
+import { ChunkingStrategy, CleanerType, EmbeddingConfig } from "@lib/rag";
 import { 
   Form,
   FormControl,
@@ -13,12 +13,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { Progress } from "./ui/progress";
-import { Card, CardContent } from "./ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { useToast } from "../hooks/use-toast";
+} from "@ui/form";
+import { Progress } from "@ui/progress";
+import { Card, CardContent } from "@ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@ui/select";
+import { useToast } from "@hooks/use-toast";
 
 const embeddingFormSchema = z.object({
   chunkSize: z.coerce.number().min(100).max(8000),

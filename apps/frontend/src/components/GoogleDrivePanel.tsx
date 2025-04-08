@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, FileText, FileQuestion, LogIn, RefreshCw, CloudOff, Download } from 'lucide-react';
-import { getGoogleDriveAuthUrl, listGoogleDriveFiles, importGoogleDriveFile } from '../lib/rag';
-import { useRagPipeline } from '../hooks/use-rag-pipeline';
+import { getGoogleDriveAuthUrl, listGoogleDriveFiles, importGoogleDriveFile } from '@lib/rag';
+import { useRagPipeline } from '@hooks/use-rag-pipeline';
 
 interface DriveFile {
   id: string;

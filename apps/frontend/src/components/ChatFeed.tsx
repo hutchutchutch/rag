@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Send, Loader2, RefreshCw } from 'lucide-react';
-import { useRagPipeline } from '../hooks/use-rag-pipeline';
-import { ChatMessage } from '../lib/rag';
+import { useRagPipeline } from '@hooks/use-rag-pipeline';
+import { ChatMessage } from '@lib/rag';
 
 const ChatFeed: React.FC = () => {
   const [message, setMessage] = React.useState('');
