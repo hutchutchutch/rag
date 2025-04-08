@@ -7,95 +7,168 @@ This repository demonstrates a comprehensive **Retrieval-Augmented Generation (R
 ## Repository Overview
 
 ```
-my-app/
-├── apps/
-│   ├── frontend/           # Vite-based frontend
-│   │   ├── Dockerfile      # Production Dockerfile
-│   │   ├── Dockerfile.dev  # Dev Dockerfile (hot reload)
-│   │   ├── src/
-│   │   │   ├── pages/      # Upload page, chat interface, vector store visualization
-│   │   │   ├── components/ # Shared UI components (sidebar, chat window, document viewer)
-│   │   │   ├── hooks/      # React hooks
-│   │   │   └── ...
-│   │   └── ...
-│   └── backend/            # Express.js + LangGraph
-│       ├── Dockerfile
-│       ├── Dockerfile.dev
-│       ├── src/
-│       │   ├── routes/     # API routes for documents, embeddings, chat
-│       │   ├── controllers/ # Handlers for document processing, embedding generation
-│       │   ├── services/   # Business logic, e.g. vector storage, retrieval
-│       │   ├── langgraph/  # Agents using LangGraph for RAG workflow (retrieval, summarization)
-│       │   └── ...
-│       └── ...
-├── infra/                  # Infrastructure for Neo4j, Docker Compose, AWS config
-│   ├── docker-compose.yml  # Orchestrates local dev environment
-│   ├── aws/
-│   │   ├── ecs-neo4j-config/ # ECS Task Definitions or scripts for hosting Neo4j
-│   │   ├── s3-setup.md     # Steps/scripts for S3 config
-│   │   ├── google-drive-docs/ # Scripts for Google Drive integration
-│   │   └── ...
-│   └── ...
-├── packages/               # Shared libraries across apps (optional)
-│   ├── shared-lib/         # e.g. reusable domain models, utils
-│   └── ...
-├── scripts/                # Helper scripts/CLI automation
-│   ├── seed-neo4j.ts       # Initialize database with schema constraints
-│   ├── google-drive-import.ts # Script for testing drive import
-│   └── ...
-├── turbo.json              # Turborepo config for pipeline tasks
-├── pnpm-workspace.yaml     # pnpm workspace definition
-├── package.json            # Root-level scripts and devDependencies
-└── README.md               # This file
+rag/
+├── README.md                # Project documentation
+├── package.json             # Root-level scripts and devDependencies
+├── pnpm-workspace.yaml      # pnpm workspace definition
+├── pnpm-lock.yaml           # Lock file for dependencies
+├── turbo.json               # Turborepo config for pipeline tasks
+├── tsconfig.json            # TypeScript configuration
+├── eslint.config.js         # ESLint configuration
+├── postcss.config.js        # PostCSS configuration for styling
+├── placeholders.md          # Documentation of placeholders for deployment
+│
+├── apps/                    # Application code for both frontend and backend
+│   ├── frontend/            # React/Vite-based frontend
+│   │   ├── Dockerfile.dev   # Development Dockerfile with hot reload
+│   │   ├── docker-compose.yml # Frontend-specific Docker Compose
+│   │   ├── package.json     # Frontend dependencies
+│   │   ├── index.html       # HTML entry point
+│   │   ├── tailwind.config.js # Tailwind CSS configuration
+│   │   ├── postcss.config.js # PostCSS configuration
+│   │   └── src/
+│   │       ├── main.tsx     # Application entry point
+│   │       ├── App.tsx      # Main application component
+│   │       ├── index.css    # Global styles
+│   │       ├── components/  # UI components
+│   │       │   ├── ChatFeed.tsx       # Chat message display and input
+│   │       │   ├── GraphPanel.tsx     # Visualization of vector relationships
+│   │       │   ├── Sidebar.tsx        # Collapsible sidebar with dropdowns
+│   │       │   ├── VectorStorePanel.tsx # Vector store status and info
+│   │       │   └── ui/               # Reusable UI components
+│   │       │       ├── button.tsx    # Button component
+│   │       │       ├── card.tsx      # Card component
+│   │       │       ├── collapsible.tsx # Collapsible panel component
+│   │       │       ├── form.tsx      # Form components
+│   │       │       ├── input.tsx     # Input field component
+│   │       │       ├── progress.tsx  # Progress indicator
+│   │       │       └── select.tsx    # Dropdown select component
+│   │       ├── contexts/
+│   │       │   └── book-context.tsx  # Context for document management
+│   │       ├── hooks/
+│   │       │   ├── use-rag-pipeline.ts # Hook for RAG operations
+│   │       │   └── use-toast.ts      # Toast notification hook
+│   │       ├── lib/
+│   │       │   ├── rag.ts            # RAG API functions and types
+│   │       │   └── utils.ts          # Utility functions
+│   │       └── shared/
+│   │           └── schema.ts         # Shared type definitions
+│   │
+│   └── backend/             # Express.js + LangGraph backend
+│       ├── Dockerfile.dev   # Development Dockerfile
+│       ├── docker-compose.yml # Backend-specific Docker Compose
+│       ├── package.json     # Backend dependencies
+│       ├── .env.example     # Example environment variables
+│       ├── uploads/         # Directory for uploaded documents
+│       │   └── ansi.md      # Sample document for testing
+│       └── src/
+│           ├── index.ts     # Server entry point
+│           ├── config/      # Configuration
+│           │   └── index.ts # Configuration variables and setup
+│           ├── controllers/ # API route handlers
+│           │   ├── document.controller.ts # Document upload/processing
+│           │   └── chat.controller.ts     # Chat functionality
+│           ├── middlewares/ # Express middlewares
+│           │   └── upload.middleware.ts   # File upload handling
+│           ├── models/      # Data models (if any)
+│           ├── routes/      # API route definitions
+│           │   ├── document.routes.ts     # Document API routes
+│           │   └── chat.routes.ts         # Chat API routes
+│           ├── services/    # Business logic services
+│           │   ├── s3.service.ts          # AWS S3 integration
+│           │   ├── neo4j.service.ts       # Neo4j vector store service
+│           │   ├── postgres.service.ts    # PostgreSQL vector store
+│           │   ├── document.service.ts    # Document processing
+│           │   └── chat.service.ts        # Chat with LangGraph
+│           └── utils/       # Utility functions
+│
+├── infra/                  # Infrastructure configuration
+│   ├── docker-compose.yml   # Main Docker Compose for all services
+│   ├── docker-compose-dev.yml # Development Docker Compose
+│   ├── neo4j/              # Neo4j configuration
+│   │   ├── import/         # Import directory for Neo4j
+│   │   └── plugins/        # Plugins for Neo4j
+│   └── aws/                # AWS infrastructure
+│       ├── ecs-neo4j-config/ # ECS configuration for Neo4j
+│       │   ├── neo4j-fargate-service.md # Documentation
+│       │   └── task-definition.json    # ECS task definition
+│       ├── s3-setup.md     # Documentation for S3 setup
+│       └── google-drive-docs/ # Google Drive integration
+│           └── google-drive-integration.md # Documentation
+│
+├── packages/               # Shared libraries (if any)
+│
+└── scripts/                # Helper scripts
+    ├── google-drive-import.ts # Script for importing from Google Drive
+    └── seed-neo4j.ts       # Script for initializing Neo4j
 ```
+
+This repository structure provides a complete organization for a multi-vector store RAG system using the Turborepo monorepo pattern. Here's a breakdown of the key areas:
 
 ### Key Directories
 
 1. **`apps/frontend/`**  
-   - **Vite** for the UI with React and TypeScript.
-   - **Dockerfiles**:
-     - `Dockerfile.dev` for local dev with hot reload.
-     - `Dockerfile` for production builds.
-   - Pages include:
-     - **Document Upload**: Interface for uploading markdown documents or importing from Google Drive.
-     - **Chat Interface**: Allows users to ask questions about uploaded documents.
-     - **Vector Store Visualization**: View document chunks and their vector representations.
-   - Services layer for API communication with the backend.
-   - Type definitions that mirror backend data models.
+   - **React/Vite** UI with TypeScript and Tailwind CSS
+   - **Core Components**:
+     - `ChatFeed.tsx`: Real-time chat interface with message history and input controls
+     - `Sidebar.tsx`: Collapsible sidebar with dropdown menus for document management
+     - `GraphPanel.tsx`: Visualization of vector embeddings and relationships
+     - `VectorStorePanel.tsx`: Displays vector store status and metrics
+   - **UI Component Library**: Reusable UI components in `ui/` folder:
+     - Buttons, cards, inputs, progress indicators, and more
+   - **Hooks and Utilities**:
+     - `use-rag-pipeline.ts`: Core hook managing document processing and chat functionality
+     - `use-toast.ts`: Notification management
+     - `rag.ts`: API client functions for backend communication
+   - **State Management**:
+     - Context providers for document and application state
+     - Type definitions shared with backend
 
 2. **`apps/backend/`**  
-   - **Express.js** with TypeScript.  
-   - **Neo4j Integration**:
-     - Connection management with the Neo4j database.
-     - Models for documents, chunks, embeddings, and relationships.
-     - Complex graph queries for document retrieval.
-   - **PostgreSQL/pgvector Integration**:
-     - Secondary vector storage for comparison and backup.
-     - Vector similarity search capabilities.
-   - **RESTful API**:
-     - Endpoints for document uploading and processing.
-     - Embedding generation and storage.
-     - Chat conversation handling.
-   - Integrates **LangGraph** for multi-step workflows, e.g. document chunking, embedding generation, retrieval, and answer generation.  
-   - Connects to:
-     - **AWS S3** for document storage (markdown files).
-     - **Neo4j** on ECS for storing document relationships and vector embeddings.
-     - **PostgreSQL with pgvector** for additional vector storage and search.
-     - **Google Gemini** for creating embeddings and text generation.
+   - **Express.js** server with TypeScript
+   - **API Structure**:
+     - RESTful API with dedicated routes and controllers
+     - Middleware for file uploads and request processing
+   - **Core Services**:
+     - `s3.service.ts`: Integration with AWS S3 for document storage
+     - `neo4j.service.ts`: Primary vector store using Neo4j graph database
+     - `postgres.service.ts`: Secondary vector store with PostgreSQL/pgvector
+     - `document.service.ts`: Document processing pipeline
+     - `chat.service.ts`: LangGraph implementation for RAG conversations
+   - **Environment Configuration**:
+     - `.env.example`: Template for environment variables
+     - `config/index.ts`: Application configuration management
+   - **Document Storage**:
+     - `uploads/`: Directory for temporarily storing uploaded documents
+     - Sample document (`ansi.md`) for testing
 
 3. **`infra/`**  
-   - **docker-compose.yml**: For local dev, spins up Neo4j, PostgreSQL, LocalStack (S3 emulation), the backend, and the frontend.  
-   - **`aws/ecs-neo4j-config/`**: Defines how we run Neo4j in AWS ECS (Fargate or EC2-based tasks).  
-   - **`aws/s3-setup.md`**: Docs for creating S3 buckets for storing documents.  
-   - **`aws/google-drive-docs/`**: Scripts and documentation for Google Drive integration.
+   - **Docker Compose Files**:
+     - `docker-compose.yml`: Main configuration for all services
+     - `docker-compose-dev.yml`: Development-specific configuration
+   - **AWS Infrastructure**:
+     - `ecs-neo4j-config/`: Configuration for Neo4j on AWS ECS
+     - `s3-setup.md`: Documentation for S3 bucket setup
+   - **Neo4j Configuration**:
+     - Directory structure for plugins and imports
+   - **Google Drive Integration**:
+     - Documentation and configuration for Drive API integration
 
-4. **`packages/`** (optional)  
-   - If you have shared code (utilities, embedding algorithms, or retrieval strategies), place them in subfolders.  
-   - **pnpm** automatically handles linking across your workspace.
+4. **Root Configuration**:
+   - `pnpm-workspace.yaml`: Monorepo workspace definition
+   - `turbo.json`: Turborepo pipeline configuration
+   - `tsconfig.json`: TypeScript configuration
+   - `eslint.config.js`: Code linting rules
+   - `postcss.config.js`: CSS processing configuration
+   - `placeholders.md`: Documentation of configuration placeholders for deployment
 
 5. **`scripts/`**  
-   - **`seed-neo4j.ts`**: Seeds the database with schema constraints and initial data.  
-   - **`google-drive-import.ts`**: Script for testing Google Drive integration.
+   - Utility scripts for maintenance and initialization:
+     - `seed-neo4j.ts`: Initializes Neo4j with schema constraints
+     - `google-drive-import.ts`: Testing script for Google Drive integration
+
+6. **`packages/`** (optional)  
+   - Reserved for shared libraries that might be extracted later
 
 ---
 
@@ -191,6 +264,76 @@ my-app/
 5. **Vector Store Visualization**:
    - View document chunks and their vector representations.
    - Visualize similarity between chunks for better understanding.
+
+## Frontend Pages and Components
+
+The frontend application provides an intuitive interface for interacting with the RAG system. It follows a three-panel layout with a primary chat interface and supporting sidebars.
+
+### Main Application Layout
+
+- **Three-Panel Design**: Consists of left sidebar, central content area, and optional right sidebar
+- **Collapsible Sidebars**: Sidebars can be collapsed to maximize working space
+- **Dark Theme**: Modern dark theme optimized for readability and reduced eye strain
+
+### Left Sidebar Components
+
+1. **Document Management**
+   - **Upload Section**: Expandable dropdown for uploading markdown files
+   - **Document Browser**: List of all uploaded documents with metadata
+   - **Vector Store Status**: Shows connection status and vector counts for Neo4j and PostgreSQL
+   - **Search Interface**: Allows direct querying of vector stores without using chat
+
+2. **Sidebar Navigation**
+   - **Collapsible Sections**: All sections collapse/expand with smooth animations
+   - **Adaptive Width**: Items take full sidebar width for easy visibility and access
+   - **Status Indicators**: Shows connection status for different backend services
+
+### Central Chat Interface
+
+1. **Chat Feed**
+   - **Message History**: Displays alternating user and AI messages in conversation format
+   - **Message Styling**: Different styling for user vs. AI messages
+   - **Automatic Scrolling**: Auto-scrolls to the latest message
+   - **Empty State**: Helpful prompt when no conversation has started
+
+2. **Input Controls**
+   - **Text Input**: Full-width input field for entering questions
+   - **Send Button**: Submits questions with loading state indicator
+   - **Clear Conversation**: Option to reset the current chat session
+
+### Right Sidebar Components (Optional)
+
+1. **Vector Visualization**
+   - **Graph View**: Visual representation of document chunks and relationships
+   - **Similarity Scores**: Shows relevance between query and retrieved chunks
+   - **Source Attribution**: Links retrieved information back to original documents
+
+2. **Technical Details**
+   - **Embedding Information**: Technical details about vector embeddings
+   - **Performance Metrics**: Response times and retrieval statistics
+   - **Debug Information**: For developers to understand the RAG pipeline
+
+### Additional Frontend Features
+
+1. **Real-time Feedback**
+   - **Processing Indicators**: Visual progress of document upload and processing
+   - **Step Tracking**: Shows current step in the RAG pipeline (upload, chunking, embedding, etc.)
+   - **Loading States**: Clear indicators during searches and chat operations
+
+2. **Responsive Adaption**
+   - **Mobile-friendly Design**: Adapts layout for smaller screens
+   - **Collapsible Elements**: Maximize working space on any device
+   - **Touch-friendly Controls**: Optimized for both mouse and touch interactions
+
+3. **Error Handling**
+   - **Graceful Error Messages**: User-friendly error notifications
+   - **Retry Mechanisms**: Options to retry failed operations
+   - **Connection Recovery**: Automatic reconnection to backend services
+
+4. **User Experience Enhancements**
+   - **Keyboard Shortcuts**: For common operations like sending messages
+   - **Context Highlighting**: Highlights which parts of documents were used for answers
+   - **Hover Previews**: Quick previews of document chunks on hover
 
 ---
 
