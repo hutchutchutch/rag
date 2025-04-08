@@ -7,31 +7,15 @@
 }
 
 body {
-  @apply bg-dark-900 text-gray-100;
-}
-
-.sidebar {
-  @apply w-80 bg-dark-800 h-screen p-6 flex flex-col border-dark-600;
+  @apply bg-[#141414] text-gray-100;
 }
 
 .chat-input {
-  @apply w-full px-4 py-3 rounded-lg bg-dark-700 border-dark-600 text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-gray-400;
+  @apply w-full px-4 py-3 rounded-lg bg-[#252525] border border-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-gray-500;
 }
 
 .btn-primary {
-  @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
-}
-
-.document-item {
-  @apply p-4 bg-dark-700 rounded-lg flex items-start gap-3 hover:bg-dark-600 transition-colors duration-200 border border-dark-600;
-}
-
-.input-highlight {
-  @apply bg-[#252525] border-gray-700 text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent;
-}
-
-.animated-border {
-  @apply transition-all duration-200 hover:border-purple-500;
+  @apply bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 /* Custom scrollbar */
@@ -41,11 +25,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-dark-800;
+  @apply bg-[#1A1A1A];
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-dark-600 rounded-full hover:bg-dark-500;
+  @apply bg-gray-700 rounded-full hover:bg-gray-600;
 }
 
 /* Form styles */
@@ -100,10 +84,5 @@ body {
 }
 
 .collapsible-content {
-  @apply bg-[#1E1E1E] p-4 space-y-4 border-t border-gray-800;
-}
-
-/* Code block */
-.code-block {
-  @apply font-mono text-sm bg-[#252525] rounded-lg p-4 overflow-x-auto;
+  @apply bg-[#1A1A1A] p-4 space-y-4 border-t border-gray-800;
 }
