@@ -34,14 +34,14 @@ const ChatFeed: React.FC = () => {
   const renderMessage = (msg: ChatMessage, index: number) => {
     if (msg.type === 'human') {
       return (
-        <div key={index} className="bg-primary-900/30 rounded-lg p-4 max-w-[80%] self-end">
-          <p className="text-gray-100">{msg.content}</p>
+        <div key={index} className="chat-message-user">
+          <p className="text-dark-50">{msg.content}</p>
         </div>
       );
     } else if (msg.type === 'ai') {
       return (
-        <div key={index} className="bg-dark-700 rounded-lg p-4 max-w-[80%] self-start">
-          <p className="text-gray-100">{msg.content}</p>
+        <div key={index} className="chat-message-ai">
+          <p className="text-dark-50">{msg.content}</p>
         </div>
       );
     } else {
@@ -50,21 +50,21 @@ const ChatFeed: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-screen bg-dark-800 border-x border-dark-600">
-      <div className="p-4 border-b border-dark-600 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-white">Chat</h2>
+    <div className="chat-container">
+      <div className="chat-header">
+        <h2 className="text-lg font-semibold text-dark-50">Chat</h2>
         <button 
           onClick={clearChat}
-          className="p-2 hover:bg-dark-700 rounded-md text-gray-400 hover:text-white transition-colors"
+          className="btn btn-icon"
           title="Clear chat history"
         >
           <RefreshCw size={18} />
         </button>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="chat-messages">
         {chatHistory.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+          <div className="flex flex-col items-center justify-center h-full text-dark-400">
             <p>No messages yet. Ask a question to get started.</p>
           </div>
         ) : (
@@ -75,19 +75,19 @@ const ChatFeed: React.FC = () => {
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="p-6 border-t border-dark-600">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="chat-input-container">
+        <form onSubmit={handleSubmit} className="chat-form">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Ask a question about the document..."
-            className="chat-input"
+            className="input flex-1"
             disabled={isChatting}
           />
           <button 
             type="submit" 
-            className="btn-primary"
+            className="btn btn-primary glow-hover-primary"
             disabled={isChatting || !message.trim()}
           >
             {isChatting ? (

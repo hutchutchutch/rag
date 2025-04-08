@@ -36,28 +36,31 @@ const Sidebar: React.FC<SidebarProps> = ({ position, title, children }) => {
 
   if (collapsed) {
     return (
-      <div className={`w-16 bg-[#1A1A1A] h-screen flex flex-col items-center pt-6 ${position === 'left' ? 'border-r' : 'border-l'} border-gray-800`}>
-        <button
-          onClick={() => setCollapsed(false)}
-          className="p-2 hover:bg-[#252525] rounded-lg transition-colors text-gray-400 hover:text-gray-200"
-        >
-          {position === 'left' ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
+      <div className={`sidebar w-16 elevation-2 ${position === 'left' ? 'border-r' : 'border-l'} border-dark-700`}>
+        <div className="flex justify-center py-6">
+          <button
+            onClick={() => setCollapsed(false)}
+            className="btn btn-icon-sm"
+            aria-label={position === 'left' ? 'Expand sidebar' : 'Expand sidebar'}
+          >
+            {position === 'left' ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+        </div>
         
-        <div className="mt-6 flex flex-col gap-4">
+        <div className="mt-6 flex flex-col items-center gap-4">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 hover:bg-[#252525] rounded-lg transition-colors text-gray-400 hover:text-gray-200"
+            className="btn btn-icon-sm glow-hover-primary"
             title="Upload Document"
           >
-            <Upload size={20} />
+            <Upload size={18} />
           </button>
           
           <button
-            className="p-2 hover:bg-[#252525] rounded-lg transition-colors text-gray-400 hover:text-gray-200"
+            className="btn btn-icon-sm glow-hover-primary"
             title="Settings"
           >
-            <Settings size={20} />
+            <Settings size={18} />
           </button>
         </div>
         
@@ -73,18 +76,19 @@ const Sidebar: React.FC<SidebarProps> = ({ position, title, children }) => {
   }
 
   return (
-    <div className={`w-80 bg-[#1A1A1A] h-screen flex flex-col ${position === 'left' ? 'border-r' : 'border-l'} border-gray-800`}>
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
-        <h2 className="text-lg font-semibold text-gray-200">{title}</h2>
+    <div className={`sidebar w-80 elevation-2 ${position === 'left' ? 'border-r' : 'border-l'} border-dark-700`}>
+      <div className="sidebar-header">
+        <h2 className="text-lg font-semibold text-dark-50">{title}</h2>
         <button
           onClick={() => setCollapsed(true)}
-          className="p-2 hover:bg-[#252525] rounded-lg transition-colors text-gray-400 hover:text-gray-200"
+          className="btn btn-icon-sm"
+          aria-label={position === 'left' ? 'Collapse sidebar' : 'Collapse sidebar'}
         >
-          {position === 'left' ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          {position === 'left' ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
         </button>
       </div>
       
-      <div className="flex-1 overflow-y-auto">
+      <div className="sidebar-content">
         {children}
       </div>
     </div>

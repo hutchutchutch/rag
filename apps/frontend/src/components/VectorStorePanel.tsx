@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const embeddingFormSchema = z.object({
   vectorDb: z.string(),
@@ -55,104 +56,111 @@ const VectorStorePanel: React.FC = () => {
   const progressPercentage = 91; // This would be calculated based on form completion
 
   return (
-    <div className="flex flex-col h-full bg-[#1A1A1A] text-gray-100">
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Vector Store Creation</h2>
-          <ChevronDown className="w-5 h-5 text-gray-400" />
+    <div className="sidebar-content">
+      <div className="panel">
+        <div className="panel-header">
+          <h2 className="text-lg font-semibold text-dark-50">Vector Store Creation</h2>
+          <button className="btn btn-icon-sm">
+            <ChevronDown className="w-5 h-5" />
+          </button>
         </div>
 
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-sm text-gray-400">Configuration Progress</span>
-            <span className="text-sm font-medium text-gray-300">{progressPercentage}%</span>
-          </div>
-          <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-purple-600 transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
-        </div>
-
-        <FormProvider {...methods}>
-          <Form {...methods}>
-            <div className="space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium text-gray-300">Primary Options</h3>
-                  <span className="text-xs text-gray-500">2/2 selected</span>
-                </div>
-
-                <div className="space-y-4">
-                  <FormField
-                    name="vectorDb"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-400">Vector Database</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-[#252525] border-gray-700 text-gray-200">
-                              <SelectValue placeholder="PostgreSQL (pgvector)" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="pgvector">PostgreSQL (pgvector)</SelectItem>
-                            <SelectItem value="neo4j">Neo4j</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    name="embeddingModel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-400">Embedding Model</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-[#252525] border-gray-700 text-gray-200">
-                              <SelectValue placeholder="OpenAI" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="openai">OpenAI</SelectItem>
-                            <SelectItem value="cohere">Cohere</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="mt-4 bg-[#252525] rounded-lg p-3 border border-gray-700 flex items-start gap-2">
-                  <Info className="w-5 h-5 text-blue-400 mt-0.5" />
-                  <p className="text-sm text-gray-400">
-                    Document type will be automatically detected from your uploaded file.
-                  </p>
-                </div>
-              </div>
-
-              {/* Additional sections would be added here */}
-              {/* Text Processing, Embedding Configuration, etc. */}
-
-              <button
-                type="submit"
-                className="w-full bg-[#252525] text-gray-200 py-3 rounded-lg hover:bg-[#303030] transition-colors"
-                disabled={isPreparing}
-              >
-                Create Vector Store
-              </button>
+        <div className="panel-content">
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm text-dark-300">Configuration Progress</span>
+              <span className="text-sm font-medium text-dark-100">{progressPercentage}%</span>
             </div>
-          </Form>
-        </FormProvider>
+            <div className="h-1 bg-dark-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary-500 transition-all duration-300 shadow-glow-xs"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </div>
+
+          <FormProvider {...methods}>
+            <Form {...methods}>
+              <div className="space-y-6">
+                <Card className="elevation-1">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-dark-100">Primary Options</CardTitle>
+                      <span className="text-xs text-dark-400">2/2 selected</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <FormField
+                        name="vectorDb"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-dark-300">Vector Database</FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="select">
+                                  <SelectValue placeholder="PostgreSQL (pgvector)" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="pgvector">PostgreSQL (pgvector)</SelectItem>
+                                <SelectItem value="neo4j">Neo4j</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        name="embeddingModel"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-dark-300">Embedding Model</FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="select">
+                                  <SelectValue placeholder="OpenAI" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="openai">OpenAI</SelectItem>
+                                <SelectItem value="cohere">Cohere</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="mt-4 bg-dark-700 rounded-lg p-3 border border-dark-600 flex items-start gap-2">
+                      <Info className="w-5 h-5 text-primary-400 mt-0.5" />
+                      <p className="text-sm text-dark-300">
+                        Document type will be automatically detected from your uploaded file.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Additional sections would be added here */}
+                {/* Text Processing, Embedding Configuration, etc. */}
+
+                <button
+                  type="submit"
+                  className="btn btn-primary w-full glow-hover-primary"
+                  disabled={isPreparing}
+                >
+                  Create Vector Store
+                </button>
+              </div>
+            </Form>
+          </FormProvider>
+        </div>
       </div>
     </div>
   );
