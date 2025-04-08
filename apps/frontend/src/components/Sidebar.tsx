@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Upload, File, Settings, Loader2, ChevronDown, Database, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Upload, File, Settings, Loader2, ChevronDown, Database, Search, Cloud } from 'lucide-react';
 import { useRagPipeline } from '../hooks/use-rag-pipeline';
+import GoogleDrivePanel from './GoogleDrivePanel';
 
 interface SidebarProps {
   position: 'left' | 'right';
@@ -183,6 +184,14 @@ const Sidebar: React.FC<SidebarProps> = ({ position, title, children }) => {
             accept=".md,.markdown"
             className="hidden"
           />
+        </DropdownMenu>
+        
+        <DropdownMenu 
+          title="Google Drive" 
+          icon={<Cloud size={18} />}
+          defaultOpen={true}
+        >
+          <GoogleDrivePanel />
         </DropdownMenu>
         
         <DropdownMenu 

@@ -59,6 +59,63 @@ export async function uploadDocument(file: File): Promise<Document> {
 }
 
 /**
+ * Get Google Drive authorization URL
+ */
+export async function getGoogleDriveAuthUrl(): Promise<string> {
+  const response = await fetch(`${API_URL}/google-drive/auth`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to get Google Drive auth URL');
+  }
+  
+  const data = await response.json();
+  return data.authUrl;
+}
+
+/**
+ * List files from Google Drive
+ */
+export async function listGoogleDriveFiles(pageSize: number = 50): Promise<any[]> {
+  const response = await fetch(`${API_URL}/google-drive/files?pageSize=${pageSize}`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to list Google Drive files');
+  }
+  
+  const data = await response.json();
+  return data.files;
+}
+
+/**
+ * Import a file from Google Drive
+ */
+export async function importGoogleDriveFile(fileId: string): Promise<Document> {
+  const response = await fetch(`${API_URL}/google-drive/import`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ fileId }),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to import Google Drive file');
+  }
+  
+  return response.json();
+}
+
+/**
  * Search for relevant document chunks
  */
 export async function searchDocuments(query: string, limit: number = 5): Promise<SearchResponse> {

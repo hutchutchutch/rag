@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 const config = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
+  host: process.env.HOST || '0.0.0.0',
   
   // AWS S3
   aws: {
@@ -35,17 +36,60 @@ const config = {
     user: process.env.POSTGRES_USER || 'postgres',
     password: process.env.POSTGRES_PASSWORD || 'password',
     database: process.env.POSTGRES_DB || 'ragdb',
+    ssl: process.env.POSTGRES_SSL === 'true',
   },
   
   // Google Gemini API
   googleApiKey: process.env.GOOGLE_API_KEY,
   
   // OpenAI API
-  openaiApiKey: process.env.OPENAI_API_KEY,
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY,
+    model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+    temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
+  },
+  
+  // Google Drive Integration
+  googleDrive: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    redirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback',
+  },
+  
+  // Document Processing
+  documentProcessing: {
+    maxSizeMB: parseInt(process.env.MAX_DOCUMENT_SIZE_MB || '10'),
+    chunkSize: parseInt(process.env.CHUNK_SIZE || '1000'),
+    chunkOverlap: parseInt(process.env.CHUNK_OVERLAP || '200'),
+    embeddingDimension: parseInt(process.env.EMBEDDING_DIMENSION || '768'),
+  },
+  
+  // CORS
+  cors: {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  },
+  
+  // Rate Limiting
+  rateLimit: {
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // Max 100 requests per window
+  },
+  
+  // LangGraph
+  langGraph: {
+    maxIterations: parseInt(process.env.LANGGRAPH_MAX_ITERATIONS || '10'),
+    timeoutMs: parseInt(process.env.LANGGRAPH_TIMEOUT_MS || '60000'),
+  },
   
   // Paths
   paths: {
     uploads: path.resolve(__dirname, '../../uploads'),
+  },
+  
+  // Logging
+  logging: {
+    level: process.env.LOG_LEVEL || 'info',
+    queries: process.env.LOG_QUERIES === 'true',
   },
 };
 
