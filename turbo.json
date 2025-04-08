@@ -1,18 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env"],
-  "projects": {
-    "frontend": {
-      "root": "apps/frontend"
-    },
-    "backend": {
-      "root": "apps/backend"
-    },
-    "infra": {
-      "root": "infra"
-    }
- "packages/my-lib": { "root": "packages/my-lib" }
-  },
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],

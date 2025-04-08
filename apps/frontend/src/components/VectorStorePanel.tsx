@@ -31,7 +31,7 @@ type FormValues = z.infer<typeof embeddingFormSchema>;
 
 const VectorStorePanel: React.FC = () => {
   const { selectedBook } = useBookContext();
-  const { isPreparing, currentStep, prepareRagPipeline } = useRagPipeline();
+  const { isPreparing, currentStep } = useRagPipeline();
   const [expandedSections, setExpandedSections] = useState({
     textProcessing: false,
     embeddingConfig: false,
