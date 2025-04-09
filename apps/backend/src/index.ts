@@ -4,11 +4,11 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import documentRoutes from './routes/document.routes.js';
-import chatRoutes from './routes/chat.routes.js';
-import googleDriveRoutes from './routes/google-drive.routes.js';
-import config from './config/index.js';
-import logger from './utils/logger.js';
+import documentRoutes from './routes/document.routes';
+import chatRoutes from './routes/chat.routes';
+import googleDriveRoutes from './routes/google-drive.routes';
+import config from './config/index';
+import logger from './utils/logger';
 import fs from 'fs';
 import path from 'path';
 
@@ -25,12 +25,27 @@ const app = express();
 const port = config.port;
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    // Only relax security settings in development mode
+    ...(config.nodeEnv === 'development' ? {
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      crossOriginOpenerPolicy: { policy: "unsafe-none" },
+      // Disable content security policy in development
+      contentSecurityPolicy: false
+    } : {})
+  })
+);
 
 // CORS configuration
 app.use(cors({
-  origin: config.cors.origin,
+  // Allow all origins in dev mode, or specific origins in production
+  origin: config.nodeEnv === 'production'
+    ? [config.cors.origin, ...config.cors.additionalOrigins]
+    : '*', // Allow all origins in development
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
 // Rate limiting
@@ -75,7 +90,18 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/google-drive', googleDriveRoutes);
 
-// Health check
+// Health check endpoints at multiple paths for diagnostics
+// Standard API health check
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok',
+    version: '1.0.0',
+    environment: config.nodeEnv,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Root health check for direct access
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok',
@@ -84,6 +110,39 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// NOTE: This is only for development testing - should be removed in production
+if (config.nodeEnv === 'development') {
+  // Basic health check with explicit headers for diagnostic purposes
+  app.get('/rawhealth', (req, res) => {
+    // Manually set CORS headers for diagnostic purposes
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.setHeader('Content-Type', 'text/plain');
+    res.send('Backend is healthy');
+  });
+  
+  // Special diagnostics endpoint with no middleware
+  app.get('/api/test-cors', (req, res) => {
+    // Log diagnostic info
+    console.log('Received test-cors request:', {
+      headers: req.headers,
+      origin: req.get('origin'),
+      method: req.method
+    });
+    
+    // Return CORS diagnostics
+    res.json({ 
+      success: true, 
+      message: 'CORS test successful',
+      headers: {
+        origin: req.get('origin'),
+        host: req.get('host')
+      }
+    });
+  });
+}
 
 // 404 handler
 app.use((req, res) => {
@@ -108,13 +167,12 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   
   res.status(statusCode).json({
     error: message,
-    status: statusCode,
-    requestId: req.id,
+    status: statusCode
   });
 });
 
 // Start server
 app.listen(port, config.host, () => {
   logger.info(`Server running on ${config.host}:${port} in ${config.nodeEnv} mode`);
-  logger.info(`Health check available at http://${config.host}:${port}/health`);
+  logger.info(`Health check available at http://${config.host}:${port}/api/health`);
 });

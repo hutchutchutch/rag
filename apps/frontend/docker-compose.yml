@@ -2,11 +2,16 @@ version: "3.8"
 
 services:
   frontend:
-    build: .
-    container_name: frontend
+    image: node:18-alpine
+    container_name: rag-frontend
     ports:
-      - "5173:5173"  # Vite dev server
+      - "5173:5173"
     volumes:
-      - ./:/app
+      - .:/app
     working_dir: /app
-    command: pnpm dev
+    environment:
+      VITE_API_URL: "http://localhost:3000/api"
+    command: sh -c "npm install -g pnpm && pnpm install && pnpm dev"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    network_mode: "host"

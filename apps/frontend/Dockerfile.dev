@@ -8,16 +8,14 @@ WORKDIR /app
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Copy the entire monorepo into the container.
-# (Assumes you run `docker build` from the monorepo root.)
-COPY . . 
+# Copy package.json first for better caching
+COPY package.json ./
 
-# Install dependencies, but filter to the frontend if you prefer.
-# This step references your monorepo's pnpm-workspace.yaml in /app.
-RUN pnpm install --filter=./apps/frontend...
+# Install dependencies
+RUN pnpm install 
 
-# Switch into the frontend directory
-WORKDIR /app/apps/frontend
+# Copy the rest of the application
+COPY . .
 
 # Expose Vite dev server port
 EXPOSE 5173

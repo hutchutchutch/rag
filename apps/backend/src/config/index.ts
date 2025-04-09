@@ -67,6 +67,10 @@ const config = {
   // CORS
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    // Additional allowed origins can be specified as comma-separated list
+    additionalOrigins: process.env.ADDITIONAL_CORS_ORIGINS 
+      ? process.env.ADDITIONAL_CORS_ORIGINS.split(',') 
+      : [],
   },
   
   // Rate Limiting

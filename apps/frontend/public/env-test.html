@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Environment Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f7f7f7;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    pre {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 4px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Environment Variable Test</h1>
+    <p>This checks if the environment variables are being loaded correctly.</p>
+    
+    <div id="result"></div>
+  </div>
+
+  <script type="module">
+    const resultDiv = document.getElementById('result');
+    
+    // Check for import.meta.env (Vite specific)
+    try {
+      resultDiv.innerHTML += `<h3>Vite Environment</h3>`;
+      resultDiv.innerHTML += `<pre>VITE_API_URL: ${import.meta.env.VITE_API_URL || 'undefined'}</pre>`;
+      
+      // List all environment variables
+      resultDiv.innerHTML += `<h3>All Vite Environment Variables</h3><pre>`;
+      for (const key in import.meta.env) {
+        resultDiv.innerHTML += `${key}: ${import.meta.env[key]}\n`;
+      }
+      resultDiv.innerHTML += `</pre>`;
+      
+      // Test connection
+      resultDiv.innerHTML += `<h3>Connection Test</h3><div id="connection-test">Testing...</div>`;
+      
+      // Try to connect to the backend
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      fetch(`${apiUrl}/health`)
+        .then(response => {
+          if (!response.ok) throw new Error(`Status: ${response.status}`);
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById('connection-test').innerHTML = 
+            `<pre style="background:#e6f7e6;border:1px solid #c3e6cb;">
+Connection successful!
+API URL: ${apiUrl}
+Response: ${JSON.stringify(data, null, 2)}
+</pre>`;
+        })
+        .catch(error => {
+          document.getElementById('connection-test').innerHTML = 
+            `<pre style="background:#f8d7da;border:1px solid #f5c6cb;">
+Connection failed!
+API URL: ${apiUrl}
+Error: ${error.message}
+</pre>`;
+        });
+      
+    } catch (error) {
+      resultDiv.innerHTML += `<pre style="color:red">Error: ${error.message}</pre>`;
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import config from '../config/index.js';
+import config from '../config/index';
 
 // Ensure uploads directory exists
 if (!fs.existsSync(config.paths.uploads)) {

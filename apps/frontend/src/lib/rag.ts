@@ -35,8 +35,8 @@ export interface SearchResponse {
   results: SearchResult[];
 }
 
-// Backend API URL
-const API_URL = 'http://localhost:3000/api';
+// Backend API URL - get from environment or use fallback
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 /**
  * Upload a document to process through the RAG pipeline

@@ -28,6 +28,14 @@ const ChatFeed: React.FC = () => {
       await sendMessage(userMessage);
     } catch (error) {
       console.error('Error sending message:', error);
+      // Add test message to show mock functionality is working
+      const mockResponse = { 
+        type: 'ai', 
+        content: '[Mock Response] I\'m using the mock service because the backend services are in mock mode. Your query was: ' + userMessage 
+      };
+      // Need to cast to any for TypeScript
+      (window as any).mockChatResponse = mockResponse;
+      alert('Using mock service. Check console for details.');
     }
   };
 

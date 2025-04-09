@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API Connection Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f7f7f7;
+      color: #333;
+    }
+    h1 {
+      margin-top: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .endpoint {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .endpoint-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .success {
+      background-color: #e6f7e6;
+      border-color: #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+    .pending {
+      background-color: #fff3cd;
+      border-color: #ffeeba;
+    }
+    button {
+      padding: 8px 16px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #3e8e41;
+    }
+    pre {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 4px;
+      overflow: auto;
+      max-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>API Connection Test</h1>
+    <p>This page tests direct connections to different backend endpoints to diagnose connectivity issues.</p>
+    
+    <div id="endpoints"></div>
+    
+    <button id="testAll">Test All Endpoints</button>
+  </div>
+
+  <script>
+    // List of endpoints to test
+    const endpoints = [
+      { url: 'http://localhost:3000/api/health', name: 'API Health Check' },
+      { url: 'http://localhost:3000/health', name: 'Root Health Check' },
+      { url: 'http://localhost:3000/api/test-cors', name: 'CORS Test Endpoint' },
+      { url: 'http://localhost:3000/rawhealth', name: 'Raw Health Endpoint' },
+      { url: 'http://127.0.0.1:3000/api/health', name: 'API Health via 127.0.0.1' },
+      { url: 'http://rag-backend:3000/api/health', name: 'API Health via rag-backend container name' },
+      { url: 'http://test-backend:3000/api/health', name: 'API Health via test-backend container name' },
+      { url: 'http://host.docker.internal:3000/api/health', name: 'API Health via host.docker.internal' }
+    ];
+    
+    // Create UI for each endpoint
+    const endpointsContainer = document.getElementById('endpoints');
+    endpoints.forEach((endpoint, index) => {
+      const div = document.createElement('div');
+      div.className = 'endpoint pending';
+      div.id = `endpoint-${index}`;
+      div.innerHTML = `
+        <div class="endpoint-title">${endpoint.name}</div>
+        <div>URL: ${endpoint.url}</div>
+        <div>Status: <span id="status-${index}">Pending</span></div>
+        <div>Response: <pre id="response-${index}">Not tested yet</pre></div>
+      `;
+      endpointsContainer.appendChild(div);
+    });
+    
+    // Function to test a single endpoint
+    async function testEndpoint(endpoint, index) {
+      const statusEl = document.getElementById(`status-${index}`);
+      const responseEl = document.getElementById(`response-${index}`);
+      const endpointEl = document.getElementById(`endpoint-${index}`);
+      
+      endpointEl.className = 'endpoint pending';
+      statusEl.textContent = 'Testing...';
+      
+      try {
+        console.log(`Testing ${endpoint.url}...`);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const response = await fetch(endpoint.url, {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Accept': 'application/json, text/plain, */*'
+          },
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        console.log(`Response from ${endpoint.url}:`, response);
+        
+        if (response.ok) {
+          let data;
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+            responseEl.textContent = JSON.stringify(data, null, 2);
+          } else {
+            data = await response.text();
+            responseEl.textContent = data;
+          }
+          
+          statusEl.textContent = `Success (${response.status})`;
+          endpointEl.className = 'endpoint success';
+        } else {
+          statusEl.textContent = `Error (${response.status})`;
+          responseEl.textContent = await response.text();
+          endpointEl.className = 'endpoint error';
+        }
+      } catch (error) {
+        console.error(`Error testing ${endpoint.url}:`, error);
+        statusEl.textContent = 'Error';
+        responseEl.textContent = error.toString();
+        endpointEl.className = 'endpoint error';
+      }
+    }
+    
+    // Test all endpoints when the button is clicked
+    document.getElementById('testAll').addEventListener('click', async () => {
+      for (let i = 0; i < endpoints.length; i++) {
+        await testEndpoint(endpoints[i], i);
+      }
+    });
+    
+    // Auto-test when the page loads
+    window.addEventListener('load', () => {
+      document.getElementById('testAll').click();
+    });
+  </script>
+</body>
+</html>
