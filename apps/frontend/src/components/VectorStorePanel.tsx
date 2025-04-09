@@ -1,169 +1,155 @@
-import React, { useState } from 'react';
-import { ChevronDown, Info } from 'lucide-react';
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useBookContext } from "@/contexts/book-context";
 import { useRagPipeline } from "@/hooks/use-rag-pipeline";
-import { ChunkingStrategy, CleanerType, EmbeddingConfig } from "@/lib/rag";
+import { Form } from "@/components/ui/form";
+ import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { embeddingFormSchema, FormValues } from "./vector-store/types";
+import { useState } from "react";
+import { CollapsibleSection } from "./vector-store/CollapsibleSection";
 import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  EmbeddingModelSection, 
+  VectorDbSection, 
+  ChunkingSection, 
+  PreprocessingSection 
+} from "./vector-store";
 
-const embeddingFormSchema = z.object({
-  vectorDb: z.string(),
-  embeddingModel: z.string(),
-  chunkSize: z.coerce.number().min(100).max(8000),
-  overlap: z.coerce.number().min(0).max(1000),
-  cleaner: z.string(),
-  strategy: z.string(),
-  model: z.string(),
-});
-
-type FormValues = z.infer<typeof embeddingFormSchema>;
-
-const VectorStorePanel: React.FC = () => {
+export default function VectorStorePanel() {
   const { selectedBook } = useBookContext();
-  const { isPreparing, currentStep } = useRagPipeline();
-  const [expandedSections, setExpandedSections] = useState({
-    textProcessing: false,
-    embeddingConfig: false,
-    metadata: false,
-    advanced: false,
-    system: false,
+  const { toast } = useToast();
+  const { isPreparing, processDocument: prepareRagPipeline } = useRagPipeline();
+  const [openSections, setOpenSections] = useState({
+    embedding: true,
+    database: false,
+    chunking: false,
+    preprocessing: false,
   });
 
-  const methods = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(embeddingFormSchema),
     defaultValues: {
+      embeddingModel: "text-embedding-ada-002",
       vectorDb: "pgvector",
-      embeddingModel: "openai",
       chunkSize: 1024,
-      overlap: 200,
-      cleaner: "simple",
-      strategy: "fixed",
-      model: "gpt-3.5-turbo",
+      chunkOverlap: 20,
+      chunkingMethod: "recursive",
+      extractMetadata: ["page-numbers", "section-titles"],
+      textCleaning: ["remove-special-chars", "remove-extra-whitespace"],
+      removeStopwords: false,
+      useLemmatization: false,
     },
   });
 
-  const progressPercentage = 91; // This would be calculated based on form completion
+  const handleCreateVectorStore = async (values: FormValues) => {
+    if (!selectedBook) {
+      toast({
+        title: "No book selected",
+        description: "Please upload or select a book first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Convert form values to EmbeddingConfig
+      const embeddingConfig = {
+        chunkSize: values.chunkSize,
+        overlap: values.chunkOverlap,
+        cleaner: 'simple' as const,
+        strategy: values.chunkingMethod === 'recursive' ? 'recursive' as const : 'fixed' as const,
+        model: values.embeddingModel
+      };
+      
+      const file = new File([""], selectedBook.id);
+      await prepareRagPipeline(file, embeddingConfig);
+      
+      toast({
+        title: "Processing complete",
+        description: "Vector store created successfully",
+      });
+    } catch (error: unknown) {
+      toast({
+        title: "Processing failed",
+        description: error instanceof Error ? error.message : "An error occurred during vector store creation",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section as keyof typeof prev]
+    }));
+  };
 
   return (
-    <div className="sidebar-content">
-      <div className="panel">
-        <div className="panel-header">
-          <h2 className="text-lg font-semibold text-dark-50">Vector Store Creation</h2>
-          <button className="btn btn-icon-sm">
-            <ChevronDown className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="panel-content">
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-sm text-dark-300">Configuration Progress</span>
-              <span className="text-sm font-medium text-dark-100">{progressPercentage}%</span>
-            </div>
-            <div className="h-1 bg-dark-700 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary-500 transition-all duration-300 shadow-glow-xs"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
+    <div className="flex flex-col h-full space-y-4">
+      <div className="p-3 border-b border-dark-600">
+        <h2 className="text-lg font-semibold text-white">Vector Store Configuration</h2>
+      </div>
+      <div className="flex-1 overflow-y-auto px-3">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleCreateVectorStore)}>
+          <div className="space-y-3 mb-4">
+            <CollapsibleSection
+              title="Embedding Model"
+              sectionKey="embedding"
+              isOpen={openSections.embedding}
+              onToggle={handleToggleSection}
+              completedOptions={1}
+              optionsCount={1}
+            >
+              <EmbeddingModelSection form={form} />
+            </CollapsibleSection>
+            
+            <CollapsibleSection
+              title="Vector Database"
+              sectionKey="database"
+              isOpen={openSections.database}
+              onToggle={handleToggleSection}
+              completedOptions={1}
+              optionsCount={1}
+            >
+              <VectorDbSection form={form} />
+            </CollapsibleSection>
+            
+            <CollapsibleSection
+              title="Chunking"
+              sectionKey="chunking"
+              isOpen={openSections.chunking}
+              onToggle={handleToggleSection}
+              completedOptions={3}
+              optionsCount={4}
+            >
+              <ChunkingSection form={form} />
+            </CollapsibleSection>
+            
+            <CollapsibleSection
+              title="Text Processing"
+              sectionKey="preprocessing"
+              isOpen={openSections.preprocessing}
+              onToggle={handleToggleSection}
+              completedOptions={2}
+              optionsCount={3}
+            >
+              <PreprocessingSection form={form} />
+            </CollapsibleSection>
           </div>
-
-          <FormProvider {...methods}>
-            <Form {...methods}>
-              <div className="space-y-6">
-                <Card className="elevation-1">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium text-dark-100">Primary Options</CardTitle>
-                      <span className="text-xs text-dark-400">2/2 selected</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <FormField
-                        name="vectorDb"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-dark-300">Vector Database</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="select">
-                                  <SelectValue placeholder="PostgreSQL (pgvector)" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="pgvector">PostgreSQL (pgvector)</SelectItem>
-                                <SelectItem value="neo4j">Neo4j</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        name="embeddingModel"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-dark-300">Embedding Model</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="select">
-                                  <SelectValue placeholder="OpenAI" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="openai">OpenAI</SelectItem>
-                                <SelectItem value="cohere">Cohere</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="mt-4 bg-dark-700 rounded-lg p-3 border border-dark-600 flex items-start gap-2">
-                      <Info className="w-5 h-5 text-primary-400 mt-0.5" />
-                      <p className="text-sm text-dark-300">
-                        Document type will be automatically detected from your uploaded file.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Additional sections would be added here */}
-                {/* Text Processing, Embedding Configuration, etc. */}
-
-                <button
-                  type="submit"
-                  className="btn btn-primary w-full glow-hover-primary"
-                  disabled={isPreparing}
-                >
-                  Create Vector Store
-                </button>
-              </div>
-            </Form>
-          </FormProvider>
-        </div>
+            
+            <div className="mt-6">
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isPreparing || !selectedBook}
+              >
+                {isPreparing ? "Processing..." : "Create Vector Store"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );
-};
-
-export default VectorStorePanel;
+}
