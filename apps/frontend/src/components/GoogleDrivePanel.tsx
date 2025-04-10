@@ -1,7 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Loader2, FileText, FileQuestion, LogIn, RefreshCw, CloudOff, Download } from 'lucide-react';
-import { getGoogleDriveAuthUrl, listGoogleDriveFiles, importGoogleDriveFile } from '@lib/rag';
-import { useRagPipeline } from '@hooks/use-rag-pipeline';
+import * as React from "react";
+import { 
+  Loader2, 
+  FileText, 
+  FileQuestion, 
+  LogIn, 
+  RefreshCw, 
+  CloudOff, 
+  Download 
+} from "lucide-react";
+import { getGoogleDriveAuthUrl, listGoogleDriveFiles, importGoogleDriveFile } from "../lib/rag";
+import { useRagPipeline } from "../hooks/use-rag-pipeline";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface DriveFile {
   id: string;
@@ -10,19 +21,20 @@ interface DriveFile {
   modifiedTime: string;
   size?: string;
   webViewLink?: string;
+  imported?: boolean;
 }
 
-const GoogleDrivePanel: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [files, setFiles] = useState<DriveFile[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [importingFileId, setImportingFileId] = useState<string | null>(null);
+export function GoogleDrivePanel() {
+  const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [files, setFiles] = React.useState<DriveFile[]>([]);
+  const [error, setError] = React.useState<string | null>(null);
+  const [importingFileId, setImportingFileId] = React.useState<string | null>(null);
   
   // Use the current URL to check if we've just returned from OAuth flow
-  useEffect(() => {
+  React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const authSuccess = urlParams.get('auth') === 'success';
+    const authSuccess = urlParams.get("auth") === "success";
     
     if (authSuccess) {
       setIsAuthenticated(true);
@@ -42,7 +54,7 @@ const GoogleDrivePanel: React.FC = () => {
       // Redirect to Google auth
       window.location.href = authUrl;
     } catch (err: any) {
-      setError(err.message || 'Failed to get authorization URL');
+      setError(err.message || "Failed to get authorization URL");
       setIsLoading(false);
     }
   };
@@ -56,10 +68,10 @@ const GoogleDrivePanel: React.FC = () => {
       setFiles(filesList);
       setIsAuthenticated(true);
     } catch (err: any) {
-      setError(err.message || 'Failed to list files');
+      setError(err.message || "Failed to list files");
       
       // If we get an auth error, set authenticated to false
-      if (err.message.includes('Not authenticated') || err.message.includes('401')) {
+      if (err.message.includes("Not authenticated") || err.message.includes("401")) {
         setIsAuthenticated(false);
       }
     } finally {
@@ -89,17 +101,19 @@ const GoogleDrivePanel: React.FC = () => {
   // Not authenticated state
   if (!isAuthenticated) {
     return (
-      <div className="bg-dark-800 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-white mb-4">Google Drive Import</h3>
+      <div className="flex h-full flex-col">
+        <div className="flex items-center justify-between border-b border-dark-700 p-4">
+          <h2 className="text-lg font-semibold text-dark-50">Google Drive</h2>
+        </div>
         
-        <div className="text-center py-8">
-          <CloudOff className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <p className="text-gray-300 mb-6">Connect to your Google Drive to import markdown documents</p>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-dark-300">
+          <CloudOff className="h-16 w-16 text-dark-400" />
+          <p className="text-center">Connect to your Google Drive to import documents</p>
           
-          <button
+          <Button
             onClick={handleLogin}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2"
           >
             {isLoading ? (
               <>
@@ -112,10 +126,10 @@ const GoogleDrivePanel: React.FC = () => {
                 <span>Connect to Google Drive</span>
               </>
             )}
-          </button>
+          </Button>
           
           {error && (
-            <p className="mt-4 text-red-400 text-sm">{error}</p>
+            <p className="mt-4 text-sm text-error-400">{error}</p>
           )}
         </div>
       </div>
@@ -123,76 +137,84 @@ const GoogleDrivePanel: React.FC = () => {
   }
   
   return (
-    <div className="bg-dark-800 rounded-lg p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-white">Google Drive Files</h3>
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between border-b border-dark-700 p-4">
+        <h2 className="text-lg font-semibold text-dark-50">Google Drive</h2>
         
-        <button
+        <Button
           onClick={fetchFiles}
           disabled={isLoading}
-          className="p-2 hover:bg-dark-700 rounded-md text-gray-300 hover:text-white transition-colors disabled:opacity-50"
+          variant="ghost"
+          size="icon"
           title="Refresh file list"
         >
-          <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-        </button>
+          <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+          <span className="sr-only">Refresh files</span>
+        </Button>
       </div>
       
       {error && (
-        <div className="mb-4 p-3 bg-red-900/30 border border-red-800 rounded-md">
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="m-4 rounded-md border border-error-500/30 bg-error-500/10 p-3">
+          <p className="text-sm text-error-400">{error}</p>
         </div>
       )}
       
-      {isLoading && files.length === 0 ? (
-        <div className="py-10 text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary-500 mb-4" />
-          <p className="text-gray-400">Loading files from Google Drive...</p>
-        </div>
-      ) : files.length === 0 ? (
-        <div className="py-10 text-center">
-          <FileQuestion className="mx-auto h-8 w-8 text-gray-400 mb-4" />
-          <p className="text-gray-400">No markdown files found in your Google Drive</p>
-        </div>
-      ) : (
-        <div className="space-y-2 mt-2">
-          {files.map((file) => (
-            <div 
-              key={file.id}
-              className="flex items-center justify-between p-3 bg-dark-700 rounded-md hover:bg-dark-600 transition-colors"
-            >
-              <div className="flex items-center">
-                <FileText size={16} className="text-gray-400 mr-3 shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-white font-medium truncate">{file.name}</p>
-                  <p className="text-gray-400 text-xs">
-                    Modified: {new Date(file.modifiedTime).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              
-              <button
-                onClick={() => handleImport(file.id)}
-                disabled={importingFileId === file.id}
-                className="ml-2 p-2 bg-primary-700 hover:bg-primary-600 text-white rounded-md transition-colors disabled:opacity-50 flex items-center gap-1"
+      <ScrollArea className="flex-1">
+        {isLoading && files.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-16 text-dark-300">
+            <Loader2 className="h-10 w-10 animate-spin text-primary-500" />
+            <p>Loading files from Google Drive...</p>
+          </div>
+        ) : files.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-16 text-dark-300">
+            <FileQuestion className="h-10 w-10 text-dark-400" />
+            <p>No markdown files found in your Google Drive</p>
+          </div>
+        ) : (
+          <div className="space-y-2 p-4">
+            {files.map((file) => (
+              <Card
+                key={file.id}
+                className={`flex items-center justify-between p-3 transition-colors hover:bg-dark-800 ${
+                  file.imported ? "border-success-500/50 bg-success-500/10" : ""
+                }`}
               >
-                {importingFileId === file.id ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin" />
-                    <span>Importing...</span>
-                  </>
-                ) : (
-                  <>
-                    <Download size={14} />
-                    <span>Import</span>
-                  </>
-                )}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <FileText className="h-5 w-5 shrink-0 text-dark-300" />
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-dark-100">{file.name}</p>
+                    <p className="text-xs text-dark-400">
+                      Modified: {new Date(file.modifiedTime).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                
+                <Button
+                  onClick={() => handleImport(file.id)}
+                  disabled={importingFileId === file.id || file.imported}
+                  size="sm"
+                  variant={file.imported ? "success" : "default"}
+                  className="ml-2 shrink-0"
+                >
+                  {importingFileId === file.id ? (
+                    <>
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      <span>Importing...</span>
+                    </>
+                  ) : file.imported ? (
+                    <span>Imported</span>
+                  ) : (
+                    <>
+                      <Download className="mr-1 h-3 w-3" />
+                      <span>Import</span>
+                    </>
+                  )}
+                </Button>
+              </Card>
+            ))}
+          </div>
+        )}
+      </ScrollArea>
     </div>
   );
-};
-
-export default GoogleDrivePanel;
+}

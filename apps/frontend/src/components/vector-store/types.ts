@@ -61,7 +61,30 @@ export const embeddingFormSchema = z.object({
   useLemmatization: z.boolean().default(false),
 });
 
-export type FormValues = z.infer<typeof embeddingFormSchema>;
+export interface FormValues {
+  embeddingModel: 
+    | 'text-embedding-ada-002'
+    | 'text-embedding-3-small'
+    | 'text-embedding-3-large'
+    | 'embed-english-v3.0'
+    | 'embed-multilingual-v3.0'
+    | 'all-MiniLM-L6-v2'
+    | 'all-mpnet-base-v2'
+    | 'bge-large-en'
+    | 'e5-large-v2'
+    | 'gte-large'
+    | 'instructor-xl'
+    | 'jina-embeddings-v2-base-en'
+    | 'jina-embeddings-v2-small-en';
+  vectorDb: 'pinecone' | 'weaviate' | 'chroma' | 'milvus' | 'qdrant' | 'faiss' | 'pgvector';
+  chunkSize: number;
+  chunkOverlap: number;
+  chunkingMethod: 'recursive' | 'fixed-size' | 'sentence' | 'paragraph';
+  extractMetadata: string[];
+  textCleaning: string[];
+  removeStopwords: boolean;
+  useLemmatization: boolean;
+}
 
 // Section configuration to track completion
 export interface SectionConfig {

@@ -1,0 +1,331 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+  =====================================================================================
+   GLOBAL DESIGN VARIABLES
+   - This file enforces the design system for the entire project.
+   - All color, spacing, and layout references must use these variables or 
+     the tokens from tailwind.config.js.
+   - DO NOT hardcode styles outside of these tokens. 
+  =====================================================================================
+*/
+
+@layer base {
+  :root {
+    /* Base theme colors */
+    --color-dark-50: 234 234 234; /* #EAEAEA */
+    --color-dark-100: 189 189 189; /* #BDBDBD */
+    --color-dark-200: 158 158 158; /* #9E9E9E */
+    --color-dark-300: 117 117 117; /* #757575 */
+    --color-dark-400: 97 97 97;   /* #616161 */
+    --color-dark-500: 66 66 66;   /* #424242 */
+    --color-dark-600: 48 48 48;   /* #303030 */
+    --color-dark-700: 36 36 36;   /* #242424 */
+    --color-dark-800: 26 26 26;   /* #1A1A1A */
+    --color-dark-900: 15 15 15;   /* #0F0F0F */
+    --color-dark-950: 8 8 8;      /* #080808 */
+    
+    /* Primary color - Purple */
+    --color-primary-50: 244 240 255;  /* #F4F0FF */
+    --color-primary-100: 233 227 255; /* #E9E3FF */
+    --color-primary-200: 212 196 255; /* #D4C4FF */
+    --color-primary-300: 190 166 255; /* #BEA6FF */
+    --color-primary-400: 169 135 255; /* #A987FF */
+    --color-primary-500: 139 92 246;  /* #8B5CF6 */
+    --color-primary-600: 124 77 238;  /* #7C4DEE */
+    --color-primary-700: 109 61 230;  /* #6D3DE6 */
+    --color-primary-800: 94 48 218;   /* #5E30DA */
+    --color-primary-900: 76 33 203;   /* #4C21CB */
+    
+    /* Overlay colors for modals, dialogs, etc. */
+    --color-overlay-light: rgba(255, 255, 255, 0.1);
+    --color-overlay-dark: rgba(0, 0, 0, 0.5);
+    
+    /* Border colors */
+    --color-border-light: rgba(255, 255, 255, 0.12);
+    --color-border-normal: rgba(255, 255, 255, 0.24);
+    --color-border-focus: rgb(139, 92, 246); /* primary-500 */
+    
+    /* Text colors */
+    --color-text-primary: rgba(255, 255, 255, 0.87);
+    --color-text-secondary: rgba(255, 255, 255, 0.6);
+    --color-text-disabled: rgba(255, 255, 255, 0.38);
+    
+    /* Elevations - using Material design elevation system */
+    --shadow-dp0: none;
+    --shadow-dp1: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 
+                  0 2px 1px -1px rgba(0, 0, 0, 0.12), 
+                  0 1px 3px 0 rgba(0, 0, 0, 0.2);
+    --shadow-dp2: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 
+                  0 3px 1px -2px rgba(0, 0, 0, 0.12), 
+                  0 1px 5px 0 rgba(0, 0, 0, 0.2);
+    --shadow-dp3: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 
+                  0 3px 3px -2px rgba(0, 0, 0, 0.12), 
+                  0 1px 8px 0 rgba(0, 0, 0, 0.2);
+    --shadow-dp4: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 
+                  0 1px 10px 0 rgba(0, 0, 0, 0.12), 
+                  0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-dp6: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 
+                  0 1px 18px 0 rgba(0, 0, 0, 0.12), 
+                  0 3px 5px -1px rgba(0, 0, 0, 0.2);
+    --shadow-dp8: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 
+                  0 3px 14px 2px rgba(0, 0, 0, 0.12), 
+                  0 5px 5px -3px rgba(0, 0, 0, 0.2);
+    --shadow-dp12: 0 12px 17px 2px rgba(0, 0, 0, 0.14), 
+                   0 5px 22px 4px rgba(0, 0, 0, 0.12), 
+                   0 7px 8px -4px rgba(0, 0, 0, 0.2);
+    --shadow-dp16: 0 16px 24px 2px rgba(0, 0, 0, 0.14), 
+                   0 6px 30px 5px rgba(0, 0, 0, 0.12), 
+                   0 8px 10px -5px rgba(0, 0, 0, 0.2);
+    --shadow-dp24: 0 24px 38px 3px rgba(0, 0, 0, 0.14), 
+                   0 9px 46px 8px rgba(0, 0, 0, 0.12), 
+                   0 11px 15px -7px rgba(0, 0, 0, 0.2);
+    
+    /* Glow effects */
+    --shadow-glow-primary: 0 0 15px rgba(139, 92, 246, 0.5);
+    --shadow-glow-secondary: 0 0 15px rgba(6, 182, 212, 0.5);
+    --shadow-glow-success: 0 0 15px rgba(16, 185, 129, 0.5);
+    --shadow-glow-error: 0 0 15px rgba(239, 68, 68, 0.5);
+    
+    /* Animation durations */
+    --animation-short: 150ms;
+    --animation-medium: 300ms;
+    --animation-long: 500ms;
+    
+    /* Border radius */
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-2xl: 16px;
+    --radius-full: 9999px;
+    
+    /* Material elevation background for dark theme */
+    --bg-elevation-0: rgb(18, 18, 18);
+    --bg-elevation-1: rgb(30, 30, 30);
+    --bg-elevation-2: rgb(33, 33, 33);
+    --bg-elevation-3: rgb(37, 37, 37);
+    --bg-elevation-4: rgb(41, 41, 41);
+    --bg-elevation-6: rgb(45, 45, 45);
+    --bg-elevation-8: rgb(48, 48, 48);
+    --bg-elevation-12: rgb(51, 51, 51);
+    --bg-elevation-16: rgb(54, 54, 54);
+    --bg-elevation-24: rgb(57, 57, 57);
+    
+    /* Base typography */
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    
+    /* Z-index layers */
+    --z-index-dropdown: 10;
+    --z-index-sticky: 20;
+    --z-index-fixed: 30;
+    --z-index-modal-backdrop: 40;
+    --z-index-modal: 50;
+    --z-index-popover: 60;
+    --z-index-tooltip: 70;
+  }
+}
+
+/* 
+  =====================================================================================
+   BASE STYLING AND RESETS
+   - All elements must respect these variables and the design tokens from tailwind.config.js
+   - Do not override these rules with inline or custom classes unless absolutely necessary.
+  =====================================================================================
+*/
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    color-scheme: dark;
+    background-color: rgb(var(--color-dark-900)); /* #0F0F0F */
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    line-height: 1.5;
+  }
+  
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    margin-top: 0;
+    margin-bottom: 0.5em;
+  }
+  
+  p {
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+  
+  a {
+    color: rgb(var(--color-primary-400));
+    text-decoration: none;
+    transition: color var(--animation-short) ease;
+  }
+  
+  a:hover {
+    color: rgb(var(--color-primary-300));
+    text-decoration: underline;
+  }
+  
+  code, pre, kbd {
+    font-family: var(--font-mono);
+  }
+
+  /* Fix for mobile Safari */
+  button, input, optgroup, select, textarea {
+    font-family: inherit;
+  }
+}
+
+/* 
+  =====================================================================================
+   COMPONENT LAYERS
+   - Utility classes, reusable patterns, respecting design tokens (colors, spacing, etc.).
+   - DO NOT define new color or spacing values outside tailwind.config.js or these CSS vars.
+  =====================================================================================
+*/
+@layer components {
+  /* Panel and layout components */
+  .app-container {
+    @apply flex h-screen w-screen bg-dark-900 text-dark-50;
+  }
+
+  .main-content {
+    @apply flex flex-1 flex-col h-full overflow-hidden;
+  }
+
+  .header {
+    @apply flex items-center justify-between border-b border-dark-700 bg-dark-800 p-4;
+  }
+
+  .panel {
+    @apply bg-dark-800 rounded-md border border-dark-700;
+  }
+
+  .panel-header {
+    @apply flex items-center justify-between border-b border-dark-700 p-4;
+  }
+
+  .panel-content {
+    @apply p-4;
+  }
+
+  /* Elevation classes using Material Design system */
+  .elevation-0 {
+    @apply bg-dark-900 shadow-none;
+  }
+
+  .elevation-1 {
+    @apply bg-dark-800 shadow-sm;
+  }
+
+  .elevation-2 {
+    @apply bg-dark-800 shadow;
+  }
+
+  .elevation-4 {
+    @apply bg-dark-700 shadow-md;
+  }
+
+  .elevation-8 {
+    @apply bg-dark-700 shadow-lg;
+  }
+
+  .elevation-16 {
+    @apply bg-dark-600 shadow-xl;
+  }
+
+  .elevation-24 {
+    @apply bg-dark-600 shadow-2xl;
+  }
+
+  /* Glow effects for interactive elements */
+  .glow-hover-primary {
+    @apply transition-shadow duration-300 hover:shadow-primary-glow;
+  }
+
+  .glow-hover-secondary {
+    @apply transition-shadow duration-300 hover:shadow-secondary-glow;
+  }
+
+  .glow-hover-success {
+    @apply transition-shadow duration-300 hover:shadow-success-glow;
+  }
+
+  .glow-hover-error {
+    @apply transition-shadow duration-300 hover:shadow-error-glow;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-fade-in {
+    @apply animate-fade-in;
+  }
+
+  .animate-slide-in {
+    @apply animate-slide-in-bottom;
+  }
+
+  .animate-slide-out {
+    @apply animate-slide-out-bottom;
+  }
+
+  /* Responsive utilities */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 
+  =====================================================================================
+   SCROLLBARS, FOCUS, SELECTION
+   - Additional styling for interactive states referencing existing tokens.
+  =====================================================================================
+*/
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background-color: rgb(26, 26, 26); /* dark-800 */
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgb(48, 48, 48); /* dark-600 */
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(66, 66, 66); /* dark-500 */
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--color-primary-500));
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: rgba(var(--color-primary-500), 0.3);
+}

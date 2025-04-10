@@ -1,4 +1,9 @@
-/** @type {import('tailwindcss').Config} */
+/** 
+ * @type {import('tailwindcss').Config} 
+ *
+ * This file defines the official design tokens for the entire project.
+ * Do not override them with custom inline values in components or CSS.
+ */
 const { fontFamily } = require('tailwindcss/defaultTheme');
 
 module.exports = {
@@ -31,7 +36,7 @@ module.exports = {
           900: '#0F0F0F',
           950: '#080808',
         },
-        // Primary color with glow effect (purple)
+        // Primary color (purple)
         primary: {
           50: '#F4F0FF',
           100: '#E9E3FF',
@@ -110,7 +115,7 @@ module.exports = {
           900: '#171717',
           950: '#0A0A0A',
         },
-        // Other design system names (preserving for compatibility)
+        // Additional tokens (preserving for compatibility with shadcn/ui)
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -128,10 +133,18 @@ module.exports = {
       },
       boxShadow: {
         'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        DEFAULT: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-        'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        DEFAULT:
+          '0 1px 3px 0 rgba(0, 0, 0, 0.1), ' +
+          '0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        'md':
+          '0 4px 6px -1px rgba(0, 0, 0, 0.1), ' +
+          '0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'lg':
+          '0 10px 15px -3px rgba(0, 0, 0, 0.1), ' +
+          '0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'xl':
+          '0 20px 25px -5px rgba(0, 0, 0, 0.1), ' +
+          '0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         // Glow effects
         'primary-glow': '0 0 15px rgba(139, 92, 246, 0.5)',
@@ -158,39 +171,39 @@ module.exports = {
       spacing: {
         // Material design spacing system (8px grid)
         '0': '0',
-        '0.5': '2px',  // 0.125rem
-        '1': '4px',    // 0.25rem
-        '1.5': '6px',  // 0.375rem
-        '2': '8px',    // 0.5rem
-        '2.5': '10px', // 0.625rem
-        '3': '12px',   // 0.75rem
-        '3.5': '14px', // 0.875rem
-        '4': '16px',   // 1rem (base spacing unit)
-        '5': '20px',   // 1.25rem
-        '6': '24px',   // 1.5rem
-        '7': '28px',   // 1.75rem
-        '8': '32px',   // 2rem
-        '9': '36px',   // 2.25rem
-        '10': '40px',  // 2.5rem
-        '11': '44px',  // 2.75rem
-        '12': '48px',  // 3rem
-        '14': '56px',  // 3.5rem
-        '16': '64px',  // 4rem
-        '20': '80px',  // 5rem
-        '24': '96px',  // 6rem
-        '28': '112px', // 7rem
-        '32': '128px', // 8rem
-        '36': '144px', // 9rem
-        '40': '160px', // 10rem
-        '44': '176px', // 11rem
-        '48': '192px', // 12rem
-        '52': '208px', // 13rem
-        '56': '224px', // 14rem
-        '60': '240px', // 15rem
-        '64': '256px', // 16rem
-        '72': '288px', // 18rem
-        '80': '320px', // 20rem
-        '96': '384px', // 24rem
+        '0.5': '2px',
+        '1': '4px',
+        '1.5': '6px',
+        '2': '8px',
+        '2.5': '10px',
+        '3': '12px',
+        '3.5': '14px',
+        '4': '16px',
+        '5': '20px',
+        '6': '24px',
+        '7': '28px',
+        '8': '32px',
+        '9': '36px',
+        '10': '40px',
+        '11': '44px',
+        '12': '48px',
+        '14': '56px',
+        '16': '64px',
+        '20': '80px',
+        '24': '96px',
+        '28': '112px',
+        '32': '128px',
+        '36': '144px',
+        '40': '160px',
+        '44': '176px',
+        '48': '192px',
+        '52': '208px',
+        '56': '224px',
+        '60': '240px',
+        '64': '256px',
+        '72': '288px',
+        '80': '320px',
+        '96': '384px',
       },
       transitionProperty: {
         'height': 'height',
@@ -262,7 +275,6 @@ module.exports = {
           '100%': { transform: 'translateY(20px)', opacity: '0' },
         },
       },
-      // Z-index system
       zIndex: {
         '0': '0',
         '10': '10',

@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useBookContext } from "@/contexts/book-context";
 import { useRagPipeline } from "@/hooks/use-rag-pipeline";
 import { Form } from "@/components/ui/form";
- import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { embeddingFormSchema, FormValues } from "./vector-store/types";
 import { useState } from "react";
@@ -40,6 +40,9 @@ export default function VectorStorePanel() {
       useLemmatization: false,
     },
   });
+
+  // Watch for selected embedding model
+  const selectedEmbeddingModel = form.watch('embeddingModel');
 
   const handleCreateVectorStore = async (values: FormValues) => {
     if (!selectedBook) {
@@ -85,60 +88,60 @@ export default function VectorStorePanel() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div className="flex flex-col h-full">
       <div className="p-3 border-b border-dark-600">
         <h2 className="text-lg font-semibold text-white">Vector Store Configuration</h2>
       </div>
-      <div className="flex-1 overflow-y-auto px-3">
+      <div className="flex-1 overflow-y-auto p-3">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleCreateVectorStore)}>
-          <div className="space-y-3 mb-4">
-            <CollapsibleSection
-              title="Embedding Model"
-              sectionKey="embedding"
-              isOpen={openSections.embedding}
-              onToggle={handleToggleSection}
-              completedOptions={1}
-              optionsCount={1}
-            >
-              <EmbeddingModelSection form={form} />
-            </CollapsibleSection>
+            <div className="space-y-3 mb-4">
+              <CollapsibleSection
+                title="Embedding Model"
+                sectionKey="embedding"
+                isOpen={openSections.embedding}
+                onToggle={handleToggleSection}
+                completedOptions={selectedEmbeddingModel ? 1 : 0}
+                optionsCount={1}
+              >
+                <EmbeddingModelSection form={form} />
+              </CollapsibleSection>
+              
+              <CollapsibleSection
+                title="Vector Database"
+                sectionKey="database"
+                isOpen={openSections.database}
+                onToggle={handleToggleSection}
+                completedOptions={1}
+                optionsCount={1}
+              >
+                <VectorDbSection form={form} />
+              </CollapsibleSection>
+              
+              <CollapsibleSection
+                title="Chunking"
+                sectionKey="chunking"
+                isOpen={openSections.chunking}
+                onToggle={handleToggleSection}
+                completedOptions={3}
+                optionsCount={4}
+              >
+                <ChunkingSection form={form} />
+              </CollapsibleSection>
+              
+              <CollapsibleSection
+                title="Text Processing"
+                sectionKey="preprocessing"
+                isOpen={openSections.preprocessing}
+                onToggle={handleToggleSection}
+                completedOptions={2}
+                optionsCount={3}
+              >
+                <PreprocessingSection form={form} />
+              </CollapsibleSection>
+            </div>
             
-            <CollapsibleSection
-              title="Vector Database"
-              sectionKey="database"
-              isOpen={openSections.database}
-              onToggle={handleToggleSection}
-              completedOptions={1}
-              optionsCount={1}
-            >
-              <VectorDbSection form={form} />
-            </CollapsibleSection>
-            
-            <CollapsibleSection
-              title="Chunking"
-              sectionKey="chunking"
-              isOpen={openSections.chunking}
-              onToggle={handleToggleSection}
-              completedOptions={3}
-              optionsCount={4}
-            >
-              <ChunkingSection form={form} />
-            </CollapsibleSection>
-            
-            <CollapsibleSection
-              title="Text Processing"
-              sectionKey="preprocessing"
-              isOpen={openSections.preprocessing}
-              onToggle={handleToggleSection}
-              completedOptions={2}
-              optionsCount={3}
-            >
-              <PreprocessingSection form={form} />
-            </CollapsibleSection>
-          </div>
-            
-            <div className="mt-6">
+            <div className="mt-6 sticky bottom-3 z-10">
               <Button 
                 type="submit" 
                 className="w-full"

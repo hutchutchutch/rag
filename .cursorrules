@@ -1,0 +1,101 @@
+# Cursor Design System Enforcement
+
+> **Context:** We are using Tailwind CSS, `index.css` for design variables, and [shadcn/ui](https://ui.shadcn.com/) for all component primitives. Our goal is to keep styling consistent and strictly refer to existing tokens. **Never** hardcode colors, spacing, font sizes, or any other style values.
+
+---
+
+## 1. Use shadcn/ui for All UI Components
+
+- **✅** Always import and use shadcn/ui components: `Button`, `Card`, `Dialog`, `Input`, etc.
+- **❌** Never re-implement these primitives manually or install competing UI libraries.
+- **Example**:
+  ```tsx
+  // Good:
+  import { Button } from "@/components/ui/button"
+  ...
+  <Button variant="default" size="lg">Go!</Button>
+
+  // Bad:
+  <button style={{ padding: "12px 24px", backgroundColor: "#8B5CF6" }}>Go!</button>
+2. Colors & Spacing from Tokens Only
+✅ Use color, spacing, and radius from tailwind.config.js or index.css (CSS variables).
+
+❌ No inline or arbitrary style properties, e.g. style={{ marginTop: "10px" }} or bg-[#FF0000].
+
+Example:
+
+tsx
+Copy
+Edit
+// Good:
+<div className="p-4 text-primary-500" />
+
+// Bad:
+<div className="p-[22px] text-[#FF0000]" />
+3. Typography & Font Sizes
+✅ Use Tailwind classes from theme.extend.fontSize for headings, body text, etc.
+
+❌ Never manually set font-size or line-height inline or via arbitrary values.
+
+Example:
+
+tsx
+Copy
+Edit
+// Good:
+<h1 className="text-3xl font-bold">Heading</h1>
+
+// Bad:
+<h1 style={{ fontSize: "26px", lineHeight: "30px" }}>Heading</h1>
+4. Shadows, Borders, and Radii
+✅ Use shadow-* classes from theme.extend.boxShadow or CSS variables like --shadow-dp4.
+
+✅ Use rounded-* classes from theme.extend.borderRadius or --radius-sm from index.css.
+
+❌ Never specify box-shadow or border-radius manually.
+
+Example:
+
+tsx
+Copy
+Edit
+// Good:
+<Card className="rounded-md shadow-primary-glow" />
+
+// Bad:
+<div style={{ borderRadius: "6px", boxShadow: "0 1px 3px..." }}>...</div>
+5. Layout and Utility Classes
+✅ Use Tailwind layout utility classes (flex, grid, gap, space-x-*, p-*, etc.) and keep spacing consistent with the scale in tailwind.config.js.
+
+❌ No inline style declarations for margins, paddings, or positioning.
+
+Example:
+
+tsx
+Copy
+Edit
+// Good:
+<div className="flex flex-col gap-4 p-6" />
+
+// Bad:
+<div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "24px" }} />
+6. Hard Constraints
+Use only the colors and spacing defined in index.css
+
+Never hardcode values
+
+Refer to tailwind.config.js for all design tokens
+
+Use shadcn/ui exclusively for design primitives
+
+7. Behavior Checklist for Every AI-Generated File
+shadcn/ui usage confirmed?
+
+All color/spacing from Tailwind tokens or index.css variables?
+
+No inline styling or hex codes?
+
+Correct, consistent layout classes?
+
+Typography from Tailwind’s extended font sizes?
+

@@ -27,29 +27,48 @@ rag/
 │   │   ├── tailwind.config.js # Tailwind CSS configuration
 │   │   ├── postcss.config.js # PostCSS configuration
 │   │   └── src/
-│   │       ├── main.tsx     # Application entry point
-│   │       ├── App.tsx      # Main application component
-│   │       ├── index.css    # Global styles
 │   │       ├── components/  # UI components
-│   │       │   ├── ChatFeed.tsx       # Chat message display and input
-│   │       │   ├── GraphPanel.tsx     # Visualization of vector relationships
-│   │       │   ├── Sidebar.tsx        # Collapsible sidebar with dropdowns
-│   │       │   ├── VectorStorePanel.tsx # Vector store status and info
-│   │       │   └── ui/               # Reusable UI components
-│   │       │       ├── button.tsx    # Button component
-│   │       │       ├── card.tsx      # Card component
-│   │       │       ├── collapsible.tsx # Collapsible panel component
+│   │       │   ├── chat/              # Chat-related components
+│   │       │   │   ├── ChatFeed.tsx   # Chat message display
+│   │       │   │   ├── ChatInput.tsx  # Message input with actions
+│   │       │   │   └── ChatMessage.tsx # Individual message component
+│   │       │   ├── graph/             # Graph visualization components
+│   │       │   │   ├── GraphPanel.tsx # Vector relationship visualization
+│   │       │   │   └── GraphNode.tsx  # Individual node component
+│   │       │   ├── sidebar/           # Sidebar components
+│   │       │   │   ├── Sidebar.tsx    # Main sidebar container
+│   │       │   │   └── SidebarItem.tsx # Individual sidebar item
+│   │       │   ├── vector-store/      # Vector store components
+│   │       │   │   ├── VectorStorePanel.tsx # Vector store configuration
+│   │       │   │   ├── EmbeddingModelSection.tsx # Embedding model settings
+│   │       │   │   ├── VectorDbSection.tsx # Database configuration
+│   │       │   │   ├── ChunkingSection.tsx # Text chunking settings
+│   │       │   │   └── PreprocessingSection.tsx # Text preprocessing options
+│   │       │   └── ui/               # shadcn/ui components
+│   │       │       ├── button.tsx    # Button with variants
+│   │       │       ├── card.tsx      # Card container
+│   │       │       ├── checkbox.tsx  # Checkbox input
+│   │       │       ├── collapsible.tsx # Collapsible panel
+│   │       │       ├── dialog.tsx    # Modal dialog
 │   │       │       ├── form.tsx      # Form components
-│   │       │       ├── input.tsx     # Input field component
+│   │       │       ├── input.tsx     # Text input
+│   │       │       ├── label.tsx     # Form label
 │   │       │       ├── progress.tsx  # Progress indicator
-│   │       │       └── select.tsx    # Dropdown select component
+│   │       │       ├── radio-group.tsx # Radio button group
+│   │       │       ├── select.tsx    # Dropdown select
+│   │       │       ├── slider.tsx    # Range slider
+│   │       │       ├── switch.tsx    # Toggle switch
+│   │       │       └── tabs.tsx      # Tabbed interface
+│   │       ├── styles/              # Global styles and themes
+│   │       │   ├── index.css        # Global CSS and Tailwind imports
+│   │       │   └── theme.ts         # Theme tokens and variables
 │   │       ├── contexts/
-│   │       │   └── book-context.tsx  # Context for document management
+│   │       │   └── book-context.tsx # Document management context
 │   │       ├── hooks/
-│   │       │   ├── use-rag-pipeline.ts # Hook for RAG operations
-│   │       │   └── use-toast.ts      # Toast notification hook
+│   │       │   ├── use-rag-pipeline.ts # RAG operations hook
+│   │       │   └── use-toast.ts      # Toast notifications
 │   │       ├── lib/
-│   │       │   ├── rag.ts            # RAG API functions and types
+│   │       │   ├── rag.ts            # RAG API functions
 │   │       │   └── utils.ts          # Utility functions
 │   │       └── shared/
 │   │           └── schema.ts         # Shared type definitions
