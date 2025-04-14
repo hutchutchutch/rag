@@ -6,7 +6,7 @@ services:
     container_name: neo4j
     ports:
       - "7474:7474"  # Neo4j Browser
-      - "7687:7687"  # Bolt
+      - "7687:7687"  # Bolt protocol
     environment:
       NEO4J_AUTH: "neo4j/testpassword"
       NEO4J_PLUGINS: '["apoc"]'
@@ -15,7 +15,7 @@ services:
       - neo4j_logs:/logs
       - neo4j_plugins:/plugins
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7474"]
+      test: ["CMD", "curl", "-f", "http://localhost:7474/browser/"]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -50,15 +50,14 @@ services:
     volumes:
       - localstack_data:/tmp/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - ../apps/backend/scripts:/app/scripts  # Mount init script
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s
       timeout: 5s
       retries: 5
     command: >
-      sh -c "awslocal s3 mb s3://rag-documents || true && 
-             echo 'LocalStack initialized' && 
-             tail -f /dev/null"
+      sh -c "/app/scripts/init-localstack.sh && tail -f /dev/null"
 
   backend:
     build:
@@ -66,9 +65,12 @@ services:
       dockerfile: Dockerfile.dev
     container_name: backend
     depends_on:
-      - neo4j
-      - postgres
-      - localstack
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
     ports:
       - "3000:3000"
     environment:
@@ -99,7 +101,8 @@ services:
       dockerfile: Dockerfile.dev
     container_name: frontend
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "5173:5173"
     volumes:
