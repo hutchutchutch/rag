@@ -38,16 +38,12 @@ export default function VectorStorePanel() {
       return;
     }
     
-    // Add to document list and set as selected book
-    const newBook = {
-      id: file.name,
-      title: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
-      path: URL.createObjectURL(file)
-    };
-    
-    // Set the selected book in the context
-    const { setSelectedBook } = useBookContext();
-    setSelectedBook(newBook);
+    // Force a rerender to show the selected file
+    // In a real application, we might save the file in a state
+    const fileInput = event.target;
+    setTimeout(() => {
+      fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }, 10);
   };
   const [openSections, setOpenSections] = useState({
     database: true,
@@ -74,10 +70,10 @@ export default function VectorStorePanel() {
   const selectedEmbeddingModel = form.watch('embeddingModel');
 
   const handleCreateVectorStore = async (values: FormValues) => {
-    if (!selectedBook) {
+    if (!fileInputRef.current?.files?.length) {
       toast({
-        title: "No book selected",
-        description: "Please upload or select a book first",
+        title: "No file selected",
+        description: "Please select a file to vectorize first",
         variant: "destructive",
       });
       return;
@@ -97,7 +93,10 @@ export default function VectorStorePanel() {
         model: values.embeddingModel
       };
       
-      const file = new File([""], selectedBook.id);
+      // Use the actual file selected by the user
+      const file = fileInputRef.current?.files?.[0];
+      if (!file) return;
+      
       await prepareRagPipeline(file, embeddingConfig);
       
       toast({
@@ -126,44 +125,51 @@ export default function VectorStorePanel() {
         <h2 className="text-lg font-semibold text-white">Vector Store Configuration</h2>
       </div>
       <div className="p-3 border-b border-dark-600">
-        {!selectedBook ? (
+        <div className="mb-3">
+          <h3 className="text-sm font-medium text-dark-100 mb-2">Step 1: Upload a document</h3>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isPreparing}
+              className="flex-1"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Select File
+            </Button>
+            
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".md,.markdown,.txt,.pdf"
+              className="hidden"
+            />
+          </div>
+          {fileInputRef.current?.files?.length ? (
+            <div className="mt-2 text-xs text-blue-400">
+              Selected: {fileInputRef.current.files[0].name}
+            </div>
+          ) : null}
+        </div>
+        
+        <div>
+          <h3 className="text-sm font-medium text-dark-100 mb-2">Step 2: Configure and vectorize</h3>
           <Button 
             variant="default" 
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isPreparing}
             className="w-full"
+            onClick={form.handleSubmit(handleCreateVectorStore)}
+            disabled={isPreparing || !fileInputRef.current?.files?.length || !form.watch('embeddingModel') || !form.watch('vectorDb')}
           >
-            <Upload className="w-4 h-4 mr-2" />
-            Upload Document
+            <Upload className="h-4 w-4 mr-2" />
+            Create Vector Store
           </Button>
-        ) : (
-          <div className="bg-dark-900 p-2 rounded-md border border-dark-600">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center text-white">
-                <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                <span className="text-sm truncate max-w-[190px]">
-                  {selectedBook.title}
-                </span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                className="ml-2 h-7 text-xs"
-              >
-                Change
-              </Button>
+          {isPreparing && (
+            <div className="mt-2 text-xs text-amber-400 flex items-center animate-pulse">
+              <span className="mr-1">●</span> Processing document...
             </div>
-          </div>
-        )}
-        
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          accept=".md,.markdown,.txt,.pdf"
-          className="hidden"
-        />
+          )}
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto p-3">
         <Form {...form}>
@@ -203,24 +209,7 @@ export default function VectorStorePanel() {
               </CollapsibleSection>
             </div>
             
-            <div className="mt-6 sticky bottom-3 z-10">
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={isPreparing || !selectedBook || !form.watch('embeddingModel') || !form.watch('vectorDb')}
-              >
-                {isPreparing ? "Processing..." : "Create Vector Store"}
-              </Button>
-              {!selectedBook && (
-                <p className="text-sm text-red-500 mt-2 text-center">Please select a document first</p>
-              )}
-              {selectedBook && !form.watch('embeddingModel') && (
-                <p className="text-sm text-amber-500 mt-2 text-center">Select an embedding model</p>
-              )}
-              {selectedBook && !form.watch('vectorDb') && (
-                <p className="text-sm text-amber-500 mt-2 text-center">Select a vector database</p>
-              )}
-            </div>
+            {/* Create Vector Store button now moved to the top section */}
           </form>
         </Form>
       </div>

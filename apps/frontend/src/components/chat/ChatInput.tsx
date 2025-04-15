@@ -17,11 +17,11 @@ export function ChatInput({ onSend, isLoading, placeholder = "Type a message..."
   const [message, setMessage] = React.useState("");
   const { selectedBook, setSelectedBook } = useBookContext();
   
-  // Mock documents for demo purposes
+  // Mock vector stores for demo purposes
   const documents = [
-    { id: 'doc1', title: 'Sample Document 1', path: '/docs/sample1' },
-    { id: 'doc2', title: 'Machine Learning Guide', path: '/docs/ml-guide' },
-    { id: 'doc3', title: 'Vector Database Guide', path: '/docs/vector-db' }
+    { id: 'doc1', title: 'Sample Document 1 (vectorized)', path: '/docs/sample1' },
+    { id: 'doc2', title: 'Machine Learning Guide (vectorized)', path: '/docs/ml-guide' },
+    { id: 'doc3', title: 'Vector Database Guide (vectorized)', path: '/docs/vector-db' }
   ];
   
   const handleSelectDocument = (value: string) => {
@@ -56,8 +56,8 @@ export function ChatInput({ onSend, isLoading, placeholder = "Type a message..."
         <span className="sr-only">Send message</span>
       </Button>
       <Select value={selectedBook?.id || ""} onValueChange={handleSelectDocument}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select a document" />
+        <SelectTrigger className="w-[250px]">
+          <SelectValue placeholder="Select a vectorized document" />
         </SelectTrigger>
         <SelectContent>
           {documents.map(doc => (
