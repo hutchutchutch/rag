@@ -4,7 +4,7 @@ import { Sidebar } from './components/sidebar/Sidebar';
 import { ChatFeed } from './components/chat/ChatFeed';
 import { GraphPanel } from './components/graph/GraphPanel';
 import VectorStorePanel from './components/VectorStorePanel';
-import { Badge } from './components/ui/badge';
+import { Header } from './components/Header';
 
 export function App() {
   const [backendStatus, setBackendStatus] = React.useState<string>('Checking...');
@@ -114,14 +114,7 @@ export function App() {
         </Sidebar>
         
         <div className="main-content">
-          <header className="header">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-semibold text-dark-50">RAG Explorer</h1>
-              <Badge variant={backendStatus.includes('Connected') ? 'success' : 'destructive'}>
-                {backendStatus}
-              </Badge>
-            </div>
-          </header>
+          <Header backendStatus={backendStatus} />
           
           <div className="flex-1">
             <ChatFeed />

@@ -23,13 +23,17 @@ const storage = multer.diskStorage({
 
 // File filter function
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  // Accept only markdown files
+  // Accept markdown, text, and PDF files
   if (file.mimetype === 'text/markdown' || 
+      file.mimetype === 'text/plain' ||
+      file.mimetype === 'application/pdf' ||
       file.originalname.endsWith('.md') || 
-      file.originalname.endsWith('.markdown')) {
+      file.originalname.endsWith('.markdown') ||
+      file.originalname.endsWith('.txt') ||
+      file.originalname.endsWith('.pdf')) {
     cb(null, true);
   } else {
-    cb(new Error('Only markdown files are allowed'));
+    cb(new Error('Only markdown, text, and PDF files are allowed'));
   }
 };
 

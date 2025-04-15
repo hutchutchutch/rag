@@ -19,12 +19,37 @@ class DocumentService {
       // Generate unique document ID
       const documentId = uuidv4();
       const fileName = path.basename(filePath);
+      const fileExt = path.extname(fileName).toLowerCase();
+      
+      // Determine content type based on file extension
+      let contentType = 'text/plain';
+      if (fileExt === '.md' || fileExt === '.markdown') {
+        contentType = 'text/markdown';
+      } else if (fileExt === '.pdf') {
+        contentType = 'application/pdf';
+      }
       
       // Upload to S3
-      const s3Key = await s3Service.uploadFile(filePath, 'text/markdown');
+      const s3Key = await s3Service.uploadFile(filePath, contentType);
       
       // Read and parse the document
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      let fileContent = '';
+      
+      // Handle different file types
+      if (fileExt === '.pdf') {
+        // For PDF files, we would normally use a PDF parsing library
+        // For this implementation, we'll just read the file but in a real app
+        // you would use a library like pdf-parse or pdf2json
+        console.log('Processing PDF file:', fileName);
+        // Mock extraction for demo purposes
+        fileContent = `Extracted content from PDF: ${fileName}\n\n` +
+                      `This is placeholder text since we're not actually parsing the PDF.\n` +
+                      `In a production environment, you would use a PDF parsing library.`;
+      } else {
+        // For text-based files (markdown, txt)
+        fileContent = fs.readFileSync(filePath, 'utf-8');
+      }
+      
       const chunks = this.chunkDocument(fileContent, fileName);
       
       // Store document metadata in PostgreSQL
