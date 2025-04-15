@@ -55,13 +55,13 @@ export function ChatFeed({ className }: ChatFeedProps) {
       </div>
       
       <div className="relative flex-1">
-        <ScrollArea className="h-full" viewportRef={scrollRef}>
+        <ScrollArea className="h-full flex flex-col justify-end" viewportRef={scrollRef}>
           {messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center p-8 text-dark-400">
+            <div className="flex h-full flex-col items-center justify-end p-8 text-dark-400">
               <p>No messages yet. Ask a question to get started.</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-2 p-4">
+            <div className="flex flex-col gap-2 p-4 mt-auto w-full max-w-[800px] mx-auto">
               {messages.map((message) => (
                 <ChatMessage
                   key={message.id}
@@ -71,7 +71,7 @@ export function ChatFeed({ className }: ChatFeedProps) {
                 />
               ))}
               {isChatting && (
-                <div className="flex items-center justify-center p-4">
+                <div className="flex items-center p-4">
                   <div className="animate-pulse text-dark-300">
                     AI is thinking...
                   </div>

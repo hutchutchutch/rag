@@ -109,7 +109,7 @@ export function ChatInputArea({
 
     return (
         <div className="flex flex-col w-full mx-auto p-4 space-y-4">
-            <div className="w-full max-w-[600px] mx-auto">
+            <div className="w-full max-w-[800px] mx-auto">
                 <div className="relative bg-neutral-900 rounded-xl border border-neutral-800">
                     <div className="overflow-y-auto">
                         <Textarea
