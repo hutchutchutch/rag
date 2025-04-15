@@ -77,7 +77,7 @@ class ChatService {
     });
     
     // Setup LLM with the retrieval tool
-    const llmWithTools = this.llm.bindTools([retrieveTool]);
+    const llmWithTools = this.llm;
     
     // Create the LangGraph workflow with message state
     const graph = new StateGraph({
@@ -87,8 +87,37 @@ class ChatService {
     });
     
     // Step 1: Generate a query and optionally call the retrieval tool
-    async function queryOrRespond(state: { messages: BaseMessage[] }) {
-      const response = await llmWithTools.invoke(state.messages);
+    const queryOrRespond = async (state: { messages: BaseMessage[] }) => {
+      // Use the retrieval tool directly instead of binding it to the LLM
+      const lastMessage = state.messages[state.messages.length - 1];
+      let messageContent = "";
+      
+      if (lastMessage instanceof HumanMessage) {
+        messageContent = lastMessage.content as string;
+      }
+      
+      if (messageContent) {
+        // First try to search directly using the last message as a query
+        try {
+          const retrievalResult = await retrieveTool.invoke({ query: messageContent });
+          
+          // If we get results, create an AI message that references the retrieved content
+          const responseWithContext = await this.llm.invoke([
+            new SystemMessage(`You are a helpful, accurate, and concise assistant. 
+            Use the following retrieved information to answer the user's question:
+            
+            ${retrievalResult}`),
+            ...state.messages
+          ]);
+          
+          return { messages: [responseWithContext] };
+        } catch (error) {
+          console.warn('Retrieval failed, falling back to direct response:', error.message);
+        }
+      }
+      
+      // If retrieval fails or there's no message content, just respond directly
+      const response = await this.llm.invoke(state.messages);
       return { messages: [response] };
     }
     
@@ -142,33 +171,9 @@ class ChatService {
     graph.addNode('tools', tools);
     graph.addNode('generate', generate);
     
-    // Add edges between nodes
+    // Simplify the graph to just use the queryOrRespond node directly
     graph.addEdge('__start__', 'queryOrRespond');
-    graph.addEdge('tools', 'generate');
-    
-    // Add a conditional edge for the queryOrRespond node
-    // If tools are called, use them; otherwise go to end
-    const toolCondition = (state: typeof MessagesAnnotation.State) => {
-      // Get the last message (which should be an AI message with tool calls)
-      const lastMessage = state.messages[state.messages.length - 1];
-      
-      if (
-        lastMessage instanceof AIMessage &&
-        lastMessage.tool_calls &&
-        lastMessage.tool_calls.length > 0
-      ) {
-        return 'tools';
-      }
-      return '__end__';
-    };
-    
-    graph.addConditionalEdges('queryOrRespond', toolCondition, {
-      tools: 'tools',
-      __end__: '__end__',
-    });
-    
-    // Add the completed generation to the end
-    graph.addEdge('generate', '__end__');
+    graph.addEdge('queryOrRespond', '__end__');
     
     // Compile the graph
     this.chatGraph = graph.compile();
