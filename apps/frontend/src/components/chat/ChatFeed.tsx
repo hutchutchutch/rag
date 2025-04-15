@@ -82,7 +82,7 @@ export function ChatFeed({ className }: ChatFeedProps) {
         </ScrollArea>
       </div>
       
-      <div className="border-t border-dark-700">
+      <div className="border-t border-dark-700 sticky bottom-0 bg-dark-800">
         <ChatInput
           onSend={sendMessage}
           isLoading={isChatting}

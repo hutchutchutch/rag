@@ -79,35 +79,21 @@ export function Header({ backendStatus }: HeaderProps) {
       </div>
       
       <div className="flex items-center gap-4">
-        {documents.length > 0 && (
-          <Select value={selectedDocument} onValueChange={handleSelectDocument}>
-            <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Select a document" />
-            </SelectTrigger>
-            <SelectContent>
-              {documents.map(doc => (
-                <SelectItem key={doc.id} value={doc.id}>{doc.title}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        
         <Button 
-          variant="default" 
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isPreparing}
+          variant="outline" 
+          size="sm"
         >
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Document
+          <FileDown className="w-4 h-4 mr-2" />
+          Export Data
         </Button>
         
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          accept=".md,.markdown,.txt,.pdf"
-          className="hidden"
-        />
+        <Button 
+          variant="outline" 
+          size="sm"
+        >
+          <Search className="w-4 h-4 mr-2" />
+          Advanced Search
+        </Button>
       </div>
     </div>
   );

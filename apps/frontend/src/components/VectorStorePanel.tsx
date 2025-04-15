@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useBookContext } from "@/contexts/book-context";
@@ -11,19 +12,47 @@ import { CollapsibleSection } from "./vector-store/CollapsibleSection";
 import { 
   EmbeddingModelSection, 
   VectorDbSection, 
-  ChunkingSection, 
-  PreprocessingSection 
+  ChunkingSection 
 } from "./vector-store";
+import { Upload, CheckCircle } from "lucide-react";
 
 export default function VectorStorePanel() {
   const { selectedBook } = useBookContext();
   const { toast } = useToast();
   const { isPreparing, processDocument: prepareRagPipeline } = useRagPipeline();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    const validExtensions = [".md", ".markdown", ".txt", ".pdf"];
+    const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+    
+    if (!hasValidExtension) {
+      toast({
+        title: "Invalid file format",
+        description: "Please upload a markdown, text, or PDF file",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Add to document list and set as selected book
+    const newBook = {
+      id: file.name,
+      title: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
+      path: URL.createObjectURL(file)
+    };
+    
+    // Set the selected book in the context
+    const { setSelectedBook } = useBookContext();
+    setSelectedBook(newBook);
+  };
   const [openSections, setOpenSections] = useState({
-    embedding: true,
-    database: false,
+    database: true,
+    embedding: false,
     chunking: false,
-    preprocessing: false,
   });
 
   const form = useForm<FormValues>({
@@ -36,8 +65,8 @@ export default function VectorStorePanel() {
       chunkingMethod: "recursive",
       extractMetadata: ["page-numbers", "section-titles"],
       textCleaning: ["remove-special-chars", "remove-extra-whitespace"],
-      removeStopwords: false,
-      useLemmatization: false,
+      removeStopwords: true,
+      useLemmatization: true,
     },
   });
 
@@ -59,8 +88,12 @@ export default function VectorStorePanel() {
       const embeddingConfig = {
         chunkSize: values.chunkSize,
         overlap: values.chunkOverlap,
-        cleaner: 'simple' as const,
-        strategy: values.chunkingMethod === 'recursive' ? 'recursive' as const : 'fixed' as const,
+        cleaner: 'advanced' as const, // Always use advanced cleaning
+        strategy: values.chunkingMethod === 'recursive' 
+          ? 'recursive' as const 
+          : values.chunkingMethod === 'paragraph' 
+            ? 'semantic' as const 
+            : 'fixed' as const,
         model: values.embeddingModel
       };
       
@@ -92,21 +125,50 @@ export default function VectorStorePanel() {
       <div className="p-3 border-b border-dark-600">
         <h2 className="text-lg font-semibold text-white">Vector Store Configuration</h2>
       </div>
+      <div className="p-3 border-b border-dark-600">
+        {!selectedBook ? (
+          <Button 
+            variant="default" 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isPreparing}
+            className="w-full"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Document
+          </Button>
+        ) : (
+          <div className="bg-dark-900 p-2 rounded-md border border-dark-600">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center text-white">
+                <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                <span className="text-sm truncate max-w-[190px]">
+                  {selectedBook.title}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="ml-2 h-7 text-xs"
+              >
+                Change
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          accept=".md,.markdown,.txt,.pdf"
+          className="hidden"
+        />
+      </div>
       <div className="flex-1 overflow-y-auto p-3">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleCreateVectorStore)}>
             <div className="space-y-3 mb-4">
-              <CollapsibleSection
-                title="Embedding Model"
-                sectionKey="embedding"
-                isOpen={openSections.embedding}
-                onToggle={handleToggleSection}
-                completedOptions={selectedEmbeddingModel ? 1 : 0}
-                optionsCount={1}
-              >
-                <EmbeddingModelSection form={form} />
-              </CollapsibleSection>
-              
               <CollapsibleSection
                 title="Vector Database"
                 sectionKey="database"
@@ -119,25 +181,25 @@ export default function VectorStorePanel() {
               </CollapsibleSection>
               
               <CollapsibleSection
+                title="Embedding Model"
+                sectionKey="embedding"
+                isOpen={openSections.embedding}
+                onToggle={handleToggleSection}
+                completedOptions={selectedEmbeddingModel ? 1 : 0}
+                optionsCount={1}
+              >
+                <EmbeddingModelSection form={form} />
+              </CollapsibleSection>
+              
+              <CollapsibleSection
                 title="Chunking"
                 sectionKey="chunking"
                 isOpen={openSections.chunking}
                 onToggle={handleToggleSection}
                 completedOptions={3}
-                optionsCount={4}
-              >
-                <ChunkingSection form={form} />
-              </CollapsibleSection>
-              
-              <CollapsibleSection
-                title="Text Processing"
-                sectionKey="preprocessing"
-                isOpen={openSections.preprocessing}
-                onToggle={handleToggleSection}
-                completedOptions={2}
                 optionsCount={3}
               >
-                <PreprocessingSection form={form} />
+                <ChunkingSection form={form} />
               </CollapsibleSection>
             </div>
             
@@ -145,10 +207,19 @@ export default function VectorStorePanel() {
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={isPreparing || !selectedBook}
+                disabled={isPreparing || !selectedBook || !form.watch('embeddingModel') || !form.watch('vectorDb')}
               >
                 {isPreparing ? "Processing..." : "Create Vector Store"}
               </Button>
+              {!selectedBook && (
+                <p className="text-sm text-red-500 mt-2 text-center">Please select a document first</p>
+              )}
+              {selectedBook && !form.watch('embeddingModel') && (
+                <p className="text-sm text-amber-500 mt-2 text-center">Select an embedding model</p>
+              )}
+              {selectedBook && !form.watch('vectorDb') && (
+                <p className="text-sm text-amber-500 mt-2 text-center">Select a vector database</p>
+              )}
             </div>
           </form>
         </Form>
