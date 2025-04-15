@@ -1,5 +1,17 @@
 import { ChatInputArea } from "@/components/ui/chat-input-area"
 
-export function ChatInput() {
-    return <ChatInputArea />
+interface ChatInputProps {
+  onSend: (message: string) => void;
+  isLoading?: boolean;
+  placeholder?: string;
+}
+
+export function ChatInput({ onSend, isLoading, placeholder }: ChatInputProps) {
+  return (
+    <ChatInputArea 
+      onSend={onSend} 
+      isLoading={isLoading}
+      placeholder={placeholder}
+    />
+  );
 }

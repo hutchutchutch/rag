@@ -71,7 +71,17 @@ function useAutoResizeTextarea({
     return { textareaRef, adjustHeight };
 }
 
-export function ChatInputArea() {
+interface ChatInputAreaProps {
+    onSend?: (message: string) => void;
+    isLoading?: boolean;
+    placeholder?: string;
+}
+
+export function ChatInputArea({ 
+    onSend, 
+    isLoading = false, 
+    placeholder = "Ask a question about your document..." 
+}: ChatInputAreaProps) {
     const [value, setValue] = useState("");
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 60,
@@ -81,16 +91,25 @@ export function ChatInputArea() {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            if (value.trim()) {
+            if (value.trim() && !isLoading && onSend) {
+                onSend(value);
                 setValue("");
                 adjustHeight(true);
             }
         }
     };
+    
+    const handleSendClick = () => {
+        if (value.trim() && !isLoading && onSend) {
+            onSend(value);
+            setValue("");
+            adjustHeight(true);
+        }
+    };
 
     return (
         <div className="flex flex-col w-full mx-auto p-4 space-y-4">
-            <div className="w-full">
+            <div className="w-full max-w-[600px] mx-auto">
                 <div className="relative bg-neutral-900 rounded-xl border border-neutral-800">
                     <div className="overflow-y-auto">
                         <Textarea
@@ -142,17 +161,20 @@ export function ChatInputArea() {
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
+                                onClick={handleSendClick}
+                                disabled={!value.trim() || isLoading}
                                 className={cn(
                                     "px-1.5 py-1.5 rounded-lg text-sm transition-colors border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 flex items-center justify-between gap-1",
-                                    value.trim()
+                                    value.trim() && !isLoading
                                         ? "bg-white text-black"
-                                        : "text-zinc-400"
+                                        : "text-zinc-400 opacity-50",
+                                    isLoading && "cursor-not-allowed"
                                 )}
                             >
                                 <ArrowUpIcon
                                     className={cn(
                                         "w-4 h-4",
-                                        value.trim()
+                                        value.trim() && !isLoading
                                             ? "text-black"
                                             : "text-zinc-400"
                                     )}
@@ -163,26 +185,51 @@ export function ChatInputArea() {
                     </div>
                 </div>
 
-                <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
+                <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
                     <SuggestionButton
                         icon={<SearchIcon className="w-4 h-4" />}
                         label="Find main concepts"
+                        onClick={() => {
+                            if (onSend) {
+                                onSend("What are the main concepts in this document?");
+                            }
+                        }}
                     />
                     <SuggestionButton
                         icon={<BookOpen className="w-4 h-4" />}
                         label="Summarize document"
+                        onClick={() => {
+                            if (onSend) {
+                                onSend("Can you summarize this document for me?");
+                            }
+                        }}
                     />
                     <SuggestionButton
                         icon={<FileUp className="w-4 h-4" />}
                         label="What's the key takeaway?"
+                        onClick={() => {
+                            if (onSend) {
+                                onSend("What are the key takeaways from this document?");
+                            }
+                        }}
                     />
                     <SuggestionButton
                         icon={<Database className="w-4 h-4" />}
                         label="What is RAG?"
+                        onClick={() => {
+                            if (onSend) {
+                                onSend("What is RAG and how does it work?");
+                            }
+                        }}
                     />
                     <SuggestionButton
                         icon={<ImageIcon className="w-4 h-4" />}
                         label="Explain with examples"
+                        onClick={() => {
+                            if (onSend) {
+                                onSend("Can you explain this concept with examples?");
+                            }
+                        }}
                     />
                 </div>
             </div>
@@ -193,12 +240,14 @@ export function ChatInputArea() {
 interface SuggestionButtonProps {
     icon: React.ReactNode;
     label: string;
+    onClick?: () => void;
 }
 
-function SuggestionButton({ icon, label }: SuggestionButtonProps) {
+function SuggestionButton({ icon, label, onClick }: SuggestionButtonProps) {
     return (
         <button
             type="button"
+            onClick={onClick}
             className="flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 rounded-full border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
         >
             {icon}
