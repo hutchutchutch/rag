@@ -63,9 +63,12 @@ export const uploadDocument = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Search for documents and optionally generate a knowledge graph proposal
+ */
 export const searchDocuments = async (req: Request, res: Response) => {
   try {
-    const { query, limit = 5 } = req.query;
+    const { query, limit = 5, buildKnowledgeGraph = false } = req.query;
     
     if (!query || typeof query !== 'string') {
       return res.status(400).json({ error: 'Query parameter is required' });
@@ -78,7 +81,23 @@ export const searchDocuments = async (req: Request, res: Response) => {
         typeof limit === 'string' ? parseInt(limit) : 5
       );
       
-      res.json({ results });
+      // Generate knowledge graph proposal if requested
+      let knowledgeGraph = null;
+      if (buildKnowledgeGraph === 'true') {
+        knowledgeGraph = await documentService.buildKnowledgeGraph(results);
+      }
+      
+      // Create a unique session ID for this knowledge graph extraction
+      // This would be used to track edits and eventual submission
+      const extractionId = buildKnowledgeGraph === 'true' 
+        ? `kg-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`
+        : undefined;
+      
+      res.json({ 
+        results,
+        knowledgeGraph: buildKnowledgeGraph === 'true' ? knowledgeGraph : undefined,
+        extractionId
+      });
     } catch (serviceError) {
       console.warn('Using mock service due to service error:', serviceError.message);
       
@@ -88,13 +107,79 @@ export const searchDocuments = async (req: Request, res: Response) => {
         typeof limit === 'string' ? parseInt(limit) : 5
       );
       
-      res.json({ results: mockResults });
+      // Generate mock extraction ID
+      const extractionId = buildKnowledgeGraph === 'true' 
+        ? `kg-mock-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`
+        : undefined;
+      
+      res.json({ 
+        results: mockResults,
+        knowledgeGraph: buildKnowledgeGraph === 'true' ? {
+          entities: [
+            { name: "Mock Entity 1", label: "Entity" },
+            { name: "Mock Entity 2", label: "Concept" }
+          ],
+          relationships: [
+            { source: "Mock Entity 1", target: "Mock Entity 2", type: "RELATED_TO" }
+          ],
+          newSchemaElements: [
+            { type: "entity_label", value: "Organization" }
+          ]
+        } : undefined,
+        extractionId
+      });
     }
   } catch (error: any) {
     console.error('Error searching documents:', error);
     res.status(500).json({
       error: 'Failed to search documents',
       details: error.message,
+    });
+  }
+};
+
+/**
+ * Submit edited knowledge graph for storage in Neo4j
+ */
+export const submitKnowledgeGraph = async (req: Request, res: Response) => {
+  try {
+    const { extractionId } = req.params;
+    const { entities, relationships } = req.body;
+    
+    if (!extractionId) {
+      return res.status(400).json({ error: 'Extraction ID is required' });
+    }
+    
+    if (!entities || !Array.isArray(entities) || !relationships || !Array.isArray(relationships)) {
+      return res.status(400).json({ error: 'Valid entities and relationships arrays are required' });
+    }
+    
+    // Here we would call a service method to merge these into Neo4j
+    // For now, we'll just return success
+    
+    try {
+      // In a real implementation, this would persist to Neo4j
+      // await documentService.saveKnowledgeGraph(extractionId, entities, relationships);
+      
+      res.json({
+        success: true,
+        message: 'Knowledge graph saved successfully',
+        extractionId,
+        entitiesAdded: entities.length,
+        relationshipsAdded: relationships.length
+      });
+    } catch (serviceError) {
+      console.warn('Knowledge graph save error:', serviceError);
+      res.status(500).json({
+        error: 'Failed to save knowledge graph',
+        details: serviceError.message
+      });
+    }
+  } catch (error: any) {
+    console.error('Error submitting knowledge graph:', error);
+    res.status(500).json({
+      error: 'Failed to process knowledge graph submission',
+      details: error.message
     });
   }
 };

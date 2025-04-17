@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { EmbeddingConfig, uploadDocument, searchDocuments, sendChatMessage, ChatMessage } from '@lib/rag';
+import { 
+  EmbeddingConfig, 
+  uploadDocument, 
+  searchDocuments, 
+  sendChatMessage, 
+  submitKnowledgeGraph,
+  ChatMessage,
+  KnowledgeGraph,
+  Entity,
+  Relationship
+} from '@lib/rag';
 
 interface Chunk {
   chunk_index: number;
@@ -18,6 +28,11 @@ export function useRagPipeline() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isChatting, setIsChatting] = useState(false);
+  
+  // Knowledge graph state
+  const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraph | null>(null);
+  const [extractionId, setExtractionId] = useState<string | null>(null);
+  const [isSubmittingGraph, setIsSubmittingGraph] = useState(false);
 
   /**
    * Upload a document and process it through the RAG pipeline
@@ -83,10 +98,10 @@ export function useRagPipeline() {
   /**
    * Search for relevant document chunks
    */
-  const search = async (query: string, limit: number = 5) => {
+  const search = async (query: string, limit: number = 5, buildKg: boolean = false) => {
     setIsSearching(true);
     try {
-      const results = await searchDocuments(query, limit);
+      const results = await searchDocuments(query, limit, buildKg);
       
       const chunks: Chunk[] = results.results.map((result, index) => ({
         chunk_index: index,
@@ -95,12 +110,73 @@ export function useRagPipeline() {
       }));
       
       setSearchResults(chunks);
+      
+      // Set knowledge graph data if available
+      if (results.knowledgeGraph) {
+        setKnowledgeGraph(results.knowledgeGraph);
+        if (results.extractionId) {
+          setExtractionId(results.extractionId);
+        }
+      } else {
+        setKnowledgeGraph(null);
+        setExtractionId(null);
+      }
+      
       setIsSearching(false);
       return chunks;
     } catch (error) {
       console.error('Error searching documents:', error);
       setIsSearching(false);
       throw error;
+    }
+  };
+  
+  /**
+   * Submit knowledge graph to Neo4j
+   */
+  const saveKnowledgeGraph = async (entities: Entity[], relationships: Relationship[]) => {
+    if (!extractionId) {
+      throw new Error("No extraction ID available");
+    }
+    
+    setIsSubmittingGraph(true);
+    try {
+      const result = await submitKnowledgeGraph(extractionId, { entities, relationships });
+      
+      // Reset after successful submission
+      setKnowledgeGraph(null);
+      setExtractionId(null);
+      setIsSubmittingGraph(false);
+      
+      return result;
+    } catch (error) {
+      console.error('Error submitting knowledge graph:', error);
+      setIsSubmittingGraph(false);
+      throw error;
+    }
+  };
+  
+  /**
+   * Update knowledge graph entities
+   */
+  const updateKnowledgeGraphEntities = (entities: Entity[]) => {
+    if (knowledgeGraph) {
+      setKnowledgeGraph({
+        ...knowledgeGraph,
+        entities
+      });
+    }
+  };
+  
+  /**
+   * Update knowledge graph relationships
+   */
+  const updateKnowledgeGraphRelationships = (relationships: Relationship[]) => {
+    if (knowledgeGraph) {
+      setKnowledgeGraph({
+        ...knowledgeGraph,
+        relationships
+      });
     }
   };
 
@@ -141,16 +217,22 @@ export function useRagPipeline() {
     isPreparing,
     isSearching,
     isChatting,
+    isSubmittingGraph,
     currentStep,
     currentChunk,
     allChunks,
     documentId,
     searchResults,
     chatHistory,
+    knowledgeGraph,
+    extractionId,
     processDocument,
     navigateToChunk,
     search,
     sendMessage,
-    clearChat
+    clearChat,
+    saveKnowledgeGraph,
+    updateKnowledgeGraphEntities,
+    updateKnowledgeGraphRelationships
   };
 }

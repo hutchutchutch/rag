@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { v4 as uuidv4 } from 'uuid';
 
 class Neo4jService {
-  private driver: Driver;
+  driver: Driver;
   private genAI: GoogleGenerativeAI;
   private embeddingModel: string = 'embedding-001';
   

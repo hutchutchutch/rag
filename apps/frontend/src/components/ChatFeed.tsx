@@ -1,22 +1,48 @@
-import React, { useRef, useEffect } from 'react';
-import { Send, Loader2, RefreshCw } from 'lucide-react';
+import React, { useRef, useEffect, useState } from 'react';
+import { Send, Loader2, RefreshCw, Database, Network } from 'lucide-react';
 import { useRagPipeline } from '@hooks/use-rag-pipeline';
-import { ChatMessage } from '@lib/rag';
+import { ChatMessage, SearchResult } from '@lib/rag';
+import KnowledgeGraphEditor from '@/components/graph/KnowledgeGraphEditor';
 
 const ChatFeed: React.FC = () => {
-  const [message, setMessage] = React.useState('');
+  const [message, setMessage] = useState('');
+  const [showRetrievedChunks, setShowRetrievedChunks] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
     isChatting,
+    isSearching,
     chatHistory,
+    searchResults,
+    knowledgeGraph,
     sendMessage,
-    clearChat
+    clearChat,
+    search
   } = useRagPipeline();
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory]);
+
+  // Handle search with knowledge graph building
+  const handleSearch = async (buildKg: boolean = false) => {
+    if (!message.trim() || isSearching) return;
+    
+    try {
+      const searchQuery = message;
+      // Keep the message in the input
+      await search(searchQuery, 5, buildKg);
+      
+      if (buildKg) {
+        setShowGraph(true);
+      } else {
+        setShowRetrievedChunks(true);
+      }
+    } catch (error) {
+      console.error('Error searching documents:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,17 +83,54 @@ const ChatFeed: React.FC = () => {
     }
   };
 
+  // Render retrieved chunks
+  const renderChunks = () => {
+    if (!searchResults || searchResults.length === 0) {
+      return <p className="text-dark-400">No results found.</p>;
+    }
+
+    return (
+      <div className="retrieved-chunks">
+        <h3 className="text-md font-semibold text-dark-50 mb-2">Retrieved Chunks</h3>
+        <div className="flex flex-col gap-2">
+          {searchResults.map((chunk, index) => (
+            <div key={index} className="bg-dark-800 p-3 rounded-md text-sm">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs text-primary-400">
+                  {chunk.metadata?.title || 'Untitled'} 
+                  {chunk.metadata?.sectionTitle ? ` - ${chunk.metadata.sectionTitle}` : ''}
+                </span>
+                <span className="text-xs text-dark-400">
+                  Score: {typeof chunk.score === 'number' ? chunk.score.toFixed(2) : 'N/A'}
+                </span>
+              </div>
+              <p className="text-dark-200">{chunk.text.substring(0, 200)}...</p>
+            </div>
+          ))}
+        </div>
+        <button 
+          className="btn btn-sm btn-outline mt-2"
+          onClick={() => setShowRetrievedChunks(false)}
+        >
+          Hide Results
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="chat-container">
       <div className="chat-header">
         <h2 className="text-lg font-semibold text-dark-50">Chat</h2>
-        <button 
-          onClick={clearChat}
-          className="btn btn-icon"
-          title="Clear chat history"
-        >
-          <RefreshCw size={18} />
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={clearChat}
+            className="btn btn-icon"
+            title="Clear chat history"
+          >
+            <RefreshCw size={18} />
+          </button>
+        </div>
       </div>
       
       <div className="chat-messages">
@@ -81,9 +144,44 @@ const ChatFeed: React.FC = () => {
           </div>
         )}
         <div ref={messagesEndRef} />
+        
+        {/* Conditional rendering for search results */}
+        {showRetrievedChunks && (
+          <div className="mt-4 bg-dark-750 p-4 rounded-md">
+            {renderChunks()}
+          </div>
+        )}
+        
+        {/* Knowledge Graph Editor */}
+        {showGraph && (
+          <div className="mt-4 bg-dark-750 p-4 rounded-md">
+            <KnowledgeGraphEditor onClose={() => setShowGraph(false)} />
+          </div>
+        )}
       </div>
       
       <div className="chat-input-container">
+        <div className="flex gap-2 mb-2">
+          <button
+            onClick={() => handleSearch(false)}
+            className="btn btn-sm btn-outline"
+            disabled={!message.trim() || isSearching}
+            title="Search for relevant documents"
+          >
+            <Database size={16} className="mr-1" />
+            Retrieve Chunks
+          </button>
+          <button
+            onClick={() => handleSearch(true)}
+            className="btn btn-sm btn-outline"
+            disabled={!message.trim() || isSearching}
+            title="Build knowledge graph from documents"
+          >
+            <Network size={16} className="mr-1" />
+            Extract Graph
+          </button>
+        </div>
+        
         <form onSubmit={handleSubmit} className="chat-form">
           <input
             type="text"

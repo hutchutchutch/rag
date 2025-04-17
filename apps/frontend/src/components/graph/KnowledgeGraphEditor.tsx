@@ -1,50 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Network, Share2, ZoomIn, ZoomOut, Filter, Save, Edit, Plus, Trash } from 'lucide-react';
+import { Network, Save, Edit, Plus, Trash, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { GraphNode } from './GraphNode';
+import { useRagPipeline } from '@/hooks/use-rag-pipeline';
+import { Entity, Relationship, SchemaElement } from '@/lib/rag';
 
-interface Entity {
-  id?: string;
-  name: string;
-  label: string;
-  isNew?: boolean;
+interface KnowledgeGraphEditorProps {
+  onClose?: () => void;
+  standalone?: boolean;
 }
 
-interface Relationship {
-  id?: string;
-  source: string;
-  target: string;
-  type: string;
-}
+const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, standalone = false }) => {
+  const {
+    knowledgeGraph,
+    extractionId,
+    isSubmittingGraph,
+    updateKnowledgeGraphEntities,
+    updateKnowledgeGraphRelationships,
+    saveKnowledgeGraph
+  } = useRagPipeline();
 
-interface SchemaElement {
-  type: string; // 'entity_label' or 'relationship_type'
-  value: string;
-}
-
-interface KnowledgeGraphData {
-  entities: Entity[];
-  relationships: Relationship[];
-  newSchemaElements?: SchemaElement[];
-  extractionId?: string;
-}
-
-import KnowledgeGraphEditor from './KnowledgeGraphEditor';
-
-export function GraphPanel() {
-  // Using the standalone KnowledgeGraphEditor component
-  return (
-    <div className="h-full">
-      <KnowledgeGraphEditor standalone={true} />
-    </div>
-  );
-  
-  // The original graph visualization code is kept below but not used
-  function OriginalGraphPanel() {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [entities, setEntities] = useState<Entity[]>([]);
   const [relationships, setRelationships] = useState<Relationship[]>([]);
@@ -53,8 +31,6 @@ export function GraphPanel() {
   const [selectedRelationship, setSelectedRelationship] = useState<Relationship | null>(null);
   const [availableEntityTypes, setAvailableEntityTypes] = useState<string[]>(["Entity", "Concept", "Document", "Topic"]);
   const [availableRelationshipTypes, setAvailableRelationshipTypes] = useState<string[]>(["RELATED_TO", "CONTAINS", "MENTIONS"]);
-  const [extractionId, setExtractionId] = useState<string | undefined>(undefined);
-  const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraphData | null>(null);
   
   // New entity/relationship form states
   const [newEntity, setNewEntity] = useState<{name: string, label: string}>({name: '', label: 'Entity'});
@@ -62,64 +38,39 @@ export function GraphPanel() {
     source: '', target: '', type: 'RELATED_TO'
   });
   
-  // Mock data for demonstration
+  // Load knowledge graph data when it changes
   useEffect(() => {
-    // In a real app, this would come from the search results via props
-    const mockData: KnowledgeGraphData = {
-      entities: [
-        { id: "e1", name: "Knowledge Graph", label: "Concept", isNew: true },
-        { id: "e2", name: "Neo4j", label: "Database", isNew: false },
-        { id: "e3", name: "LangGraph", label: "Framework", isNew: true }
-      ],
-      relationships: [
-        { id: "r1", source: "e3", target: "e1", type: "BUILDS" },
-        { id: "r2", source: "e2", target: "e1", type: "STORES" }
-      ],
-      newSchemaElements: [
-        { type: "entity_label", value: "Framework" },
-        { type: "relationship_type", value: "BUILDS" }
-      ],
-      extractionId: `kg-mock-${Date.now()}`
-    };
-    
-    setKnowledgeGraph(mockData);
-    setEntities(mockData.entities);
-    setRelationships(mockData.relationships);
-    setSchemaElements(mockData.newSchemaElements || []);
-    setExtractionId(mockData.extractionId);
-    
-    // Update available types with new schema elements
-    if (mockData.newSchemaElements) {
-      const newEntityTypes = mockData.newSchemaElements
-        .filter(el => el.type === 'entity_label')
-        .map(el => el.value);
-        
-      const newRelTypes = mockData.newSchemaElements
-        .filter(el => el.type === 'relationship_type')
-        .map(el => el.value);
-        
-      setAvailableEntityTypes(prev => [...new Set([...prev, ...newEntityTypes])]);
-      setAvailableRelationshipTypes(prev => [...new Set([...prev, ...newRelTypes])]);
+    if (knowledgeGraph) {
+      setEntities(knowledgeGraph.entities || []);
+      setRelationships(knowledgeGraph.relationships || []);
+      setSchemaElements(knowledgeGraph.newSchemaElements || []);
+      
+      // Update available types with new schema elements
+      if (knowledgeGraph.newSchemaElements) {
+        const newEntityTypes = knowledgeGraph.newSchemaElements
+          .filter(el => el.type === 'entity_label')
+          .map(el => el.value);
+          
+        const newRelTypes = knowledgeGraph.newSchemaElements
+          .filter(el => el.type === 'relationship_type')
+          .map(el => el.value);
+          
+        setAvailableEntityTypes(prev => [...new Set([...prev, ...newEntityTypes])]);
+        setAvailableRelationshipTypes(prev => [...new Set([...prev, ...newRelTypes])]);
+      }
     }
-  }, []);
+  }, [knowledgeGraph]);
   
-  const handleSaveKnowledgeGraph = () => {
+  const handleSaveKnowledgeGraph = async () => {
     if (!extractionId) return;
     
-    // This would call the backend API to save the knowledge graph
-    console.log('Saving knowledge graph with ID:', extractionId);
-    console.log('Entities:', entities);
-    console.log('Relationships:', relationships);
-    
-    // API call would go here
-    // fetch('/api/documents/knowledge-graph/' + extractionId, {
-    //   method: 'POST',
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: JSON.stringify({entities, relationships})
-    // })
-    
-    // Return to view mode
-    setMode('view');
+    try {
+      await saveKnowledgeGraph(entities, relationships);
+      if (onClose) onClose();
+      setMode('view');
+    } catch (error) {
+      console.error('Error saving knowledge graph:', error);
+    }
   };
   
   const addEntity = () => {
@@ -132,7 +83,9 @@ export function GraphPanel() {
       isNew: true
     };
     
-    setEntities(prev => [...prev, entityToAdd]);
+    const updatedEntities = [...entities, entityToAdd];
+    setEntities(updatedEntities);
+    updateKnowledgeGraphEntities(updatedEntities);
     setNewEntity({name: '', label: 'Entity'});
   };
   
@@ -146,17 +99,23 @@ export function GraphPanel() {
       type: newRelationship.type
     };
     
-    setRelationships(prev => [...prev, relationshipToAdd]);
+    const updatedRelationships = [...relationships, relationshipToAdd];
+    setRelationships(updatedRelationships);
+    updateKnowledgeGraphRelationships(updatedRelationships);
     setNewRelationship({source: '', target: '', type: 'RELATED_TO'});
   };
   
   const removeEntity = (entityId: string) => {
-    setEntities(prev => prev.filter(e => e.id !== entityId));
+    const updatedEntities = entities.filter(e => e.id !== entityId);
+    setEntities(updatedEntities);
+    updateKnowledgeGraphEntities(updatedEntities);
     
     // Also remove relationships that use this entity
-    setRelationships(prev => 
-      prev.filter(r => r.source !== entityId && r.target !== entityId)
+    const updatedRelationships = relationships.filter(r => 
+      r.source !== entityId && r.target !== entityId
     );
+    setRelationships(updatedRelationships);
+    updateKnowledgeGraphRelationships(updatedRelationships);
     
     if (selectedEntity?.id === entityId) {
       setSelectedEntity(null);
@@ -164,7 +123,9 @@ export function GraphPanel() {
   };
   
   const removeRelationship = (relationshipId: string) => {
-    setRelationships(prev => prev.filter(r => r.id !== relationshipId));
+    const updatedRelationships = relationships.filter(r => r.id !== relationshipId);
+    setRelationships(updatedRelationships);
+    updateKnowledgeGraphRelationships(updatedRelationships);
     
     if (selectedRelationship?.id === relationshipId) {
       setSelectedRelationship(null);
@@ -172,9 +133,11 @@ export function GraphPanel() {
   };
   
   const updateEntity = (id: string, field: keyof Entity, value: string) => {
-    setEntities(prev => 
-      prev.map(e => e.id === id ? {...e, [field]: value} : e)
+    const updatedEntities = entities.map(e => 
+      e.id === id ? {...e, [field]: value} : e
     );
+    setEntities(updatedEntities);
+    updateKnowledgeGraphEntities(updatedEntities);
     
     if (selectedEntity?.id === id) {
       setSelectedEntity(prev => prev ? {...prev, [field]: value} : null);
@@ -184,11 +147,11 @@ export function GraphPanel() {
   // If no knowledgeGraph is available yet, show placeholder
   if (!knowledgeGraph) {
     return (
-      <div className="flex h-full flex-col gap-4 p-4">
-        <Card className="flex-1 rounded-md bg-dark-800 p-6">
-          <CardContent className="w-full h-full flex items-center justify-center p-6">
+      <div className={`p-4 ${standalone ? 'h-full' : ''}`}>
+        <Card className="elevation-1">
+          <CardContent className="flex items-center justify-center p-6">
             <div className="text-dark-300 text-center">
-              <p className="text-sm">Search with 'buildKnowledgeGraph=true' to extract entities and relationships</p>
+              <p className="text-sm">No knowledge graph extraction available. Search with 'Extract Graph' to create one.</p>
             </div>
           </CardContent>
         </Card>
@@ -197,13 +160,23 @@ export function GraphPanel() {
   }
   
   return (
-    <div className="flex h-full flex-col gap-4 p-4">
+    <div className={`flex flex-col gap-4 p-4 ${standalone ? 'h-full' : ''}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Network size={20} className="text-primary-500" />
           <span className="text-sm font-medium text-dark-50">Knowledge Graph</span>
         </div>
         <div className="flex gap-1">
+          {onClose && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8"
+            >
+              <XCircle size={16} />
+            </Button>
+          )}
           {mode === 'view' ? (
             <Button
               variant="outline"
@@ -218,26 +191,33 @@ export function GraphPanel() {
               variant="default"
               size="sm"
               onClick={handleSaveKnowledgeGraph}
+              disabled={isSubmittingGraph}
               className="text-xs"
             >
-              <Save size={14} className="mr-1" /> Save to Neo4j
+              {isSubmittingGraph ? (
+                <>Saving...</>
+              ) : (
+                <>
+                  <Save size={14} className="mr-1" /> Save to Neo4j
+                </>
+              )}
             </Button>
           )}
         </div>
       </div>
       
       {/* Entity List */}
-      <Card className="p-4">
-        <CardHeader className="px-0 pt-0 pb-2">
+      <Card className="elevation-1">
+        <CardHeader className="px-4 py-2">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-sm font-medium text-dark-50">Entities</CardTitle>
+            <CardTitle className="text-xs font-medium text-dark-50">Entities</CardTitle>
             {mode === 'edit' && (
               <span className="text-xs text-dark-400">{entities.length} entities</span>
             )}
           </div>
         </CardHeader>
-        <CardContent className="px-0 py-2">
-          <ScrollArea className="h-28">
+        <CardContent className="px-4 py-2">
+          <ScrollArea className={`${standalone ? 'h-40' : 'h-28'}`}>
             {entities.length === 0 ? (
               <p className="text-xs text-dark-400 text-center py-2">No entities extracted</p>
             ) : (
@@ -318,17 +298,17 @@ export function GraphPanel() {
       </Card>
       
       {/* Relationships List */}
-      <Card className="p-4">
-        <CardHeader className="px-0 pt-0 pb-2">
+      <Card className="elevation-1">
+        <CardHeader className="px-4 py-2">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-sm font-medium text-dark-50">Relationships</CardTitle>
+            <CardTitle className="text-xs font-medium text-dark-50">Relationships</CardTitle>
             {mode === 'edit' && (
               <span className="text-xs text-dark-400">{relationships.length} relationships</span>
             )}
           </div>
         </CardHeader>
-        <CardContent className="px-0 py-2">
-          <ScrollArea className="h-28">
+        <CardContent className="px-4 py-2">
+          <ScrollArea className={`${standalone ? 'h-40' : 'h-28'}`}>
             {relationships.length === 0 ? (
               <p className="text-xs text-dark-400 text-center py-2">No relationships extracted</p>
             ) : (
@@ -437,14 +417,14 @@ export function GraphPanel() {
       
       {/* New Schema Elements */}
       {schemaElements.length > 0 && (
-        <Card className="p-4">
-          <CardHeader className="px-0 pt-0 pb-2">
-            <CardTitle className="text-sm font-medium text-dark-50">New Schema Elements</CardTitle>
+        <Card className="elevation-1">
+          <CardHeader className="px-4 py-2">
+            <CardTitle className="text-xs font-medium text-dark-50">New Schema Elements</CardTitle>
             <CardDescription className="text-xs">
               These new types were suggested by the LLM
             </CardDescription>
           </CardHeader>
-          <CardContent className="px-0 py-2">
+          <CardContent className="px-4 py-2">
             <div className="space-y-1">
               {schemaElements.map((element, idx) => (
                 <div 
@@ -466,13 +446,13 @@ export function GraphPanel() {
       
       {/* Details panel for selected entity/relationship */}
       {(selectedEntity || selectedRelationship) && (
-        <Card className="p-4">
-          <CardHeader className="px-0 pt-0 pb-2">
-            <CardTitle className="text-sm font-medium text-dark-50">
+        <Card className="elevation-1">
+          <CardHeader className="px-4 py-2">
+            <CardTitle className="text-xs font-medium text-dark-50">
               {selectedEntity ? 'Entity Details' : 'Relationship Details'}
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-0 py-2">
+          <CardContent className="px-4 py-2">
             {selectedEntity && (
               <div className="space-y-2">
                 <div className="grid grid-cols-[80px_1fr] gap-2 items-center">
@@ -545,7 +525,7 @@ export function GraphPanel() {
       {/* Instructions for user */}
       <div className="flex items-center justify-between">
         <div className="text-xs text-dark-400">
-          {extractionId && <span>Extraction ID: {extractionId}</span>}
+          {extractionId && <span>ID: {extractionId.substring(0, 10)}...</span>}
         </div>
         {mode === 'edit' && (
           <div className="flex items-center gap-1">
@@ -557,4 +537,6 @@ export function GraphPanel() {
       </div>
     </div>
   );
-}
+};
+
+export default KnowledgeGraphEditor;

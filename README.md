@@ -9,6 +9,8 @@ This repository demonstrates a comprehensive **Retrieval-Augmented Generation (R
 ```
 rag/
 ├── README.md                # Project documentation
+├── README-ENV.md            # Environment setup documentation
+├── CLAUDE.md                # Claude AI instructions
 ├── package.json             # Root-level scripts and devDependencies
 ├── pnpm-workspace.yaml      # pnpm workspace definition
 ├── pnpm-lock.yaml           # Lock file for dependencies
@@ -21,89 +23,140 @@ rag/
 ├── apps/                    # Application code for both frontend and backend
 │   ├── frontend/            # React/Vite-based frontend
 │   │   ├── Dockerfile.dev   # Development Dockerfile with hot reload
-│   │   ├── docker-compose.yml # Frontend-specific Docker Compose
+│   │   ├── Readme.md        # Frontend-specific documentation
 │   │   ├── package.json     # Frontend dependencies
+│   │   ├── pnpm-lock.yaml   # Frontend lock file
 │   │   ├── index.html       # HTML entry point
 │   │   ├── tailwind.config.js # Tailwind CSS configuration
 │   │   ├── postcss.config.js # PostCSS configuration
+│   │   ├── public/          # Static assets
+│   │   │   ├── env-test.html # Environment test page
+│   │   │   └── test-api.html # API test page
 │   │   └── src/
+│   │       ├── App.tsx      # Main application component
+│   │       ├── main.tsx     # Application entry point
 │   │       ├── components/  # UI components
-│   │       │   ├── chat/              # Chat-related components
+│   │       │   ├── ChatFeed.tsx     # Main chat feed component
+│   │       │   ├── GoogleDrivePanel.tsx # Google Drive integration
+│   │       │   ├── GraphPanel.tsx   # Graph visualization component
+│   │       │   ├── Header.tsx       # Application header
+│   │       │   ├── Sidebar.tsx      # Main sidebar component
+│   │       │   ├── VectorStorePanel.tsx # Vector store configuration
+│   │       │   ├── chat/            # Chat-related components
 │   │       │   │   ├── ChatFeed.tsx   # Chat message display
 │   │       │   │   ├── ChatInput.tsx  # Message input with actions
 │   │       │   │   └── ChatMessage.tsx # Individual message component
-│   │       │   ├── graph/             # Graph visualization components
+│   │       │   ├── graph/           # Graph visualization components
 │   │       │   │   ├── GraphPanel.tsx # Vector relationship visualization
-│   │       │   │   └── GraphNode.tsx  # Individual node component
-│   │       │   ├── sidebar/           # Sidebar components
+│   │       │   │   ├── GraphNode.tsx  # Individual node component
+│   │       │   │   └── KnowledgeGraphEditor.tsx # Editor for knowledge graphs
+│   │       │   ├── sidebar/         # Sidebar components
 │   │       │   │   ├── Sidebar.tsx    # Main sidebar container
 │   │       │   │   └── SidebarItem.tsx # Individual sidebar item
-│   │       │   ├── vector-store/      # Vector store components
-│   │       │   │   ├── VectorStorePanel.tsx # Vector store configuration
-│   │       │   │   ├── EmbeddingModelSection.tsx # Embedding model settings
-│   │       │   │   ├── VectorDbSection.tsx # Database configuration
+│   │       │   ├── vector-store/    # Vector store components
 │   │       │   │   ├── ChunkingSection.tsx # Text chunking settings
-│   │       │   │   └── PreprocessingSection.tsx # Text preprocessing options
-│   │       │   └── ui/               # shadcn/ui components
-│   │       │       ├── button.tsx    # Button with variants
-│   │       │       ├── card.tsx      # Card container
-│   │       │       ├── checkbox.tsx  # Checkbox input
+│   │       │   │   ├── CollapsibleSection.tsx # Collapsible panel
+│   │       │   │   ├── EmbeddingModelSection.tsx # Embedding model settings
+│   │       │   │   ├── MetadataOptionsSection.tsx # Metadata configuration
+│   │       │   │   ├── PreprocessingSection.tsx # Text preprocessing options
+│   │       │   │   ├── VectorDbSection.tsx # Database configuration
+│   │       │   │   ├── index.ts     # Vector store exports
+│   │       │   │   ├── sections/    # Additional section components
+│   │       │   │   └── types.ts     # Vector store type definitions
+│   │       │   └── ui/             # shadcn/ui components
+│   │       │       ├── avatar.tsx   # User avatar component
+│   │       │       ├── badge.tsx    # Badge component
+│   │       │       ├── button.tsx   # Button with variants
+│   │       │       ├── card.tsx     # Card container
+│   │       │       ├── chat-input-area.tsx # Chat input area
+│   │       │       ├── checkbox.tsx # Checkbox input
 │   │       │       ├── collapsible.tsx # Collapsible panel
-│   │       │       ├── dialog.tsx    # Modal dialog
-│   │       │       ├── form.tsx      # Form components
-│   │       │       ├── input.tsx     # Text input
-│   │       │       ├── label.tsx     # Form label
-│   │       │       ├── progress.tsx  # Progress indicator
+│   │       │       ├── form.tsx     # Form components
+│   │       │       ├── input.tsx    # Text input
+│   │       │       ├── label.tsx    # Form label
+│   │       │       ├── progress.tsx # Progress indicator
 │   │       │       ├── radio-group.tsx # Radio button group
-│   │       │       ├── select.tsx    # Dropdown select
-│   │       │       ├── slider.tsx    # Range slider
-│   │       │       ├── switch.tsx    # Toggle switch
-│   │       │       └── tabs.tsx      # Tabbed interface
-│   │       ├── styles/              # Global styles and themes
-│   │       │   ├── index.css        # Global CSS and Tailwind imports
-│   │       │   └── theme.ts         # Theme tokens and variables
+│   │       │       ├── scroll-area.tsx # Scrollable container
+│   │       │       ├── select.tsx   # Dropdown select
+│   │       │       ├── slider.tsx   # Range slider
+│   │       │       ├── switch.tsx   # Toggle switch
+│   │       │       ├── tabs.tsx     # Tabbed interface
+│   │       │       ├── textarea.tsx # Text area input
+│   │       │       └── v0-ai-chat.tsx # AI chat component
 │   │       ├── contexts/
 │   │       │   └── book-context.tsx # Document management context
 │   │       ├── hooks/
-│   │       │   ├── use-rag-pipeline.ts # RAG operations hook
-│   │       │   └── use-toast.ts      # Toast notifications
+│   │       │   ├── use-rag-pipeline.ts # Enhanced RAG operations hook
+│   │       │   └── use-toast.ts    # Toast notifications
 │   │       ├── lib/
-│   │       │   ├── rag.ts            # RAG API functions
-│   │       │   └── utils.ts          # Utility functions
-│   │       └── shared/
-│   │           └── schema.ts         # Shared type definitions
+│   │       │   ├── rag.ts          # RAG API functions with knowledge graph support
+│   │       │   └── utils.ts        # Utility functions
+│   │       ├── shared/
+│   │       │   └── schema.ts       # Shared type definitions
+│   │       ├── styles/            # Global styles and themes
+│   │       │   ├── index.css      # Global CSS and Tailwind imports
+│   │       │   └── theme.ts       # Theme tokens and variables
+│   │       └── vite-env.d.ts      # Vite environment types
 │   │
 │   └── backend/             # Express.js + LangGraph backend
 │       ├── Dockerfile.dev   # Development Dockerfile
-│       ├── docker-compose.yml # Backend-specific Docker Compose
+│       ├── Readme.md        # Backend-specific documentation
+│       ├── neo4j-log.md     # Neo4j logging information
+│       ├── neo4j-summary.md # Neo4j usage summary
 │       ├── package.json     # Backend dependencies
-│       ├── .env.example     # Example environment variables
+│       ├── pnpm-lock.yaml   # Backend lock file
+│       ├── test-neo4j.js    # Neo4j test script
+│       ├── tsconfig.json    # TypeScript configuration
 │       ├── uploads/         # Directory for uploaded documents
-│       │   └── ansi.md      # Sample document for testing
+│       │   ├── ansi.md      # Sample document for testing
+│       │   └── sample_doc.md # Additional sample document
 │       └── src/
 │           ├── index.ts     # Server entry point
 │           ├── config/      # Configuration
 │           │   └── index.ts # Configuration variables and setup
 │           ├── controllers/ # API route handlers
+│           │   ├── chat.controller.ts     # Chat functionality
 │           │   ├── document.controller.ts # Document upload/processing
-│           │   └── chat.controller.ts     # Chat functionality
+│           │   └── google-drive.controller.ts # Google Drive integration
 │           ├── middlewares/ # Express middlewares
 │           │   └── upload.middleware.ts   # File upload handling
-│           ├── models/      # Data models (if any)
+│           ├── mocks/       # Mock data
+│           │   └── database.mock.ts       # Database mocks
+│           ├── models/      # Data models
 │           ├── routes/      # API route definitions
+│           │   ├── chat.routes.ts         # Chat API routes
 │           │   ├── document.routes.ts     # Document API routes
-│           │   └── chat.routes.ts         # Chat API routes
+│           │   └── google-drive.routes.ts # Google Drive API routes
 │           ├── services/    # Business logic services
-│           │   ├── s3.service.ts          # AWS S3 integration
+│           │   ├── agents/  # LangGraph agent definitions
+│           │   │   ├── chat_rag/          # Chat RAG agent
+│           │   │   │   └── knowledge_graph_builder/ # Knowledge graph builder agent
+│           │   │   └── example_graph/     # Example LangGraph implementation
+│           │   │       ├── configuration.ts # Agent configuration
+│           │   │       ├── graph.ts       # Graph definition
+│           │   │       ├── index_graph.ts # Graph entry point
+│           │   │       ├── prompts.ts     # Agent prompts
+│           │   │       ├── retrieval.ts   # Retrieval logic
+│           │   │       ├── state.ts       # State management
+│           │   │       ├── tests/         # Tests for the agent
+│           │   │       │   ├── graph.int.test.ts # Integration tests
+│           │   │       │   └── graph.test.ts     # Unit tests
+│           │   │       └── utils.ts       # Agent utilities
+│           │   ├── chat.service.ts        # Chat service with dual agent graphs
+│           │   ├── document.service.ts    # Document processing service
+│           │   ├── google-drive.service.ts # Google Drive integration
+│           │   ├── mock.service.ts        # Mock service
 │           │   ├── neo4j.service.ts       # Neo4j vector store service
 │           │   ├── postgres.service.ts    # PostgreSQL vector store
-│           │   ├── document.service.ts    # Document processing
-│           │   └── chat.service.ts        # Chat with LangGraph
+│           │   └── s3.service.ts          # AWS S3 integration
+│           ├── types/       # TypeScript type definitions
+│           │   └── express-session.d.ts   # Express session types
 │           └── utils/       # Utility functions
+│               └── logger.ts # Logging utility
 │
 ├── infra/                  # Infrastructure configuration
 │   ├── docker-compose.yml   # Main Docker Compose for all services
-│   ├── docker-compose-dev.yml # Development Docker Compose
+│   ├── docker-compose-dev.yml # Development Docker Compose with extended features
 │   ├── neo4j/              # Neo4j configuration
 │   │   ├── import/         # Import directory for Neo4j
 │   │   └── plugins/        # Plugins for Neo4j
@@ -111,9 +164,9 @@ rag/
 │       ├── ecs-neo4j-config/ # ECS configuration for Neo4j
 │       │   ├── neo4j-fargate-service.md # Documentation
 │       │   └── task-definition.json    # ECS task definition
-│       ├── s3-setup.md     # Documentation for S3 setup
-│       └── google-drive-docs/ # Google Drive integration
-│           └── google-drive-integration.md # Documentation
+│       ├── google-drive-docs/ # Google Drive integration
+│       │   └── google-drive-integration.md # Documentation
+│       └── s3-setup.md     # Documentation for S3 setup
 │
 ├── packages/               # Shared libraries (if any)
 │
@@ -231,6 +284,10 @@ This repository structure provides a complete organization for a multi-vector st
 2. **Local Docker**  
    In `infra/`, run:
    ```bash
+   # For full development environment with dual LangGraph agents:
+   docker compose -f docker-compose-dev.yml up --build
+   
+   # For minimal setup:
    docker compose up --build
    ```
    This spins up Neo4j, PostgreSQL, LocalStack (S3 emulation), backend (Express + LangGraph), frontend (Vite).
@@ -239,6 +296,12 @@ This repository structure provides a complete organization for a multi-vector st
    ```bash
    pnpm --filter=backend dev
    pnpm --filter=frontend dev
+   ```
+   
+   **Note**: To use the dual agentic LangGraph flows, make sure to set the required environment variables:
+   ```bash
+   export GOOGLE_API_KEY=your_gemini_api_key
+   export OPENAI_API_KEY=your_openai_api_key
    ```
 
 3. **AWS ECS Deployment**  
@@ -275,12 +338,26 @@ This repository structure provides a complete organization for a multi-vector st
    - Generate high-quality embeddings using Google's Gemini model.
    - Store and retrieve embeddings from dual vector stores.
 
-4. **Chat Interface**:
-   - Ask questions about uploaded documents.
-   - System retrieves relevant context from vector stores.
-   - LangGraph orchestrates the retrieval and answer generation process.
+4. **Dual Agentic LangGraph Flows**:
+   - **Chat RAG Agent**: Handles conversation context, vector retrieval, and response generation.
+   - **Knowledge Graph Builder Agent**: Extracts structured entities and relationships from documents.
+   - Type-safe state management with Zod schemas for both agent workflows.
+   - Conditional routing between agents based on user preferences.
+   - Multiple specialized nodes for document retrieval, entity extraction, and answer generation.
 
-5. **Vector Store Visualization**:
+5. **Chat Interface with RAG Visualization**:
+   - Ask questions about uploaded documents with visibility into the RAG pipeline.
+   - View retrieved document chunks that inform the AI's responses.
+   - Toggle between standard RAG and knowledge graph extraction modes.
+   - Explore similarity scores and vector representations of relevant chunks.
+
+6. **Knowledge Graph Extraction and Editing**:
+   - AI-powered extraction of entities and relationships from documents.
+   - Interactive editor for reviewing and modifying extracted knowledge graphs.
+   - Add, edit, or remove entities and relationships before saving to Neo4j.
+   - Visualize the knowledge graph structure with entity types and relationship labels.
+
+7. **Vector Store Visualization**:
    - View document chunks and their vector representations.
    - Visualize similarity between chunks for better understanding.
 
@@ -309,26 +386,37 @@ The frontend application provides an intuitive interface for interacting with th
 
 ### Central Chat Interface
 
-1. **Chat Feed**
+1. **Chat Feed with RAG Visualization**
    - **Message History**: Displays alternating user and AI messages in conversation format
-   - **Message Styling**: Different styling for user vs. AI messages
+   - **Retrieved Chunks Display**: Shows the document chunks retrieved by the RAG system
+   - **Vector Search Results**: Displays similarity scores for each retrieved chunk
+   - **Source Attribution**: Links retrieved chunks back to original documents with citations
    - **Automatic Scrolling**: Auto-scrolls to the latest message
    - **Empty State**: Helpful prompt when no conversation has started
 
 2. **Input Controls**
    - **Text Input**: Full-width input field for entering questions
    - **Send Button**: Submits questions with loading state indicator
+   - **RAG Options**: Toggle between standard RAG and knowledge graph extraction
    - **Clear Conversation**: Option to reset the current chat session
 
-### Right Sidebar Components (Optional)
+### Right Sidebar Components
 
-1. **Vector Visualization**
+1. **Knowledge Graph Editor**
+   - **Entity Cards**: Interactive cards showing extracted entities with types/labels
+   - **Relationship Visualization**: Shows connections between entities
+   - **Edit Controls**: Add, modify, or remove entities and relationships
+   - **Schema Reference**: Available entity types and relationship types
+   - **Save Controls**: Submit edited knowledge graph to Neo4j
+
+2. **Vector Visualization**
    - **Graph View**: Visual representation of document chunks and relationships
    - **Similarity Scores**: Shows relevance between query and retrieved chunks
    - **Source Attribution**: Links retrieved information back to original documents
 
-2. **Technical Details**
+3. **Technical Details**
    - **Embedding Information**: Technical details about vector embeddings
+   - **Agent State Visualization**: Shows the current state of the LangGraph agents
    - **Performance Metrics**: Response times and retrieval statistics
    - **Debug Information**: For developers to understand the RAG pipeline
 
@@ -383,18 +471,20 @@ This RAG system uses:
 
 - **Backend**:
   - Express.js with TypeScript for a robust API server
-  - Neo4j database for graph-based data relationships
+  - Dual Agentic LangGraph flows for RAG and knowledge graph extraction
+  - Neo4j database for graph-based data relationships and knowledge graphs
   - PostgreSQL with pgvector for secondary vector storage
   - RESTful API design with structured controllers and models
   - Google Gemini for embeddings and text generation
+  - Zod schemas for type-safe state management
 
 - **Infrastructure**:
   - Turborepo + pnpm for consolidated multi-app dev
   - Docker for local dev/prod builds
-  - Neo4j on AWS ECS to store document relationships and embeddings
+  - Neo4j on AWS ECS to store document relationships and knowledge graphs
   - S3 for storing document files
   - PostgreSQL with pgvector for comparison vector storage
-  - LangGraph in the backend to orchestrate the RAG workflow
+  - LangGraph for creating agentic workflows with conditional routing
 
 ## Getting Started
 
@@ -402,7 +492,8 @@ This RAG system uses:
 
 - Node.js v18+ and pnpm
 - Docker and Docker Compose
-- Google Gemini API key
+- Google Gemini API key (for embeddings)
+- OpenAI API key (optional, for alternative LLM)
 
 ### Setup
 
@@ -410,7 +501,7 @@ This RAG system uses:
 
    ```bash
    git clone <repository-url>
-   cd my-app
+   cd rag
    ```
 
 2. **Install dependencies**
@@ -427,30 +518,110 @@ This RAG system uses:
    cp apps/backend/.env.example apps/backend/.env
    ```
 
-   Add your Google Gemini API key to the `.env` file.
+   Add your API keys to the `.env` file:
+   - GOOGLE_API_KEY: Required for Gemini embeddings
+   - OPENAI_API_KEY: Optional for alternative LLM
 
 4. **Start the development environment**
 
+   There are two options for running the application:
+
+   **Option 1: Full stack with docker-compose-dev.yml (recommended)**
+   ```bash
+   cd infra
+   docker compose -f docker-compose-dev.yml up
+   ```
+
+   This will start:
+   - Neo4j database with APOC plugin (for graph operations)
+   - PostgreSQL with pgvector extension (for vector embeddings)
+   - LocalStack for S3 emulation
+   - Backend Express server
+   - Frontend Vite server
+
+   **Option 2: Minimal setup with docker-compose.yml**
    ```bash
    cd infra
    docker compose up
    ```
 
-   This will start:
-   - Neo4j database
-   - PostgreSQL with pgvector
-   - LocalStack for S3 emulation
-   - Backend Express server
-   - Frontend Vite server
+   This starts a more basic version without LocalStack or some plugins.
 
-5. **Access the application**
+5. **Testing the frontend with Docker Compose**
+
+   To specifically test the frontend with the dual agentic flows for RAG and knowledge graph extraction:
+
+   ```bash
+   # Ensure API keys are set in your environment
+   export GOOGLE_API_KEY=your_gemini_api_key
+   export OPENAI_API_KEY=your_openai_api_key
+
+   # Start the full stack with docker-compose-dev.yml
+   cd infra
+   docker compose -f docker-compose-dev.yml up
+   ```
+
+   The frontend implements:
+   - A chat interface for querying documents using RAG
+   - Knowledge graph visualization and editing capabilities
+   - Document chunk retrieval and exploration
+   - Options to enable/disable knowledge graph extraction
+
+   **Testing knowledge graph extraction:**
+   1. Upload a document through the sidebar
+   2. Enter a query in the chat interface
+   3. Toggle the "Extract Knowledge Graph" option
+   4. View and edit extracted entities and relationships
+   5. Save the knowledge graph to Neo4j
+
+6. **Access the application**
 
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:3000
-   - Neo4j Browser: http://localhost:7474
+   - Neo4j Browser: http://localhost:7474 (login with neo4j/testpassword)
+   - PostgreSQL: localhost:5432 (connect with postgres/password or postgres/postgrespassword)
+
+## Architecture Highlights
+
+### Dual Agentic LangGraph Flows
+
+This system implements two specialized LangGraph agent workflows in the backend:
+
+1. **Chat RAG Agent**
+   - Handles conversation history and context tracking
+   - Performs vector retrieval from Neo4j and PostgreSQL
+   - Generates contextually relevant responses with retrieved chunks
+   - Uses type-safe state management with Zod schemas
+
+2. **Knowledge Graph Builder Agent**
+   - Extracts structured entities and relationships from documents
+   - Identifies entity types and relationship labels
+   - Creates a formal knowledge graph representation
+   - Maintains schema consistency for Neo4j storage
+   - Returns editable extraction results to the frontend
+
+The agents communicate through a router node that decides which flow to execute based on user preferences. This architecture allows for both traditional RAG functionality and advanced knowledge graph building within the same application.
+
+### Frontend Visualization and Editing
+
+The frontend provides transparent views into the RAG process:
+
+1. **RAG Visualization**
+   - Shows retrieved document chunks alongside AI responses
+   - Displays similarity scores and source information
+   - Provides context for how the system arrived at its answers
+
+2. **Knowledge Graph Editor**
+   - Interactive interface for reviewing extracted knowledge graphs
+   - Entity and relationship cards with edit capabilities
+   - Visual representation of the graph structure
+   - Ability to add, modify, or remove graph elements
+   - Save functionality to persist changes to Neo4j
 
 ## Conclusion
 
-This RAG system provides a comprehensive solution for document processing and question answering. By leveraging dual vector stores, it combines the strengths of graph databases and traditional vector search for improved retrieval capabilities. The LangGraph-orchestrated workflow ensures a smooth pipeline from document upload to answer generation.
+This RAG system provides a comprehensive solution for document processing and question answering with advanced knowledge graph capabilities. By leveraging dual vector stores and agentic LangGraph flows, it combines the strengths of graph databases, traditional vector search, and structured knowledge extraction.
 
-By following this architecture, you can easily build robust RAG applications that scale seamlessly in AWS. It's flexible for both local development and production-ready container deployments. Enjoy building your Multi-Vector Store RAG System!
+The system offers unprecedented transparency into the RAG process, allowing users to see retrieved chunks and edit extracted knowledge graphs before persistence. This human-in-the-loop approach ensures higher quality knowledge graphs while maintaining the efficiency of automated extraction.
+
+By following this architecture, you can easily build robust RAG applications that scale seamlessly in AWS. It's flexible for both local development and production-ready container deployments. Enjoy building your Multi-Vector Store RAG System with dual agentic workflows!

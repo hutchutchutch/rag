@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { BookProvider } from './contexts/book-context';
 import { Sidebar } from './components/sidebar/Sidebar';
-import { ChatFeed } from './components/chat/ChatFeed';
+import ChatFeed from './components/ChatFeed';
 import { GraphPanel } from './components/graph/GraphPanel';
 import VectorStorePanel from './components/VectorStorePanel';
 import { Header } from './components/Header';

@@ -33,6 +33,45 @@ export interface SearchResult {
 
 export interface SearchResponse {
   results: SearchResult[];
+  knowledgeGraph?: KnowledgeGraph;
+  extractionId?: string;
+}
+
+export interface Entity {
+  id?: string;
+  name: string;
+  label: string;
+  isNew?: boolean;
+}
+
+export interface Relationship {
+  id?: string;
+  source: string;
+  target: string;
+  type: string;
+}
+
+export interface SchemaElement {
+  type: string; // 'entity_label' or 'relationship_type'
+  value: string;
+}
+
+export interface KnowledgeGraph {
+  entities: Entity[];
+  relationships: Relationship[];
+  newSchemaElements?: SchemaElement[];
+}
+
+export interface KnowledgeGraphSubmission {
+  entities: Entity[];
+  relationships: Relationship[];
+}
+
+export interface KnowledgeGraphResponse {
+  success: boolean;
+  extractionId: string;
+  entities_added: number;
+  relationships_added: number;
 }
 
 // Backend API URL - get from environment or use fallback
@@ -118,10 +157,15 @@ export async function importGoogleDriveFile(fileId: string): Promise<Document> {
 /**
  * Search for relevant document chunks
  */
-export async function searchDocuments(query: string, limit: number = 5): Promise<SearchResponse> {
+export async function searchDocuments(
+  query: string, 
+  limit: number = 5, 
+  buildKnowledgeGraph: boolean = false
+): Promise<SearchResponse> {
   const params = new URLSearchParams({
     query,
     limit: limit.toString(),
+    buildKnowledgeGraph: buildKnowledgeGraph.toString(),
   });
   
   const response = await fetch(`${API_URL}/documents/search?${params}`, {
@@ -131,6 +175,29 @@ export async function searchDocuments(query: string, limit: number = 5): Promise
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || 'Failed to search documents');
+  }
+  
+  return response.json();
+}
+
+/**
+ * Submit knowledge graph to be saved to Neo4j
+ */
+export async function submitKnowledgeGraph(
+  extractionId: string,
+  data: KnowledgeGraphSubmission
+): Promise<KnowledgeGraphResponse> {
+  const response = await fetch(`${API_URL}/documents/knowledge-graph/${extractionId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to submit knowledge graph');
   }
   
   return response.json();
