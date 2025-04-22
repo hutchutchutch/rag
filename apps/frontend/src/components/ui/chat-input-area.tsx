@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { Textarea } from "./textarea";
+// import { cn } from "@/lib/utils";
+// import the correct styles if there's an issue with absolute imports
+import { cn } from "../../lib/utils";
 import {
     ImageIcon,
     FileUp,
@@ -87,6 +89,15 @@ export function ChatInputArea({
         minHeight: 60,
         maxHeight: 200,
     });
+
+    // Force dark mode for this component
+    useEffect(() => {
+        document.documentElement.classList.add('dark');
+        return () => {
+            // This is only relevant if you want to remove the class later
+            // document.documentElement.classList.remove('dark');
+        };
+    }, []);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
