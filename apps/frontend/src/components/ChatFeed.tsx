@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Send, Loader2, RefreshCw, Database, Network } from 'lucide-react';
 import { useRagPipeline } from '@hooks/use-rag-pipeline';
-import { ChatMessage, SearchResult } from '@lib/rag';
+import { ChatMessage } from '@lib/rag';
 import KnowledgeGraphEditor from '@/components/graph/KnowledgeGraphEditor';
 
 const ChatFeed: React.FC = () => {

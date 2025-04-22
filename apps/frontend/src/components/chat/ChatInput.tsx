@@ -1,4 +1,4 @@
-import { ChatInputArea } from "@/components/ui/chat-input-area"
+import { ChatInputArea } from "../ui/chat-input-area"
 
 interface ChatInputProps {
   onSend: (message: string) => void;

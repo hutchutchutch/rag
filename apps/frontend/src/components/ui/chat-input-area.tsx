@@ -6,6 +6,7 @@ import { Textarea } from "./textarea";
 // import { cn } from "@/lib/utils";
 // import the correct styles if there's an issue with absolute imports
 import { cn } from "../../lib/utils";
+import Marquee from "react-fast-marquee";
 import {
     ImageIcon,
     FileUp,
@@ -119,7 +120,7 @@ export function ChatInputArea({
     };
 
     return (
-        <div className="flex flex-col w-full mx-auto p-4 space-y-4">
+        <div className="flex flex-col w-full mx-auto p-4 space-y-4 bg-dark-800">
             <div className="w-full max-w-[800px] mx-auto">
                 <div className="relative bg-neutral-900 rounded-xl border border-neutral-800">
                     <div className="overflow-y-auto">
@@ -196,52 +197,63 @@ export function ChatInputArea({
                     </div>
                 </div>
 
-                <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
-                    <SuggestionButton
-                        icon={<SearchIcon className="w-4 h-4" />}
-                        label="Find main concepts"
-                        onClick={() => {
-                            if (onSend) {
-                                onSend("What are the main concepts in this document?");
-                            }
-                        }}
-                    />
-                    <SuggestionButton
-                        icon={<BookOpen className="w-4 h-4" />}
-                        label="Summarize document"
-                        onClick={() => {
-                            if (onSend) {
-                                onSend("Can you summarize this document for me?");
-                            }
-                        }}
-                    />
-                    <SuggestionButton
-                        icon={<FileUp className="w-4 h-4" />}
-                        label="What's the key takeaway?"
-                        onClick={() => {
-                            if (onSend) {
-                                onSend("What are the key takeaways from this document?");
-                            }
-                        }}
-                    />
-                    <SuggestionButton
-                        icon={<Database className="w-4 h-4" />}
-                        label="What is RAG?"
-                        onClick={() => {
-                            if (onSend) {
-                                onSend("What is RAG and how does it work?");
-                            }
-                        }}
-                    />
-                    <SuggestionButton
-                        icon={<ImageIcon className="w-4 h-4" />}
-                        label="Explain with examples"
-                        onClick={() => {
-                            if (onSend) {
-                                onSend("Can you explain this concept with examples?");
-                            }
-                        }}
-                    />
+                <div className="mt-4">
+                    <Marquee
+                        speed={30}
+                        gradient={true}
+                        gradientColor={"#1A1A1A"} // dark-800 in hex
+                        gradientWidth={50}
+                        pauseOnHover={true}
+                        className="py-2"
+                    >
+                        <div className="flex items-center gap-4 px-4">
+                            <SuggestionButton
+                                icon={<SearchIcon className="w-4 h-4" />}
+                                label="Find main concepts"
+                                onClick={() => {
+                                    if (onSend) {
+                                        onSend("What are the main concepts in this document?");
+                                    }
+                                }}
+                            />
+                            <SuggestionButton
+                                icon={<BookOpen className="w-4 h-4" />}
+                                label="Summarize document"
+                                onClick={() => {
+                                    if (onSend) {
+                                        onSend("Can you summarize this document for me?");
+                                    }
+                                }}
+                            />
+                            <SuggestionButton
+                                icon={<FileUp className="w-4 h-4" />}
+                                label="What's the key takeaway?"
+                                onClick={() => {
+                                    if (onSend) {
+                                        onSend("What are the key takeaways from this document?");
+                                    }
+                                }}
+                            />
+                            <SuggestionButton
+                                icon={<Database className="w-4 h-4" />}
+                                label="What is RAG?"
+                                onClick={() => {
+                                    if (onSend) {
+                                        onSend("What is RAG and how does it work?");
+                                    }
+                                }}
+                            />
+                            <SuggestionButton
+                                icon={<ImageIcon className="w-4 h-4" />}
+                                label="Explain with examples"
+                                onClick={() => {
+                                    if (onSend) {
+                                        onSend("Can you explain this concept with examples?");
+                                    }
+                                }}
+                            />
+                        </div>
+                    </Marquee>
                 </div>
             </div>
         </div>
