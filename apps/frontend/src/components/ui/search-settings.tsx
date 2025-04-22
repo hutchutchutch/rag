@@ -79,9 +79,18 @@ export function SearchSettings({
       
       {/* Distance Threshold */}
       <div className="space-y-2">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <Label htmlFor="distanceThreshold">Distance Threshold</Label>
-          <span className="text-sm text-dark-300">{values.distanceThreshold.toFixed(2)}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-dark-300">{values.distanceThreshold.toFixed(2)}</span>
+            <span className="text-xs text-dark-400">
+              {values.distanceThreshold < 0.2
+                ? "Very Relevant"
+                : values.distanceThreshold <= 0.5
+                ? "Moderately Relevant"
+                : "Less Relevant"}
+            </span>
+          </div>
         </div>
         <Slider
           id="distanceThreshold"
@@ -114,9 +123,18 @@ export function SearchSettings({
 
       {/* EF Search */}
       <div className="space-y-2">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <Label htmlFor="efSearch">EF Search (Accuracy vs Speed)</Label>
-          <span className="text-sm text-dark-300">{values.efSearch}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-dark-300">{values.efSearch}</span>
+            <span className="text-xs text-dark-400">
+              {values.efSearch <= 50
+                ? "Fast Response"
+                : values.efSearch <= 200
+                ? "Balanced"
+                : "High Accuracy"}
+            </span>
+          </div>
         </div>
         <Slider
           id="efSearch"
