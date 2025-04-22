@@ -7,6 +7,8 @@ import { Textarea } from "./textarea";
 // import the correct styles if there's an issue with absolute imports
 import { cn } from "../../lib/utils";
 import Marquee from "react-fast-marquee";
+import { Dialog } from "@/components/ui/dialog";
+import { SearchSettings, SearchSettingsValues } from "./search-settings";
 import {
     ImageIcon,
     FileUp,
@@ -14,9 +16,11 @@ import {
     SearchIcon,
     Database,
     ArrowUpIcon,
-    Paperclip,
     PlusIcon,
+    SlidersHorizontal,
 } from "lucide-react";
+
+
 
 interface UseAutoResizeTextareaProps {
     minHeight: number;
@@ -86,6 +90,16 @@ export function ChatInputArea({
     placeholder = "Ask a question about your document..." 
 }: ChatInputAreaProps) {
     const [value, setValue] = useState("");
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [searchSettings, setSearchSettings] = useState<SearchSettingsValues>({
+        efSearch: 128,
+        distanceThreshold: 0.75,
+        resultLimit: 5,
+        useHybridSearch: false,
+        hybridAlpha: 0.5,
+        preprocessQuery: true
+    });
+    
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 60,
         maxHeight: 200,
@@ -99,6 +113,21 @@ export function ChatInputArea({
             // document.documentElement.classList.remove('dark');
         };
     }, []);
+
+    const handleOpenSettings = () => {
+        setIsSettingsOpen(true);
+    };
+
+    const handleCloseSettings = () => {
+        setIsSettingsOpen(false);
+    };
+
+    const handleSaveSettings = (values: SearchSettingsValues) => {
+        setSearchSettings(values);
+        setIsSettingsOpen(false);
+        // In a real app, you might want to save these settings to localStorage or a backend
+        console.log("Search settings saved:", values);
+    };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -162,11 +191,12 @@ export function ChatInputArea({
                             
                             <button
                                 type="button"
+                                onClick={handleOpenSettings}
                                 className="group p-2 hover:bg-neutral-800 rounded-lg transition-colors flex items-center gap-1"
                             >
-                                <Paperclip className="w-4 h-4 text-white" />
+                                <SlidersHorizontal className="w-4 h-4 text-white" />
                                 <span className="text-xs text-zinc-400 hidden group-hover:inline transition-opacity">
-                                    Attach
+                                    Search Settings
                                 </span>
                             </button>
                         </div>
@@ -196,6 +226,17 @@ export function ChatInputArea({
                         </div>
                     </div>
                 </div>
+
+                <Dialog
+                    open={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    title="Search Settings"
+                >
+                    <SearchSettings
+                        initialValues={searchSettings}
+                        onSave={handleSaveSettings}
+                    />
+                </Dialog>
 
                 <div className="mt-4">
                     <Marquee
