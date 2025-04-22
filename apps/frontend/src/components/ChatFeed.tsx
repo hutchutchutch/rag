@@ -47,9 +47,9 @@ const ChatFeed: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || isChatting) return;
-    
+
+    const userMessage = message;
     try {
-      const userMessage = message;
       setMessage('');
       await sendMessage(userMessage);
     } catch (error) {
@@ -101,7 +101,7 @@ const ChatFeed: React.FC = () => {
                   {chunk.metadata?.sectionTitle ? ` - ${chunk.metadata.sectionTitle}` : ''}
                 </span>
                 <span className="text-xs text-dark-400">
-                  Score: {typeof chunk.score === 'number' ? chunk.score.toFixed(2) : 'N/A'}
+                  Score: {typeof (chunk as any).score === 'number' ? (chunk as any).score.toFixed(2) : 'N/A'}
                 </span>
               </div>
               <p className="text-dark-200">{chunk.text.substring(0, 200)}...</p>
