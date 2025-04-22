@@ -13,7 +13,7 @@ import {
   VectorDbSection, 
   ChunkingSection 
 } from "./vector-store";
-import { Upload, CheckCircle } from "lucide-react";
+import { Upload, CheckCircle, DatabaseZap } from "lucide-react";
 
 export default function VectorStorePanel() {
   const { toast } = useToast();
@@ -202,7 +202,7 @@ export default function VectorStorePanel() {
             onClick={form.handleSubmit(handleCreateVectorStore)}
             disabled={isPreparing || !fileInputRef.current?.files?.length || !form.watch('embeddingModel') || !form.watch('vectorDb')}
           >
-            <Upload className="h-4 w-4 mr-2" />
+            <DatabaseZap className="h-4 w-4 mr-2" />
             Create Vector Store
           </Button>
           {isPreparing && (
