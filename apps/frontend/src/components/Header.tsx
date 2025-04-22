@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Button } from './ui/button';
 import { useRagPipeline } from '../hooks/use-rag-pipeline';
 
 interface HeaderProps {
