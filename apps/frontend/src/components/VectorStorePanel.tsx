@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBookContext } from "@/contexts/book-context";
 import { useRagPipeline } from "@/hooks/use-rag-pipeline";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ import {
 import { Upload, CheckCircle } from "lucide-react";
 
 export default function VectorStorePanel() {
-  const { selectedBook } = useBookContext();
   const { toast } = useToast();
   const { isPreparing, processDocument: prepareRagPipeline } = useRagPipeline();
   const fileInputRef = React.useRef<HTMLInputElement>(null);

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { BookProvider } from './contexts/book-context';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ChatFeed } from './components/chat/ChatFeed';
 import { GraphPanel } from './components/graph/GraphPanel';
@@ -112,7 +111,6 @@ export function App() {
   }, []);
 
   return (
-    <BookProvider>
       <div className="app-container dark:bg-dark-900 dark:text-dark-50">
         <Sidebar position="left" title="Vector Store">
           <VectorStorePanel />
@@ -130,7 +128,6 @@ export function App() {
           <GraphPanel />
         </Sidebar>
       </div>
-    </BookProvider>
   );
 }
 
