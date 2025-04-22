@@ -152,26 +152,9 @@ export default function VectorStorePanel() {
             </div>
           ) : null}
         </div>
+        <h3 className="text-sm font-medium text-dark-100 mb-2">Step 2: Configure Settings</h3>
+        <div className="flex-1 overflow-y-auto p-3">
         
-        <div>
-          <h3 className="text-sm font-medium text-dark-100 mb-2">Step 2: Configure and vectorize</h3>
-          <Button 
-            variant="default" 
-            className="w-full"
-            onClick={form.handleSubmit(handleCreateVectorStore)}
-            disabled={isPreparing || !fileInputRef.current?.files?.length || !form.watch('embeddingModel') || !form.watch('vectorDb')}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Create Vector Store
-          </Button>
-          {isPreparing && (
-            <div className="mt-2 text-xs text-amber-400 flex items-center animate-pulse">
-              <span className="mr-1">●</span> Processing document...
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto p-3">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleCreateVectorStore)}>
             <div className="space-y-3 mb-4">
@@ -213,6 +196,25 @@ export default function VectorStorePanel() {
           </form>
         </Form>
       </div>
+        <div>
+          <h3 className="text-sm font-medium text-dark-100 mb-2">Step 3: Vectorize</h3>
+          <Button 
+            variant="default" 
+            className="w-full"
+            onClick={form.handleSubmit(handleCreateVectorStore)}
+            disabled={isPreparing || !fileInputRef.current?.files?.length || !form.watch('embeddingModel') || !form.watch('vectorDb')}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Create Vector Store
+          </Button>
+          {isPreparing && (
+            <div className="mt-2 text-xs text-amber-400 flex items-center animate-pulse">
+              <span className="mr-1">●</span> Processing document...
+            </div>
+          )}
+        </div>
+      </div>
+      
     </div>
   );
 }
