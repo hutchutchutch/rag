@@ -1,5 +1,5 @@
 // Simple script to test Neo4j connection and vector indexing
-import neo4j from 'neo4j-driver';
+import neo4j, { Session, Record as Neo4jRecord } from 'neo4j-driver';
 import dotenv from 'dotenv';
 
 // Load environment variables from the backend .env file
@@ -32,13 +32,13 @@ const driver = neo4j.driver(
 );
 
 // Function to verify connection
-async function verifyConnection() {
-  const session = driver.session();
+async function verifyConnection(): Promise<boolean> {
+  const session: Session = driver.session();
   try {
     const result = await session.run('RETURN 1 AS n');
     console.log('Successfully connected to Neo4j');
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to connect to Neo4j:', error.message);
     return false;
   } finally {
@@ -47,8 +47,8 @@ async function verifyConnection() {
 }
 
 // Function to check Neo4j version
-async function checkVersion() {
-  const session = driver.session();
+async function checkVersion(): Promise<void> {
+  const session: Session = driver.session();
   try {
     const result = await session.run(
       'CALL dbms.components() YIELD name, versions, edition RETURN name, versions, edition'
@@ -63,7 +63,7 @@ async function checkVersion() {
       console.log(`- Version: ${versions[0]}`);
       console.log(`- Edition: ${edition}`);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get Neo4j version:', error.message);
   } finally {
     await session.close();
@@ -71,8 +71,8 @@ async function checkVersion() {
 }
 
 // Function to test vector index creation
-async function testVectorIndex() {
-  const session = driver.session();
+async function testVectorIndex(): Promise<boolean> {
+  const session: Session = driver.session();
   try {
     // 1. Check if the index exists
     try {
@@ -86,7 +86,7 @@ async function testVectorIndex() {
       } else {
         console.log('Vector index does not exist, attempting to create it');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Error checking for existing index:', error.message);
     }
     
@@ -103,7 +103,7 @@ async function testVectorIndex() {
       `);
       console.log('Successfully created vector index with modern syntax');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Error creating vector index with modern syntax:', error.message);
     }
     
@@ -120,11 +120,11 @@ async function testVectorIndex() {
       `);
       console.log('Successfully created vector index with older syntax');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create vector index with older syntax:', error.message);
       return false;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in testVectorIndex:', error.message);
     return false;
   } finally {
@@ -133,11 +133,11 @@ async function testVectorIndex() {
 }
 
 // Function to test vector search
-async function testVectorSearch() {
-  const session = driver.session();
+async function testVectorSearch(): Promise<boolean> {
+  const session: Session = driver.session();
   try {
     // Create a test node with embedding
-    const embedding = Array(768).fill(0).map((_, i) => Math.sin(i) * 0.1);
+    const embedding: number[] = Array(768).fill(0).map((_, i) => Math.sin(i) * 0.1);
     
     try {
       // First create a test document chunk
@@ -165,7 +165,7 @@ async function testVectorSearch() {
         } else {
           console.log('Vector search returned no results');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Modern vector search failed:', error.message);
         
         // Try alternative search method
@@ -185,16 +185,16 @@ async function testVectorSearch() {
           } else {
             console.log('Alternative vector search returned no results');
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Alternative vector search failed:', error.message);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create test document:', error.message);
     }
     
     return false;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in testVectorSearch:', error.message);
     return false;
   } finally {
@@ -203,7 +203,7 @@ async function testVectorSearch() {
 }
 
 // Main test function
-async function main() {
+async function main(): Promise<void> {
   try {
     // 1. Verify connection
     const connected = await verifyConnection();
