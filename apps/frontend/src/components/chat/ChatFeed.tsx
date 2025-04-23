@@ -41,21 +41,9 @@ export function ChatFeed({ className }: ChatFeedProps) {
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
-      <div className="flex items-center justify-between border-b border-dark-700 p-4">
-        <h2 className="text-lg font-semibold text-dark-50">Chat</h2>
-        <Button 
-          onClick={clearChat}
-          variant="outline"
-          size="icon"
-          title="Clear chat history"
-        >
-          <RefreshCw className="h-4 w-4" />
-          <span className="sr-only">Clear chat</span>
-        </Button>
-      </div>
       
       <div className="relative flex-1">
-        <ScrollArea className="h-full flex flex-col justify-end" viewportRef={scrollRef}>
+        <ScrollArea className="h-full flex flex-col justify-end" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-end p-8 text-dark-400">
               <p>No messages yet. Ask a question to get started.</p>

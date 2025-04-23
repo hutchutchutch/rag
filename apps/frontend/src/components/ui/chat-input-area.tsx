@@ -151,7 +151,18 @@ export function ChatInputArea({
     return (
         <div className="flex flex-col w-full mx-auto p-4 space-y-4 bg-dark-800">
             <div className="w-full max-w-[800px] mx-auto">
+            <div className="flex flex-row items-center gap-2 p-4 pb-0">
+                <h2 className="text-lg font-semibold text-dark-50 leading-tight h-8 flex items-center">Chat with</h2>
+                <button
+                    type="button"
+                    className="h-8 px-3 rounded-lg text-sm text-zinc-400 transition-colors border border-dashed border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 flex items-center gap-1"
+                >
+                    <PlusIcon className="w-4 h-4" />
+                    Select a Document
+                </button>
+            </div>
                 <div className="relative bg-neutral-900 rounded-xl border border-neutral-800">
+                    
                     <div className="overflow-y-auto">
                         <Textarea
                             ref={textareaRef}
@@ -181,14 +192,6 @@ export function ChatInputArea({
 
                     <div className="flex items-center justify-between p-3">
                         <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                className="px-2 py-1 rounded-lg text-sm text-zinc-400 transition-colors border border-dashed border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 flex items-center justify-between gap-1"
-                            >
-                                <PlusIcon className="w-4 h-4" />
-                                Select a Document
-                            </button>
-                            
                             <button
                                 type="button"
                                 onClick={handleOpenSettings}
@@ -242,18 +245,20 @@ export function ChatInputArea({
                     <Marquee
                         speed={30}
                         gradient={true}
-                        gradientColor={"#1A1A1A"} // dark-800 in hex
+                        gradientColor={"#1A1A1A"}
                         gradientWidth={50}
                         pauseOnHover={true}
-                        className="py-2"
+                        className="py-2 h-14 overflow-hidden"
                     >
-                        <div className="flex items-center gap-4 px-4">
+                        <div className="flex items-center gap-4 px-4 h-14">
                             <SuggestionButton
                                 icon={<SearchIcon className="w-4 h-4" />}
                                 label="Find main concepts"
                                 onClick={() => {
-                                    if (onSend) {
-                                        onSend("What are the main concepts in this document?");
+                                    setValue("What are the main concepts in this document?");
+                                    if (textareaRef.current) {
+                                        textareaRef.current.focus();
+                                        adjustHeight();
                                     }
                                 }}
                             />
@@ -261,8 +266,10 @@ export function ChatInputArea({
                                 icon={<BookOpen className="w-4 h-4" />}
                                 label="Summarize document"
                                 onClick={() => {
-                                    if (onSend) {
-                                        onSend("Can you summarize this document for me?");
+                                    setValue("Can you summarize this document for me?");
+                                    if (textareaRef.current) {
+                                        textareaRef.current.focus();
+                                        adjustHeight();
                                     }
                                 }}
                             />
@@ -270,8 +277,10 @@ export function ChatInputArea({
                                 icon={<FileUp className="w-4 h-4" />}
                                 label="What's the key takeaway?"
                                 onClick={() => {
-                                    if (onSend) {
-                                        onSend("What are the key takeaways from this document?");
+                                    setValue("What are the key takeaways from this document?");
+                                    if (textareaRef.current) {
+                                        textareaRef.current.focus();
+                                        adjustHeight();
                                     }
                                 }}
                             />
@@ -279,8 +288,10 @@ export function ChatInputArea({
                                 icon={<Database className="w-4 h-4" />}
                                 label="What is RAG?"
                                 onClick={() => {
-                                    if (onSend) {
-                                        onSend("What is RAG and how does it work?");
+                                    setValue("What is RAG and how does it work?");
+                                    if (textareaRef.current) {
+                                        textareaRef.current.focus();
+                                        adjustHeight();
                                     }
                                 }}
                             />
@@ -288,8 +299,10 @@ export function ChatInputArea({
                                 icon={<ImageIcon className="w-4 h-4" />}
                                 label="Explain with examples"
                                 onClick={() => {
-                                    if (onSend) {
-                                        onSend("Can you explain this concept with examples?");
+                                    setValue("Can you explain this concept with examples?");
+                                    if (textareaRef.current) {
+                                        textareaRef.current.focus();
+                                        adjustHeight();
                                     }
                                 }}
                             />
