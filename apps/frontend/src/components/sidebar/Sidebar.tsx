@@ -12,6 +12,7 @@ import { Card } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
 import { useRagPipeline } from "../../hooks/use-rag-pipeline";
 import { SidebarItem } from "./SidebarItem";
+import { useVectorStore } from "@/store/vectorStore";
 
 interface SidebarProps {
   position: "left" | "right";
@@ -23,6 +24,7 @@ export function Sidebar({ position, title, children }: SidebarProps) {
   const [collapsed, setCollapsed] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { processDocument, isPreparing } = useRagPipeline();
+  const { selected } = useVectorStore();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -120,7 +122,7 @@ export function Sidebar({ position, title, children }: SidebarProps) {
   }
 
   return (
-    <Card className={`h-full w-80 rounded-none border-0 shadow-none ${
+    <Card className={`h-full ${title === "Knowledge Graph" && position === "right" ? (selected ? "w-[40rem]" : "w-80") : "w-80"} rounded-none border-0 shadow-none ${
       position === "left" ? "border-r" : "border-l"
     } border-dark-700 bg-dark-900`}>
       <div className="flex items-center justify-between border-b border-dark-700 p-4">

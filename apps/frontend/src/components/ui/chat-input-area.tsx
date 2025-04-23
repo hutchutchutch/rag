@@ -19,7 +19,9 @@ import {
     PlusIcon,
     SlidersHorizontal,
 } from "lucide-react";
-
+import { useVectorStore } from "@/store/vectorStore";
+import { vectorStores } from "@/mocks/vectorStores";
+import { SelectVectorStoreDialog } from "@/components/chat/SelectVectorStoreDialog";
 
 
 interface UseAutoResizeTextareaProps {
@@ -105,6 +107,11 @@ export function ChatInputArea({
         maxHeight: 200,
     });
 
+    const { selected, setSelected } = useVectorStore();
+
+    // Add state for dialog open/close
+    const [isDocDialogOpen, setDocDialogOpen] = useState(false);
+
     // Force dark mode for this component
     useEffect(() => {
         document.documentElement.classList.add('dark');
@@ -156,9 +163,10 @@ export function ChatInputArea({
                 <button
                     type="button"
                     className="h-8 px-3 rounded-lg text-sm text-zinc-400 transition-colors border border-dashed border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 flex items-center gap-1"
+                    onClick={() => setDocDialogOpen(true)}
                 >
                     <PlusIcon className="w-4 h-4" />
-                    Select a Document
+                    {selected ? selected.name : "Select a Document"}
                 </button>
             </div>
                 <div className="relative bg-neutral-900 rounded-xl border border-neutral-800">
@@ -309,6 +317,15 @@ export function ChatInputArea({
                         </div>
                     </Marquee>
                 </div>
+
+                {/* Dialog for selecting vector store */}
+                <SelectVectorStoreDialog
+                    open={isDocDialogOpen}
+                    onClose={() => setDocDialogOpen(false)}
+                    selected={selected}
+                    setSelected={setSelected}
+                    vectorStores={vectorStores}
+                />
             </div>
         </div>
     );
