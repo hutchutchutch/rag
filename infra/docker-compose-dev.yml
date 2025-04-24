@@ -15,10 +15,11 @@ services:
       - neo4j_logs:/logs
       - neo4j_plugins:/plugins
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7474/browser/"]
-      interval: 10s
-      timeout: 10s
+      test: ["CMD-SHELL", "wget -O /dev/null -q http://localhost:7474 || exit 1"]
+      interval: 30s
+      timeout: 15s
       retries: 5
+      start_period: 30s
 
   postgres:
     image: ankane/pgvector:latest

@@ -183,3 +183,61 @@ export const submitKnowledgeGraph = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * Process and ingest Chapter 12 into PGVector store
+ */
+export const processChapter12 = async (req: Request, res: Response) => {
+  try {
+
+    console.log('Processing Chapter 12');
+    // Process Chapter 12 document
+    const result = await documentService.processChapter12();
+    
+    res.status(200).json({
+      success: true,
+      message: `Successfully processed Chapter 12 into vector store`,
+      documentId: result.documentId,
+      chunkCount: result.chunkCount
+    });
+  } catch (error: any) {
+    console.error('Error processing Chapter 12:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process Chapter 12',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Query Chapter 12 content
+ */
+export const queryChapter12 = async (req: Request, res: Response) => {
+  try {
+    const { query } = req.body;
+    
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Query is required'
+      });
+    }
+    
+    // Query the vector store
+    const results = await documentService.queryChapter12(query, 5);
+    
+    res.status(200).json({
+      success: true,
+      query,
+      results
+    });
+  } catch (error: any) {
+    console.error('Error querying Chapter 12:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to query Chapter 12',
+      error: error.message
+    });
+  }
+};

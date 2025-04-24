@@ -12,6 +12,7 @@ class Neo4jService {
     try {
       // Log Neo4j connection details (sanitizing password)
       console.log(`Connecting to Neo4j at: ${config.neo4j.uri}`);
+      console.log(config.neo4j.username, config.neo4j.password, config.logging.level, 'logs')
       
       // Configure Neo4j driver with appropriate settings
       this.driver = neo4j.driver(
@@ -23,10 +24,14 @@ class Neo4jService {
           maxTransactionRetryTime: 30000,
           maxConnectionPoolSize: 50, // Increase connection pool for better performance
           logging: {
-            level: config.logging.level === 'debug' ? 'debug' : 'warn'
+            level: config.logging.level === 'debug' ? 'debug' : 'warn',
+            logger: (level, message) => {
+              console.log(`[Neo4j ${level}] ${message}`);
+            }
           }
         }
       );
+
       
       // Initialize Google AI for embeddings
       if (config.googleApiKey) {
@@ -37,6 +42,7 @@ class Neo4jService {
         this.genAI = new GoogleGenerativeAI('dummy_api_key_for_testing');
       }
       
+
       // Verify connection and set up Neo4j with vector search capabilities
       // Using immediate async function to allow async/await in constructor
       (async () => {
@@ -80,6 +86,7 @@ class Neo4jService {
         console.error('Async initialization error:', e.message);
       });
     } catch (error) {
+      console.log(error, 'error')
       console.warn('Failed to initialize Neo4j service:', error.message);
       console.warn('Operating in mock mode without Neo4j connection');
     }
