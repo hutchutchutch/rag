@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useRagPipeline } from '@/hooks/use-rag-pipeline';
 import { Entity, Relationship, SchemaElement } from '@/lib/rag';
+import { useVectorStore } from '@/store/vectorStore';
+import { vectorStores } from '@/mocks/vectorStores';
+import SampleD3KnowledgeGraph from './SampleD3KnowledgeGraph';
 
 interface KnowledgeGraphEditorProps {
   onClose?: () => void;
@@ -22,6 +25,10 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
     updateKnowledgeGraphRelationships,
     saveKnowledgeGraph
   } = useRagPipeline();
+
+  const { selected } = useVectorStore();
+  const selectedStore = selected ? vectorStores.find(vs => vs.id === selected.id) : null;
+  const hasGraph = selectedStore && selectedStore.knowledgeGraph;
 
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [entities, setEntities] = useState<Entity[]>([]);
@@ -143,6 +150,47 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
       setSelectedEntity(prev => prev ? {...prev, [field]: value} : null);
     }
   };
+  
+  if (hasGraph && selectedStore.knowledgeGraph) {
+    const d3Entities = (selectedStore.knowledgeGraph.entities || []).map(e => ({
+      id: e.id,
+      name: e.name,
+      label: e.label
+    }));
+    const d3Relationships = (selectedStore.knowledgeGraph.relationships || []).map(r => ({
+      id: r.id,
+      source: r.source,
+      target: r.target,
+      type: r.type
+    }));
+    return (
+      <div className={`flex flex-col gap-4 p-4 ${standalone ? 'h-full' : ''}`}>
+        <Card className="elevation-1">
+          <CardHeader className="px-4 py-2">
+            <CardTitle className="text-xs font-medium text-dark-50">Sample Knowledge Graph: {selectedStore.name}</CardTitle>
+            <CardDescription className="text-xs">This is a demo graph you can paste into Neo4j or adapt for your own use.</CardDescription>
+          </CardHeader>
+          <CardContent className="px-4 py-2">
+            <div className="w-full flex justify-center items-center min-h-[200px]">
+              <SampleD3KnowledgeGraph entities={d3Entities} relationships={d3Relationships} />
+            </div>
+            {selectedStore.cypher && (
+              <div className="mt-4">
+                <pre className="bg-neutral-900 text-xs p-2 rounded border border-neutral-800 overflow-x-auto">
+                  {selectedStore.cypher}
+                </pre>
+              </div>
+            )}
+            {selectedStore.explanation && (
+              <div className="mt-4 whitespace-pre-wrap text-xs text-dark-300">
+                {selectedStore.explanation}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   // If no knowledgeGraph is available yet, show placeholder
   if (!knowledgeGraph) {
@@ -278,7 +326,7 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
                   </SelectTrigger>
                   <SelectContent>
                     {availableEntityTypes.map(type => (
-                      <SelectItem key={type} value={type} className="text-xs">{type}</SelectItem>
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -363,9 +411,7 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
                   </SelectTrigger>
                   <SelectContent>
                     {entities.map(entity => (
-                      <SelectItem key={entity.id || entity.name} value={entity.id || entity.name} className="text-xs">
-                        {entity.name}
-                      </SelectItem>
+                      <SelectItem key={entity.id || entity.name} value={entity.id || entity.name}>{entity.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -379,7 +425,7 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
                   </SelectTrigger>
                   <SelectContent>
                     {availableRelationshipTypes.map(type => (
-                      <SelectItem key={type} value={type} className="text-xs">{type}</SelectItem>
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -393,9 +439,7 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
                   </SelectTrigger>
                   <SelectContent>
                     {entities.map(entity => (
-                      <SelectItem key={entity.id || entity.name} value={entity.id || entity.name} className="text-xs">
-                        {entity.name}
-                      </SelectItem>
+                      <SelectItem key={entity.id || entity.name} value={entity.id || entity.name}>{entity.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -479,7 +523,7 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
                       </SelectTrigger>
                       <SelectContent>
                         {availableEntityTypes.map(type => (
-                          <SelectItem key={type} value={type} className="text-xs">{type}</SelectItem>
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

@@ -38,7 +38,6 @@ module.exports = {
         },
         // Primary color (purple)
         primary: {
-          50: '#F4F0FF',
           100: '#E9E3FF',
           200: '#D4C4FF',
           300: '#BEA6FF',

@@ -1,7 +1,4 @@
 import * as React from 'react';
-import { Button } from './ui/button';
-import { Upload, FileDown, Search } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useRagPipeline } from '../hooks/use-rag-pipeline';
 
 interface HeaderProps {
@@ -78,23 +75,6 @@ export function Header({ backendStatus }: HeaderProps) {
         </span>
       </div>
       
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="outline" 
-          size="sm"
-        >
-          <FileDown className="w-4 h-4 mr-2" />
-          Export Data
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          size="sm"
-        >
-          <Search className="w-4 h-4 mr-2" />
-          Advanced Search
-        </Button>
-      </div>
     </div>
   );
 }

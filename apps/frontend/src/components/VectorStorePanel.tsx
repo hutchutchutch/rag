@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBookContext } from "@/contexts/book-context";
 import { useRagPipeline } from "@/hooks/use-rag-pipeline";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -14,10 +13,9 @@ import {
   VectorDbSection, 
   ChunkingSection 
 } from "./vector-store";
-import { Upload, CheckCircle } from "lucide-react";
+import { Upload, CheckCircle, DatabaseZap } from "lucide-react";
 
 export default function VectorStorePanel() {
-  const { selectedBook } = useBookContext();
   const { toast } = useToast();
   const { isPreparing, processDocument: prepareRagPipeline } = useRagPipeline();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -204,7 +202,7 @@ export default function VectorStorePanel() {
             onClick={form.handleSubmit(handleCreateVectorStore)}
             disabled={isPreparing || !fileInputRef.current?.files?.length || !form.watch('embeddingModel') || !form.watch('vectorDb')}
           >
-            <Upload className="h-4 w-4 mr-2" />
+            <DatabaseZap className="h-4 w-4 mr-2" />
             Create Vector Store
           </Button>
           {isPreparing && (

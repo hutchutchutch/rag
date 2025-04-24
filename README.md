@@ -1,6 +1,6 @@
 # Multi-Vector Store RAG System: Turbo Monorepo with pnpm, Docker, AWS ECS (Neo4j), and S3
 
-This repository demonstrates a comprehensive **Retrieval-Augmented Generation (RAG)** system using multiple vector stores. It's built as a **Turborepo**-style monorepo, using **pnpm** for package management and **Docker** for both development and production builds. It integrates with **AWS ECS** for hosting Neo4j, **S3** for document storage, **PostgreSQL with pgvector** for vector-based searching, and **LangGraph** for multi-step logic in the **backend**. The **frontend** is built with Vite (React) and provides an intuitive user interface for document upload and chat interaction.
+This repository demonstrates a comprehensive **Retrieval-Augmented Generation (RAG)** system using multiple vector stores. It's built as a **Turborepo**-style monorepo, using **pnpm** for package management and **Docker** for both development and production builds. It integrates with **AWS ECS** for hosting Neo4j, **S3** for document storage, **PostgreSQL with pgvector** for vector-based searching, and **LangGraph** for multi-step logic in the **backend**. The **frontend** is built with Vite (React) and provides an intuitive user interface for document upload and chat interaction. The system is 100% TypeScript and uses modern UI components from shadcn/ui with Tailwind CSS styling.
 
 ---
 
@@ -37,7 +37,6 @@ rag/
 │   │       ├── main.tsx     # Application entry point
 │   │       ├── components/  # UI components
 │   │       │   ├── ChatFeed.tsx     # Main chat feed component
-│   │       │   ├── GoogleDrivePanel.tsx # Google Drive integration
 │   │       │   ├── GraphPanel.tsx   # Graph visualization component
 │   │       │   ├── Header.tsx       # Application header
 │   │       │   ├── Sidebar.tsx      # Main sidebar component
@@ -71,18 +70,19 @@ rag/
 │   │       │       ├── chat-input-area.tsx # Chat input area
 │   │       │       ├── checkbox.tsx # Checkbox input
 │   │       │       ├── collapsible.tsx # Collapsible panel
+│   │       │       ├── dialog.tsx   # Modal dialog component
 │   │       │       ├── form.tsx     # Form components
 │   │       │       ├── input.tsx    # Text input
 │   │       │       ├── label.tsx    # Form label
 │   │       │       ├── progress.tsx # Progress indicator
 │   │       │       ├── radio-group.tsx # Radio button group
 │   │       │       ├── scroll-area.tsx # Scrollable container
+│   │       │       ├── search-settings.tsx # Search configuration component
 │   │       │       ├── select.tsx   # Dropdown select
 │   │       │       ├── slider.tsx   # Range slider
 │   │       │       ├── switch.tsx   # Toggle switch
 │   │       │       ├── tabs.tsx     # Tabbed interface
-│   │       │       ├── textarea.tsx # Text area input
-│   │       │       └── v0-ai-chat.tsx # AI chat component
+│   │       │       └── textarea.tsx # Text area input
 │   │       ├── contexts/
 │   │       │   └── book-context.tsx # Document management context
 │   │       ├── hooks/
@@ -93,6 +93,8 @@ rag/
 │   │       │   └── utils.ts        # Utility functions
 │   │       ├── shared/
 │   │       │   └── schema.ts       # Shared type definitions
+│   │       ├── store/             # State management 
+│   │       │   └── vectorStore.ts  # Vector store state management
 │   │       ├── styles/            # Global styles and themes
 │   │       │   ├── index.css      # Global CSS and Tailwind imports
 │   │       │   └── theme.ts       # Theme tokens and variables
@@ -105,7 +107,7 @@ rag/
 │       ├── neo4j-summary.md # Neo4j usage summary
 │       ├── package.json     # Backend dependencies
 │       ├── pnpm-lock.yaml   # Backend lock file
-│       ├── test-neo4j.js    # Neo4j test script
+│       ├── test-neo4j.ts    # Neo4j test script (TypeScript)
 │       ├── tsconfig.json    # TypeScript configuration
 │       ├── uploads/         # Directory for uploaded documents
 │       │   ├── ansi.md      # Sample document for testing
@@ -116,8 +118,7 @@ rag/
 │           │   └── index.ts # Configuration variables and setup
 │           ├── controllers/ # API route handlers
 │           │   ├── chat.controller.ts     # Chat functionality
-│           │   ├── document.controller.ts # Document upload/processing
-│           │   └── google-drive.controller.ts # Google Drive integration
+│           │   └── document.controller.ts # Document upload/processing
 │           ├── middlewares/ # Express middlewares
 │           │   └── upload.middleware.ts   # File upload handling
 │           ├── mocks/       # Mock data
@@ -125,8 +126,7 @@ rag/
 │           ├── models/      # Data models
 │           ├── routes/      # API route definitions
 │           │   ├── chat.routes.ts         # Chat API routes
-│           │   ├── document.routes.ts     # Document API routes
-│           │   └── google-drive.routes.ts # Google Drive API routes
+│           │   └── document.routes.ts     # Document API routes
 │           ├── services/    # Business logic services
 │           │   ├── agents/  # LangGraph agent definitions
 │           │   │   ├── chat_rag/          # Chat RAG agent
@@ -144,7 +144,6 @@ rag/
 │           │   │       └── utils.ts       # Agent utilities
 │           │   ├── chat.service.ts        # Chat service with dual agent graphs
 │           │   ├── document.service.ts    # Document processing service
-│           │   ├── google-drive.service.ts # Google Drive integration
 │           │   ├── mock.service.ts        # Mock service
 │           │   ├── neo4j.service.ts       # Neo4j vector store service
 │           │   ├── postgres.service.ts    # PostgreSQL vector store
@@ -164,14 +163,11 @@ rag/
 │       ├── ecs-neo4j-config/ # ECS configuration for Neo4j
 │       │   ├── neo4j-fargate-service.md # Documentation
 │       │   └── task-definition.json    # ECS task definition
-│       ├── google-drive-docs/ # Google Drive integration
-│       │   └── google-drive-integration.md # Documentation
 │       └── s3-setup.md     # Documentation for S3 setup
 │
 ├── packages/               # Shared libraries (if any)
 │
 └── scripts/                # Helper scripts
-    ├── google-drive-import.ts # Script for importing from Google Drive
     └── seed-neo4j.ts       # Script for initializing Neo4j
 ```
 
@@ -187,13 +183,14 @@ This repository structure provides a complete organization for a multi-vector st
      - `GraphPanel.tsx`: Visualization of vector embeddings and relationships
      - `VectorStorePanel.tsx`: Displays vector store status and metrics
    - **UI Component Library**: Reusable UI components in `ui/` folder:
-     - Buttons, cards, inputs, progress indicators, and more
+     - Buttons, cards, inputs, progress indicators, dialogs, and more
    - **Hooks and Utilities**:
      - `use-rag-pipeline.ts`: Core hook managing document processing and chat functionality
      - `use-toast.ts`: Notification management
      - `rag.ts`: API client functions for backend communication
    - **State Management**:
      - Context providers for document and application state
+     - Store modules for vector store state management
      - Type definitions shared with backend
 
 2. **`apps/backend/`**  
@@ -223,8 +220,6 @@ This repository structure provides a complete organization for a multi-vector st
      - `s3-setup.md`: Documentation for S3 bucket setup
    - **Neo4j Configuration**:
      - Directory structure for plugins and imports
-   - **Google Drive Integration**:
-     - Documentation and configuration for Drive API integration
 
 4. **Root Configuration**:
    - `pnpm-workspace.yaml`: Monorepo workspace definition
@@ -237,7 +232,6 @@ This repository structure provides a complete organization for a multi-vector st
 5. **`scripts/`**  
    - Utility scripts for maintenance and initialization:
      - `seed-neo4j.ts`: Initializes Neo4j with schema constraints
-     - `google-drive-import.ts`: Testing script for Google Drive integration
 
 6. **`packages/`** (optional)  
    - Reserved for shared libraries that might be extracted later
@@ -263,13 +257,9 @@ This repository structure provides a complete organization for a multi-vector st
    - Secondary storage in **PostgreSQL with pgvector** for comparison and backup.
    - Uses **Google Gemini** to create embeddings for vector representation.
 
-5. **Google Drive Integration**  
-   - Allow users to import documents from their Drive.
-   - Integration details in `infra/aws/google-drive-docs/`.
-
-6. **LangGraph** (Backend)  
+5. **LangGraph** (Backend)  
    - The backend orchestrates the RAG workflow (chunking, embedding, retrieval, generation) with **LangGraph**.  
-   - Code in `apps/backend/src/langgraph/`, with typical files (`graph.ts`, `prompts.ts`, etc.).
+   - Code in `apps/backend/src/services/agents/`, with specialized agent implementations.
 
 ---
 
@@ -312,21 +302,14 @@ This repository structure provides a complete organization for a multi-vector st
    S3, PostgreSQL, and other resources can be configured via AWS console or IaC in the same folder.
 
 4. **Credentials & Env Variables**  
-   Manage environment variables (S3 buckets, Google OAuth secrets, Gemini API keys) through `.env` in dev and ECS secrets in production.
-
-5. **Google Drive to S3 Flow**
-   - User authenticates with Google
-   - Backend retrieves a list of drive files
-   - User selects files to upload
-   - Backend pulls selected files, chunks them, and stores in S3
-   - LangGraph nodes handle chunking + embedding, storing vectors in Neo4j and PostgreSQL
+   Manage environment variables (S3 buckets, Gemini API keys) through `.env` in dev and ECS secrets in production.
 
 ---
 
 ## RAG System Features
 
 1. **Document Processing**:
-   - Upload markdown documents directly or import from Google Drive.
+   - Upload markdown documents directly.
    - Automatic chunking of documents for efficient processing.
    - Storage in S3 with metadata in Neo4j.
 
@@ -468,13 +451,15 @@ This RAG system uses:
   - Vite for fast development and optimized builds
   - React Router for navigation between features
   - Axios for API communication with the backend
+  - Shadcn/UI component library for consistent design
+  - Tailwind CSS for styling
 
 - **Backend**:
-  - Express.js with TypeScript for a robust API server
+  - Express.js with TypeScript for a robust API server (100% TypeScript)
   - Dual Agentic LangGraph flows for RAG and knowledge graph extraction
   - Neo4j database for graph-based data relationships and knowledge graphs
   - PostgreSQL with pgvector for secondary vector storage
-  - RESTful API design with structured controllers and models
+  - RESTful API design with structured controllers and services
   - Google Gemini for embeddings and text generation
   - Zod schemas for type-safe state management
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Award, Clock, Database, Coins, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -112,6 +112,13 @@ const getCostDisplay = (cost: string) => {
 export function EmbeddingModelSection({ form }: EmbeddingModelSectionProps) {
   const [sortBy, setSortBy] = useState('quality');
 
+  // Set default model to OpenAI 3-large if not set
+  useEffect(() => {
+    if (form.getValues('embeddingModel') !== 'text-embedding-3-large') {
+      form.setValue('embeddingModel', 'text-embedding-3-large');
+    }
+  }, [form]);
+
   // Sort models based on the selected tab
   const sortedModels = useMemo(() => {
     switch (sortBy) {
@@ -157,84 +164,90 @@ export function EmbeddingModelSection({ form }: EmbeddingModelSectionProps) {
         <TabsContent value={sortBy} className="m-0">
           <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
             <div className="p-2 space-y-2">
-              {sortedModels.map(model => (
-                <div
-                  key={model.id}
-                  onClick={() => form.setValue('embeddingModel', model.id)}
-                  className={`p-3 rounded-md cursor-pointer bg-dark-800 border border-dark-700 hover:border-primary-500 ${
-                    selectedModel === model.id ? 'border-primary-500 bg-dark-700' : ''
-                  }`}
-                >
-                  <div className="space-y-2">
-                    {/* Model name and provider */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-sm text-neutral-200">{model.name}</div>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <p className="text-xs text-neutral-400">{model.description}</p>
-                          <Badge 
-                            variant="outline" 
-                            className="text-[10px] h-5 font-normal bg-dark-900 text-neutral-300 border-dark-600"
-                          >
-                            {model.provider}
-                          </Badge>
+              {sortedModels.map(model => {
+                const isAvailable = model.id === 'text-embedding-3-large';
+                const isSelected = selectedModel === 'text-embedding-3-large' && isAvailable;
+                return (
+                  <div
+                    key={model.id}
+                    onClick={() => isAvailable ? form.setValue('embeddingModel', model.id) : null}
+                    className={`p-3 rounded-md ${isAvailable ? 'cursor-pointer hover:border-primary-500' : 'opacity-60 cursor-not-allowed'} bg-dark-800 border border-dark-700 ${
+                      isSelected ? 'border-primary-500 bg-dark-700' : ''
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      {/* Model name and provider */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-sm text-neutral-200">{model.name}</div>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <p className="text-xs text-neutral-400">{model.description}</p>
+                            {isAvailable ? (
+                              <Badge 
+                                variant="outline" 
+                                className="text-[10px] h-5 font-normal bg-dark-900 text-neutral-300 border-dark-600"
+                              >
+                                {model.provider}
+                              </Badge>
+                            ) : (
+                              <Badge 
+                                variant="outline" 
+                                className="text-[10px] h-5 font-normal bg-dark-900 text-neutral-500 border-dark-800"
+                              >
+                                Coming soon
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      {/* Quality bar */}
+                      <div className="w-full flex items-center gap-1">
+                        <Award className="h-3 w-3 text-warning-500" />
+                        <div className="flex-1 bg-dark-600 rounded-full h-1">
+                          <div 
+                            className={`h-1 rounded-full ${getQualityColor(model.quality)}`} 
+                            style={{ width: `${model.quality}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-neutral-300">{model.quality}</span>
+                      </div>
+                      {/* Metrics */}
+                      <div className="grid grid-cols-1 gap-1 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-primary-500" />
+                          <span className="text-neutral-400">Speed:</span>
+                          <span className="font-medium text-neutral-300">{model.speed}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Database className="h-3.5 w-3.5 text-secondary-500" />
+                          <span className="text-neutral-400">Dimensions:</span>
+                          <span className="font-medium text-neutral-300">{model.storage}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Coins className="h-3.5 w-3.5 text-success-500" />
+                          <span className="text-neutral-400">Cost:</span>
+                          {getCostDisplay(model.cost)}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Target className="h-3.5 w-3.5 text-error-500" />
+                          <span className="text-neutral-400">Best For:</span>
+                          <span className="font-medium text-neutral-300">{model.bestFor}</span>
                         </div>
                       </div>
                     </div>
-
-                    {/* Quality bar */}
-                    <div className="w-full flex items-center gap-1">
-                      <Award className="h-3 w-3 text-warning-500" />
-                      <div className="flex-1 bg-dark-600 rounded-full h-1">
-                        <div 
-                          className={`h-1 rounded-full ${getQualityColor(model.quality)}`} 
-                          style={{ width: `${model.quality}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-neutral-300">{model.quality}</span>
-                    </div>
-
-                    {/* Metrics */}
-                    <div className="grid grid-cols-1 gap-1 text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5 text-primary-500" />
-                        <span className="text-neutral-400">Speed:</span>
-                        <span className="font-medium text-neutral-300">{model.speed}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-1.5">
-                        <Database className="h-3.5 w-3.5 text-secondary-500" />
-                        <span className="text-neutral-400">Dimensions:</span>
-                        <span className="font-medium text-neutral-300">{model.storage}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-1.5">
-                        <Coins className="h-3.5 w-3.5 text-success-500" />
-                        <span className="text-neutral-400">Cost:</span>
-                        {getCostDisplay(model.cost)}
-                      </div>
-                      
-                      <div className="flex items-center gap-1.5">
-                        <Target className="h-3.5 w-3.5 text-error-500" />
-                        <span className="text-neutral-400">Best For:</span>
-                        <span className="font-medium text-neutral-300">{model.bestFor}</span>
-                      </div>
-                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </TabsContent>
       </Tabs>
-
       <div className="pt-2 flex justify-between items-center">
         <div className="text-xs text-neutral-400">
-          {selectedModel 
-            ? `${selectedModelDetails?.name} selected` 
+          {selectedModel === 'text-embedding-3-large' && selectedModelDetails
+            ? `${selectedModelDetails.name} selected`
             : 'No model selected'}
         </div>
-        
         <Button 
           size="sm" 
           variant="ghost"
@@ -245,4 +258,4 @@ export function EmbeddingModelSection({ form }: EmbeddingModelSectionProps) {
       </div>
     </div>
   );
-} 
+}
