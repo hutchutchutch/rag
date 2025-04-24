@@ -6,7 +6,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import documentRoutes from './routes/document.routes';
 import chatRoutes from './routes/chat.routes';
-import googleDriveRoutes from './routes/google-drive.routes';
 import config from './config/index';
 import logger from './utils/logger';
 import fs from 'fs';
@@ -88,7 +87,6 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/documents', documentRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/google-drive', googleDriveRoutes);
 
 // Health check endpoints at multiple paths for diagnostics
 // Standard API health check
