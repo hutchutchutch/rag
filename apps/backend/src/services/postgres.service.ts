@@ -141,14 +141,16 @@ class PostgresService {
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
         const chunkId = uuidv4();
-        const embedding = await this.getEmbedding(chunk.text);
-        
+        const embeddingValues = getNumericEmbeddingString(await this.getEmbedding(chunk.text));
+
         await client.query(
           `
-          INSERT INTO document_chunks (id, document_id, text, chunk_index, embedding, metadata)
-          VALUES ($1, $2, $3, $4, $5, $6)
+          INSERT INTO document_chunks 
+          (id, document_id, text, chunk_index, embedding, metadata)
+          VALUES 
+          ($1, $2, $3, $4, (SELECT ARRAY[${embeddingValues}]::vector), $5::jsonb)
           `,
-          [chunkId, documentId, chunk.text, i, embedding, JSON.stringify(chunk.metadata)]
+          [chunkId, documentId, chunk.text, i, JSON.stringify(chunk.metadata)]
         );
       }
       
@@ -172,20 +174,41 @@ class PostgresService {
       const client = await this.pool.connect();
       
       try {
-        const embedding = await this.getEmbedding(query);
+        // Get embedding for the query
+        const embeddingArray = await this.getEmbedding(query);
         
+        // Format the embedding properly for pgvector
+        let vectorLiteral;
+        
+        if (Array.isArray(embeddingArray)) {
+          // Convert array directly to vector literal
+          vectorLiteral = `[${embeddingArray.join(',')}]`;
+        } else if (typeof embeddingArray === 'string') {
+          // If it's a string with curly braces, convert to square brackets
+          vectorLiteral = (embeddingArray as string)
+            .replace(/^\{/, '[')      // Replace opening curly brace with square bracket
+            .replace(/\}$/, ']')      // Replace closing curly brace with square bracket
+            .replace(/"([^"]+)"/g, '$1'); // Remove quotes around numbers
+        } else {
+          console.error('Unexpected embedding format:', typeof embeddingArray);
+          throw new Error('Invalid embedding format');
+        }
+        
+        console.log(`Using vector format (sample): ${vectorLiteral.substring(0, 30)}...`);
+        
+        // Execute the similarity search with properly formatted vector
         const result = await client.query(
           `
           SELECT
             id,
             text,
-            1 - (embedding <=> $1) AS score,
+            1 - (embedding <=> $1::vector) AS score,
             metadata
           FROM document_chunks
-          ORDER BY embedding <=> $1
+          ORDER BY embedding <=> $1::vector
           LIMIT $2
           `,
-          [embedding, limit]
+          [vectorLiteral, limit]
         );
         
         return result.rows.map(row => ({
@@ -231,6 +254,19 @@ class PostgresService {
    */
   async close(): Promise<void> {
     await this.pool.end();
+  }
+}
+
+// Helper function to convert any embedding format to numeric string
+function getNumericEmbeddingString(embedding) {
+  if (Array.isArray(embedding)) {
+    return embedding.join(',');
+  } else {
+    return embedding.toString()
+      .replace(/[{}"]/g, '')
+      .split(',')
+      .map(Number)
+      .join(',');
   }
 }
 

@@ -10,6 +10,7 @@ import s3Service from './s3.service.js';
 import neo4jService from './neo4j.service.js';
 import postgresService from './postgres.service.js';
 import config from '../config/index.js';
+import pgVectorService from './pg-vector.service.js';
 
 // Initialize Markdown parser
 const md = new MarkdownIt();
@@ -62,7 +63,20 @@ class DocumentService {
    */
   private initializeKnowledgeGraphFlow(): void {
     // Create the graph workflow
-    const graphWorkflow = new StateGraph(KnowledgeGraphState.create());
+    // const graphWorkflow = new StateGraph(KnowledgeGraphState.create());
+    // Make sure schema is defined before creating StateGraph
+    const schema = {
+      // Define your schema properties here
+      // For example:
+      documents: {},
+      metadata: {},
+      // other properties...
+    };
+    
+    const graph = new StateGraph({
+      channels: schema, // Use the defined schema
+      // other options...
+    });
     
     // Node 1: Load existing Neo4j schema
     const loadSchemaNode = async (state: any) => {
@@ -268,20 +282,31 @@ class DocumentService {
     };
     
     // Add nodes to the graph
-    graphWorkflow.addNode("loadSchema", loadSchemaNode);
-    graphWorkflow.addNode("extractEntities", extractFromChunksNode);
-    graphWorkflow.addNode("checkEntities", checkEntitiesInNeo4jNode);
-    graphWorkflow.addNode("identifySchemaChanges", identifySchemaChangesNode);
+    // graphWorkflow.addNode("loadSchema", loadSchemaNode);
+    // graphWorkflow.addNode("extractEntities", extractFromChunksNode);
+    // graphWorkflow.addNode("checkEntities", checkEntitiesInNeo4jNode);
+    // graphWorkflow.addNode("identifySchemaChanges", identifySchemaChangesNode);
+    graph.addNode("loadSchema", loadSchemaNode);
+    graph.addNode("extractEntities", extractFromChunksNode);
+    graph.addNode("checkEntities", checkEntitiesInNeo4jNode);
+    graph.addNode("identifySchemaChanges", identifySchemaChangesNode);
     
+
     // Connect with edges
-    graphWorkflow.addEdge("__start__", "loadSchema");
-    graphWorkflow.addEdge("loadSchema", "extractEntities");
-    graphWorkflow.addEdge("extractEntities", "checkEntities");
-    graphWorkflow.addEdge("checkEntities", "identifySchemaChanges");
-    graphWorkflow.addEdge("identifySchemaChanges", END);
-    
+    // graphWorkflow.addEdge("__start__", "loadSchema");
+    // graphWorkflow.addEdge("loadSchema", "extractEntities");
+    // graphWorkflow.addEdge("extractEntities", "checkEntities");
+    // graphWorkflow.addEdge("checkEntities", "identifySchemaChanges");
+    // graphWorkflow.addEdge("identifySchemaChanges", END);
+    graph.addEdge("__start__", "loadSchema");
+    graph.addEdge("loadSchema", "extractEntities");
+    graph.addEdge("extractEntities", "checkEntities");
+    graph.addEdge("checkEntities", "identifySchemaChanges");
+    graph.addEdge("identifySchemaChanges", END);
+
     // Compile the graph
-    this.knowledgeGraphFlow = graphWorkflow.compile();
+    // this.knowledgeGraphFlow = graphWorkflow.compile();
+    this.knowledgeGraphFlow = graph.compile();
   }
   
   /**
@@ -481,6 +506,31 @@ class DocumentService {
       seen.add(key);
       return true;
     });
+  }
+
+  /**
+   * Process Chapter 12 document and store in PGVector
+   */
+  async processChapter12(): Promise<{ documentId: string; chunkCount: number }> {
+    try {
+      return await pgVectorService.processChapter12();
+    } catch (error) {
+      console.error('Error processing Chapter 12:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Query Chapter 12 based on a query string
+   */
+  async queryChapter12(query: string, limit: number = 5): Promise<Array<{ text: string; score: number; metadata: Record<string, any> }>> {
+    try {
+      const results = await pgVectorService.queryChapter12(query, limit);
+      return this.deduplicateResults(results);
+    } catch (error) {
+      console.error('Error querying Chapter 12:', error);
+      throw error;
+    }
   }
 }
 
