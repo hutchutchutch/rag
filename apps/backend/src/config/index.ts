@@ -49,12 +49,7 @@ const config = {
     temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
   },
   
-  // Google Drive Integration
-  googleDrive: {
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    redirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback',
-  },
+  // Removed Google Drive Integration
   
   // Document Processing
   documentProcessing: {

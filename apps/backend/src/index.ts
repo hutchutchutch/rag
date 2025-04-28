@@ -92,6 +92,7 @@ app.use('/api/chat', chatRoutes);
 // Standard API health check
 app.get('/api/health', (req, res) => {
   res.json({ 
+    success: true,
     status: 'ok',
     version: '1.0.0',
     environment: config.nodeEnv,
@@ -102,6 +103,7 @@ app.get('/api/health', (req, res) => {
 // Root health check for direct access
 app.get('/health', (req, res) => {
   res.json({ 
+    success: true,
     status: 'ok',
     version: '1.0.0',
     environment: config.nodeEnv,
@@ -109,36 +111,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-// NOTE: This is only for development testing - should be removed in production
+// Development-specific routes when needed
 if (config.nodeEnv === 'development') {
-  // Basic health check with explicit headers for diagnostic purposes
+  // Basic health check in plain text format
   app.get('/rawhealth', (req, res) => {
-    // Manually set CORS headers for diagnostic purposes
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     res.setHeader('Content-Type', 'text/plain');
     res.send('Backend is healthy');
-  });
-  
-  // Special diagnostics endpoint with no middleware
-  app.get('/api/test-cors', (req, res) => {
-    // Log diagnostic info
-    console.log('Received test-cors request:', {
-      headers: req.headers,
-      origin: req.get('origin'),
-      method: req.method
-    });
-    
-    // Return CORS diagnostics
-    res.json({ 
-      success: true, 
-      message: 'CORS test successful',
-      headers: {
-        origin: req.get('origin'),
-        host: req.get('host')
-      }
-    });
   });
 }
 
@@ -146,6 +124,7 @@ if (config.nodeEnv === 'development') {
 app.use((req, res) => {
   logger.warn(`Route not found: ${req.method} ${req.url}`);
   res.status(404).json({
+    success: false,
     error: 'Not Found',
     message: `The requested resource '${req.path}' was not found on this server.`,
   });
@@ -164,6 +143,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   const message = err.message || 'Internal Server Error';
   
   res.status(statusCode).json({
+    success: false,
     error: message,
     status: statusCode
   });

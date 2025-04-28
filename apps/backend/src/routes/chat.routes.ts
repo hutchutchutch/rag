@@ -1,12 +1,9 @@
 import express from 'express';
-import { chat, chatWithChapter12 } from '../controllers/chat.controller';
+import { chat } from '../controllers/chat.controller';
 
 const router = express.Router();
 
-// Regular chat endpoint
+// Chat endpoint for interacting with stored documents
 router.post('/', chat);
-
-// Chapter 12 specific chat endpoint
-router.post('/chapter12', chatWithChapter12);
 
 export default router;

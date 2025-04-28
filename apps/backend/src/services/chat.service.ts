@@ -821,45 +821,7 @@ class ChatService {
     }
   }
 
-  /**
-   * Process a query specifically against Chapter 12 content
-   * Uses LangGraph to query the vector store and format the response with top chunks
-   */
-  async queryChapter12(query: string): Promise<{ response: string; topChunks: any[] }> {
-    try {
-      // Get relevant chunks from the vector store
-      const chunks = await pgVectorService.queryChapter12(query, 5);
-      
-      // Format chunks for context
-      const formattedChunks = chunks
-        .map((chunk, i) => 
-          `CHUNK ${i+1} (Score: ${chunk.score.toFixed(2)}):\n${chunk.text}\n`
-        )
-        .join("\n");
-      
-      // Create prompt with system message and context
-      const systemPrompt = `You are a helpful assistant answering questions about Chapter 12 of the book.
-      Base your answer only on the provided chunks from Chapter 12.
-      
-      Here are the most relevant chunks from the text:
-      
-      ${formattedChunks}`;
-      
-      // Generate the response
-      const result = await this.llm.invoke([
-        new SystemMessage(systemPrompt),
-        new HumanMessage(query)
-      ]);
-      
-      return {
-        response: result.content.toString(),
-        topChunks: chunks
-      };
-    } catch (error) {
-      console.error("Error processing Chapter 12 query:", error);
-      throw new Error("Failed to process query through Chapter 12 graph");
-    }
-  }
+  // Chapter 12 specific code removed for cleaner architecture
 }
 
 export default new ChatService();

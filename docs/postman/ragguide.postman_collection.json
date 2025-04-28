@@ -2,50 +2,45 @@
   "info": {
     "name": "RAGGuide Backend",
     "_postman_id": "00000000-0000-4000-a000-000000000000",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API collection for the RAGGuide backend system"
   },
   "item": [
     {
-      "name": "Auth",
+      "name": "Health Checks",
       "item": [
         {
-          "name": "Login – POST /auth/login",
+          "name": "API Health Check – GET /api/health",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{base_url}}/auth/login",
+              "raw": "{{base_url}}/api/health",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "auth",
-                "login"
+                "api",
+                "health"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
             }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
-                  "const data = pm.response.json();",
-                  "pm.environment.set(\"auth_token\", data.token);"
-                ],
-                "type": "text/javascript"
-              }
+          }
+        },
+        {
+          "name": "Root Health Check – GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             }
-          ]
+          }
         }
       ]
     },
@@ -53,28 +48,24 @@
       "name": "Documents",
       "item": [
         {
-          "name": "Upload – POST /api/v1/documents",
+          "name": "Upload Document – POST /api/documents/upload",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              },
               {
                 "key": "Accept",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/documents",
+              "raw": "{{base_url}}/api/documents/upload",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
-                "v1",
-                "documents"
+                "documents",
+                "upload"
               ]
             },
             "body": {
@@ -85,15 +76,135 @@
                   "type": "file",
                   "src": "",
                   "description": "Choose a .md or .pdf file"
-                },
-                {
-                  "key": "title",
-                  "value": "Sample Doc",
-                  "type": "text"
                 }
               ]
+            },
+            "description": "Upload a document file to be processed and stored in the vector database. The document will be chunked, embedded, and stored in both Neo4j and PostgreSQL vector stores."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/documents/upload"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"documentId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"s3Key\": \"550e8400-e29b-41d4-a716-446655440000-doc.md\",\n    \"downloadUrl\": \"https://s3-bucket.region.amazonaws.com/550e8400-e29b-41d4-a716-446655440000-doc.md\",\n    \"message\": \"Document processed successfully\"\n}"
             }
-          }
+          ]
+        },
+        {
+          "name": "Search Documents – GET /api/documents/search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/documents/search?query=what is a vector database&limit=5&buildKnowledgeGraph=false",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "what is a vector database",
+                  "description": "The search query to find relevant documents"
+                },
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "description": "Maximum number of results to return"
+                },
+                {
+                  "key": "buildKnowledgeGraph",
+                  "value": "false",
+                  "description": "Whether to extract entities and relationships to build a knowledge graph"
+                }
+              ]
+            },
+            "description": "Search for relevant document chunks based on a natural language query. Optionally build a knowledge graph from the search results."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/documents/search?query=vector database"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"query\": \"vector database\",\n    \"results\": [\n        {\n            \"id\": \"abc123\",\n            \"text\": \"Vector databases store embeddings that capture the semantic meaning of text, enabling efficient similarity search.\",\n            \"score\": 0.89,\n            \"metadata\": {\n                \"source\": \"upload\",\n                \"title\": \"Introduction to Vector Databases\"\n            }\n        },\n        {\n            \"id\": \"def456\",\n            \"text\": \"Unlike traditional databases that use exact matching, vector databases find results based on semantic similarity.\",\n            \"score\": 0.78,\n            \"metadata\": {\n                \"source\": \"upload\",\n                \"title\": \"Introduction to Vector Databases\"\n            }\n        }\n    ],\n    \"resultCount\": 2\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit Knowledge Graph – POST /api/documents/knowledge-graph/:extractionId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/documents/knowledge-graph/kg-1234567890-abcdef",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "knowledge-graph",
+                "kg-1234567890-abcdef"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"entities\": [\n        { \"name\": \"Vector Database\", \"label\": \"Technology\" },\n        { \"name\": \"Embeddings\", \"label\": \"Concept\" },\n        { \"name\": \"Similarity Search\", \"label\": \"Feature\" }\n    ],\n    \"relationships\": [\n        { \"source\": \"Vector Database\", \"target\": \"Embeddings\", \"type\": \"STORES\" },\n        { \"source\": \"Vector Database\", \"target\": \"Similarity Search\", \"type\": \"ENABLES\" }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Submit a knowledge graph for storage in Neo4j after user review and modification. The extractionId identifies a particular extraction session."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/documents/knowledge-graph/kg-1234567890-abcdef"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Knowledge graph saved successfully\",\n    \"extractionId\": \"kg-1234567890-abcdef\",\n    \"entitiesAdded\": 3,\n    \"relationshipsAdded\": 2\n}"
+            }
+          ]
         }
       ]
     },
@@ -101,45 +212,52 @@
       "name": "Chat",
       "item": [
         {
-          "name": "Send Message – POST /api/v1/chat",
+          "name": "Send Chat Message – POST /api/chat",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              },
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/chat",
+              "raw": "{{base_url}}/api/chat",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
-                "v1",
                 "chat"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"message\": \"Summarize the document\",\n  \"mode\": \"rag\",\n  \"docId\": \"{{last_doc_id}}\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Answer present\", () => pm.expect(pm.response.json().answer).to.be.a('string'));"
-                ],
-                "type": "text/javascript"
+              "raw": "{\n  \"message\": \"What is a vector database?\",\n  \"history\": [\n    { \"type\": \"human\", \"content\": \"How does RAG work?\" },\n    { \"type\": \"ai\", \"content\": \"RAG (Retrieval-Augmented Generation) works by first retrieving relevant information from a knowledge base and then using that information to generate more accurate responses. The process typically involves embedding the user's query, finding similar documents in a vector store, and providing those documents as context to an LLM.\" }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
               }
+            },
+            "description": "Send a message to chat with the system. The system will retrieve relevant documents and generate a response based on those documents and the conversation history."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/chat"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"response\": \"A vector database is a specialized database designed to store and query high-dimensional vectors (embeddings) that represent data like text, images, or audio. Unlike traditional databases that use exact matching, vector databases allow for similarity search, finding items that are semantically similar rather than exact matches. They're essential for RAG systems because they enable efficient retrieval of relevant information based on the semantic meaning of a query.\",\n    \"history\": [\n        { \"type\": \"human\", \"content\": \"How does RAG work?\" },\n        { \"type\": \"ai\", \"content\": \"RAG (Retrieval-Augmented Generation) works by first retrieving relevant information from a knowledge base and then using that information to generate more accurate responses. The process typically involves embedding the user's query, finding similar documents in a vector store, and providing those documents as context to an LLM.\" },\n        { \"type\": \"human\", \"content\": \"What is a vector database?\" },\n        { \"type\": \"ai\", \"content\": \"A vector database is a specialized database designed to store and query high-dimensional vectors (embeddings) that represent data like text, images, or audio. Unlike traditional databases that use exact matching, vector databases allow for similarity search, finding items that are semantically similar rather than exact matches. They're essential for RAG systems because they enable efficient retrieval of relevant information based on the semantic meaning of a query.\" }\n    ]\n}"
             }
           ]
         }

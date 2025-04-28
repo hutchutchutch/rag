@@ -315,51 +315,147 @@ class DocumentService {
   async buildKnowledgeGraph(searchResults: any[]): Promise<any> {
     if (!searchResults || searchResults.length === 0) {
       console.warn("No search results provided for knowledge graph building");
-      return { entities: [], relationships: [] };
+      return { entities: [], relationships: [], newSchemaElements: [] };
     }
     
     try {
       // Extract text chunks from search results
       const textChunks = searchResults.map(result => result.text);
       
-      // For now, due to TypeScript build issues, return mock data
-      // In a production environment, you would uncomment this code:
-      /*
-      // Run the knowledge graph workflow
-      const result = await this.knowledgeGraphFlow.invoke({
-        chunks: textChunks,
-        existingSchema: {},
-        extractedEntities: [],
-        extractedRels: [],
-        pendingApprovals: []
-      });
+      // Use LLM-based extraction to create knowledge graph
+      const systemPrompt = `You are a knowledge graph extraction expert. 
+      Extract entities and relationships from the provided text.
+      
+      For each entity, provide:
+      - name: The canonical name of the entity
+      - label: The entity type/category (e.g., Person, Organization, Technology, Concept, etc.)
+      
+      For each relationship, provide:
+      - source: Name of the source entity
+      - target: Name of the target entity
+      - type: Relationship type in uppercase with underscores (e.g., WORKS_AT, CREATED_BY, PART_OF)
+      
+      Return the results in JSON format with this exact structure:
+      {
+        "entities": [{"name": "...", "label": "..."}],
+        "relationships": [{"source": "...", "target": "...", "type": "..."}]
+      }`;
+      
+      // Use LLM to extract entities and relationships
+      const result = await this.llm.invoke([
+        new SystemMessage(systemPrompt),
+        new HumanMessage(`Extract entities and relationships from these text chunks:\n\n${textChunks.join("\n\n")}`)
+      ]);
+      
+      // Parse the LLM response to extract JSON
+      const response = result.content.toString();
+      const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) || 
+                       response.match(/```\s*([\s\S]*?)\s*```/) ||
+                       response.match(/\{[\s\S]*\}/);
+      
+      let entities = [];
+      let relationships = [];
+      
+      if (jsonMatch) {
+        try {
+          const parsedData = JSON.parse(jsonMatch[0]);
+          entities = parsedData.entities || [];
+          relationships = parsedData.relationships || [];
+        } catch (parseError) {
+          console.error("Error parsing LLM JSON response:", parseError);
+        }
+      }
+      
+      // Add isNew flag to all entities
+      entities = entities.map(entity => ({
+        ...entity,
+        isNew: true // Will be verified against Neo4j
+      }));
+      
+      // Check which entities already exist in Neo4j
+      const session = neo4jService.driver.session();
+      try {
+        for (let i = 0; i < entities.length; i++) {
+          const entity = entities[i];
+          
+          // Check if entity with this name already exists
+          const checkResult = await session.run(
+            `MATCH (e {name: $name}) RETURN e`,
+            { name: entity.name }
+          );
+          
+          // If results found, mark entity as not new
+          if (checkResult.records.length > 0) {
+            entities[i] = {
+              ...entity,
+              isNew: false
+            };
+          }
+        }
+      } finally {
+        await session.close();
+      }
+      
+      // Get existing schema elements from Neo4j to identify new ones
+      const schemaSession = neo4jService.driver.session();
+      let newSchemaElements = [];
+      
+      try {
+        // Get existing node labels
+        const labelsResult = await schemaSession.run(`
+          CALL db.labels() YIELD label
+          RETURN collect(label) as labels
+        `);
+        
+        // Get existing relationship types
+        const relsResult = await schemaSession.run(`
+          CALL db.relationshipTypes() YIELD relationshipType
+          RETURN collect(relationshipType) as relationshipTypes
+        `);
+        
+        const existingLabels = labelsResult.records[0].get('labels') || [];
+        const existingRelTypes = relsResult.records[0].get('relationshipTypes') || [];
+        
+        // Find new entity labels
+        const newEntityTypes = entities
+          .map(e => e.label)
+          .filter((label, index, self) => 
+            self.indexOf(label) === index && !existingLabels.includes(label)
+          );
+          
+        // Find new relationship types
+        const newRelationshipTypes = relationships
+          .map(r => r.type)
+          .filter((type, index, self) => 
+            self.indexOf(type) === index && !existingRelTypes.includes(type)
+          );
+        
+        // Create schema elements list
+        newSchemaElements = [
+          ...newEntityTypes.map(t => ({ type: 'entity_label', value: t })),
+          ...newRelationshipTypes.map(t => ({ type: 'relationship_type', value: t }))
+        ];
+      } finally {
+        await schemaSession.close();
+      }
+      
+      // Generate a unique extraction ID for tracking
+      const extractionId = `kg-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
       
       return {
-        entities: result.extractedEntities || [],
-        relationships: result.extractedRels || [],
-        newSchemaElements: result.pendingApprovals || []
-      };
-      */
-      
-      // Mock data for demonstration
-      return {
-        entities: [
-          { name: "Knowledge Graph", label: "Concept", isNew: true },
-          { name: "Neo4j", label: "Database", isNew: false },
-          { name: "LangGraph", label: "Framework", isNew: true }
-        ],
-        relationships: [
-          { source: "LangGraph", target: "Knowledge Graph", type: "BUILDS" },
-          { source: "Neo4j", target: "Knowledge Graph", type: "STORES" }
-        ],
-        newSchemaElements: [
-          { type: "entity_label", value: "Framework" },
-          { type: "relationship_type", value: "BUILDS" }
-        ]
+        entities,
+        relationships,
+        newSchemaElements,
+        extractionId
       };
     } catch (error) {
       console.error("Error building knowledge graph:", error);
-      return { entities: [], relationships: [] };
+      return { 
+        entities: [], 
+        relationships: [],
+        newSchemaElements: [],
+        extractionId: `error-${Date.now()}`
+      };
     }
   }
   /**
@@ -508,28 +604,83 @@ class DocumentService {
     });
   }
 
+  // Chapter 12 specific code removed for cleaner architecture
+  
   /**
-   * Process Chapter 12 document and store in PGVector
+   * Save knowledge graph entities and relationships to Neo4j
    */
-  async processChapter12(): Promise<{ documentId: string; chunkCount: number }> {
-    try {
-      return await pgVectorService.processChapter12();
-    } catch (error) {
-      console.error('Error processing Chapter 12:', error);
-      throw error;
+  async saveKnowledgeGraph(
+    extractionId: string, 
+    entities: any[], 
+    relationships: any[]
+  ): Promise<{entitiesAdded: number, relationshipsAdded: number}> {
+    if (!entities || !relationships) {
+      throw new Error("Both entities and relationships must be provided");
     }
-  }
-
-  /**
-   * Query Chapter 12 based on a query string
-   */
-  async queryChapter12(query: string, limit: number = 5): Promise<Array<{ text: string; score: number; metadata: Record<string, any> }>> {
+    
+    const session = neo4jService.driver.session();
+    
     try {
-      const results = await pgVectorService.queryChapter12(query, limit);
-      return this.deduplicateResults(results);
+      // First, create entity labels that don't exist yet
+      const uniqueLabels = [...new Set(entities.map(e => e.label))];
+      
+      // Create or merge entities
+      let entitiesAdded = 0;
+      for (const entity of entities) {
+        // Create entity with appropriate label
+        await session.run(
+          `
+          MERGE (e:${entity.label} {name: $name})
+          SET e.lastUpdated = datetime(),
+              e.createdInExtraction = $extractionId
+          RETURN e
+          `,
+          { 
+            name: entity.name,
+            extractionId
+          }
+        );
+        entitiesAdded++;
+      }
+      
+      // Create or merge relationships
+      let relationshipsAdded = 0;
+      for (const rel of relationships) {
+        // Create relationship between entities
+        const result = await session.run(
+          `
+          MATCH (source {name: $sourceName})
+          MATCH (target {name: $targetName})
+          WHERE source <> target
+          MERGE (source)-[r:${rel.type}]->(target)
+          SET r.lastUpdated = datetime(),
+              r.createdInExtraction = $extractionId
+          RETURN r
+          `,
+          { 
+            sourceName: rel.source,
+            targetName: rel.target,
+            extractionId
+          }
+        );
+        
+        if (result.records.length > 0) {
+          relationshipsAdded++;
+        }
+      }
+      
+      // Log success info
+      console.log(`Knowledge graph saved for extraction ${extractionId}: ${entitiesAdded} entities, ${relationshipsAdded} relationships`);
+      
+      return {
+        entitiesAdded,
+        relationshipsAdded
+      };
     } catch (error) {
-      console.error('Error querying Chapter 12:', error);
-      throw error;
+      console.error("Error saving knowledge graph to Neo4j:", error);
+      throw new Error(`Failed to save knowledge graph: ${error.message}`);
+    } finally {
+      await session.close();
     }
   }
 }
