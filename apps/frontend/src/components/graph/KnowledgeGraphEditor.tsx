@@ -174,6 +174,10 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
             <div className="w-full flex justify-center items-center min-h-[200px]">
               <SampleD3KnowledgeGraph entities={d3Entities} relationships={d3Relationships} />
             </div>
+            <div className="flex gap-2 mt-6">
+                <Button variant="default" size="sm">Add Node</Button>
+                <Button variant="outline" size="sm">Add Relationship</Button>
+              </div>
             <div className="mt-4">
               <div className="text-xs font-semibold mb-2 text-dark-50">Nodes & Relationships</div>
               <div className="space-y-4">
@@ -216,10 +220,7 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
                   );
                 })}
               </div>
-              <div className="flex gap-2 mt-6">
-                <Button variant="default" size="sm">Add Node</Button>
-                <Button variant="outline" size="sm">Add Relationship</Button>
-              </div>
+
             </div>
           </CardContent>
         </Card>

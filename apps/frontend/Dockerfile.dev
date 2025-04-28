@@ -1,24 +1,27 @@
-# Dockerfile.dev for Frontend (Vite) -- Full Monorepo Copy
+############################
+# apps/frontend/Dockerfile.dev
+############################
 
 FROM node:18-alpine
 
-# Create work dir
+# 1️⃣  Working directory inside the image
 WORKDIR /app
 
-# Install pnpm globally
-RUN npm install -g pnpm
+# 2️⃣  Enable Corepack so the exact pnpm version
+#     declared in "packageManager" is used
+RUN corepack enable
 
-# Copy package.json first for better caching
-COPY package.json ./
+# 3️⃣  Copy lockfile + manifest *only* to leverage the cache
+COPY pnpm-lock.yaml package.json ./
 
-# Install dependencies
-RUN pnpm install 
+# 4️⃣  Install all deps (prod + dev)
+RUN pnpm install --frozen-lockfile
 
-# Copy the rest of the application
+# 5️⃣  Copy the remainder of the source tree
 COPY . .
 
-# Expose Vite dev server port
+# 6️⃣  Expose the Vite dev port
 EXPOSE 5173
 
-# Default command: run dev
+# 7️⃣  Start the Vite dev server
 CMD ["pnpm", "dev"]

@@ -1,18 +1,13 @@
-# Dockerfile.dev for Backend (Express)
-
 FROM node:18-alpine
-
 WORKDIR /app
+RUN corepack enable
 
-RUN npm install -g pnpm
+# Copy lockfile and backend manifest
+COPY pnpm-lock.yaml package.json ./
 
-COPY package.json ./
-RUN pnpm install
-RUN pnpm add -D tsx
+# Copy source
+COPY apps/backend/ .
 
-COPY . .
-
-# Expose typical Express port
+RUN pnpm install --frozen-lockfile
 EXPOSE 3000
-
-CMD [ "pnpm", "dev" ]
+CMD ["pnpm","start:docker"]

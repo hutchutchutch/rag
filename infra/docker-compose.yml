@@ -1,20 +1,22 @@
-version: "3.8"
-
 services:
   backend:
     build:
-      context: ../apps/backend
-      dockerfile: Dockerfile.dev
+      context: ../
+      dockerfile: apps/backend/Dockerfile.dev
     container_name: rag-backend
     ports:
       - "3000:3000"
+    # ⬇️  Bind-mount source but keep deps in a named volume
     volumes:
       - ../apps/backend:/app
-      - /app/node_modules
+      - backend_nm:/app/node_modules
     working_dir: /app
+    # Wait for DBs to be healthy
     depends_on:
-      - neo4j
-      - postgres
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     environment:
       NODE_ENV: development
       PORT: 3000
@@ -26,7 +28,8 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgrespassword"
       POSTGRES_DB: "ragdb"
-    command: pnpm dev
+    # ⬇️  start script waits until bolt port is open
+    command: pnpm start:docker        # defined in apps/backend/package.json
 
   frontend:
     build:
@@ -37,7 +40,7 @@ services:
       - "5173:5173"
     volumes:
       - ../apps/frontend:/app
-      - /app/node_modules
+      - frontend_nm:/app/node_modules
     working_dir: /app
     depends_on:
       - backend
@@ -59,6 +62,12 @@ services:
       - neo4j_import:/var/lib/neo4j/import
       - neo4j_plugins:/plugins
       - ./neo4j/plugins:/var/lib/neo4j/plugins
+    # ⬇️  simple health-check: wait for bolt to accept TCP
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/7687"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   postgres:
     image: postgres:15
@@ -83,3 +92,5 @@ volumes:
   neo4j_logs:
   neo4j_import:
   neo4j_plugins:
+  backend_nm:    # named volumes preserve installed deps
+  frontend_nm:
