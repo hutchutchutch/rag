@@ -8,7 +8,8 @@
     "dev": "turbo run dev",
     "dev:frontend": "turbo run dev --filter=frontend",
     "build": "turbo run build",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "api:test": "pnpm --filter @apps/backend test:api"
   },
   "devDependencies": {
     "turbo": "^2.5.0"
