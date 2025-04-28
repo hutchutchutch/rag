@@ -2,12 +2,17 @@ FROM node:18-alpine
 WORKDIR /app
 RUN corepack enable
 
-# Copy lockfile and backend manifest
-COPY pnpm-lock.yaml package.json ./
+# ① copy root manifests + workspace file for lock-layer cache
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 
-# Copy source
-COPY apps/backend/ .
+# ② ALSO copy the backend manifest so its deps get installed
+COPY apps/backend/package.json apps/backend/ 
 
+# ③ install every workspace package (backend deps incl. wait-on)
 RUN pnpm install --frozen-lockfile
+
+# ④ now copy the full source tree
+COPY apps/backend /app/apps/backend
+
 EXPOSE 3000
-CMD ["pnpm","start:docker"]
+CMD ["pnpm","exec","wait-on","tcp:neo4j:7687","&&","tsx","src/index.ts"]

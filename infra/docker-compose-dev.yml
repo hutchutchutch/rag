@@ -9,32 +9,32 @@ services:
       - "7687:7687"  # Bolt protocol
     environment:
       NEO4J_AUTH: "neo4j/testpassword"
-      NEO4J_PLUGINS: '["apoc"]'
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
       - neo4j_plugins:/plugins
+      - ./neo4j/plugins:/var/lib/neo4j/plugins
     healthcheck:
-      test: ["CMD-SHELL", "wget -O /dev/null -q http://localhost:7474 || exit 1"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
-      start_period: 30s
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/7687"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   postgres:
-    image: ankane/pgvector:latest
+    image: postgres:15
     container_name: postgres
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: ragdb
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgrespassword"
+      POSTGRES_DB: "ragdb"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
 
@@ -75,26 +75,21 @@ services:
     ports:
       - "3000:3000"
     environment:
+      NODE_ENV: development
+      PORT: 3000
       NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USERNAME: neo4j
+      NEO4J_USER: neo4j
       NEO4J_PASSWORD: testpassword
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: postgrespassword
       POSTGRES_DB: ragdb
-      AWS_REGION: us-west-2
-      AWS_BUCKET_NAME: rag-documents
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_ACCESS_KEY: test
-      AWS_ENDPOINT: http://localstack:4566
-      NODE_ENV: development
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - ../apps/backend:/app
+      - backend_nm:/app/node_modules
     working_dir: /app
-    command: pnpm dev
+    command: pnpm start:docker
 
   frontend:
     build:
@@ -106,14 +101,20 @@ services:
         condition: service_healthy
     ports:
       - "5173:5173"
+    environment:
+      VITE_API_URL: "http://localhost:3000"
     volumes:
       - ../apps/frontend:/app
+      - frontend_nm:/app/node_modules
     working_dir: /app
-    command: pnpm dev
+    command: pnpm install --offline && pnpm dev
 
 volumes:
   neo4j_data:
   neo4j_logs:
+  neo4j_import:
   neo4j_plugins:
   postgres_data:
   localstack_data:
+  backend_nm:
+  frontend_nm:

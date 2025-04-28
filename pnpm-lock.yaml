@@ -25,7 +25,7 @@ importers:
         version: 0.1.3
       '@langchain/community':
         specifier: ^0.0.32
-        version: 0.0.32(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)
+        version: 0.0.32(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(lodash@4.17.21)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)
       '@langchain/core':
         specifier: ^0.3.44
         version: 0.3.49(openai@4.96.0(zod@3.24.3))
@@ -58,7 +58,7 @@ importers:
         version: 7.2.0
       langchain:
         specifier: ^0.1.37
-        version: 0.1.37(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/client-s3@3.797.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(fast-xml-parser@4.4.1)(ignore@5.3.2)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)
+        version: 0.1.37(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/client-s3@3.797.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(axios@1.9.0)(fast-xml-parser@4.4.1)(ignore@5.3.2)(lodash@4.17.21)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)
       langsmith:
         specifier: ^0.0.66
         version: 0.0.66
@@ -89,6 +89,9 @@ importers:
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
+      wait-on:
+        specifier: ^8.0.3
+        version: 8.0.3
       zod:
         specifier: ^3.22.4
         version: 3.24.3
@@ -882,6 +885,12 @@ packages:
   '@google/generative-ai@0.1.3':
     resolution: {integrity: sha512-Cm4uJX1sKarpm1mje/MiOIinM7zdUUrQp/5/qGPAgznbdd/B9zup5ehT6c1qGqycFcSopTA1J1HpqHS5kJR8hQ==}
     engines: {node: '>=18.0.0'}
+
+  '@hapi/hoek@9.3.0':
+    resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
+
+  '@hapi/topo@5.1.0':
+    resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
 
   '@hookform/resolvers@3.10.0':
     resolution: {integrity: sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==}
@@ -2068,6 +2077,15 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
+  '@sideway/address@4.1.5':
+    resolution: {integrity: sha512-IqO/DUQHUkPeixNQ8n0JA6102hT9CmaljNTPmQ1u8MEhBo/R4Q8eKLN/vGZxuebwOroDB4cbpjheD4+/sKFK4Q==}
+
+  '@sideway/formula@3.0.1':
+    resolution: {integrity: sha512-/poHZJJVjx3L+zVD6g9KgHfYnb443oi7wLu/XKojDviHy6HOEOA6z1Trk5aR1dGcmPenJEgb2sK2I80LeS3MIg==}
+
+  '@sideway/pinpoint@2.0.0':
+    resolution: {integrity: sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==}
+
   '@sindresorhus/is@0.14.0':
     resolution: {integrity: sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==}
     engines: {node: '>=6'}
@@ -2702,6 +2720,9 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
+
+  axios@1.9.0:
+    resolution: {integrity: sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -3804,6 +3825,9 @@ packages:
     resolution: {integrity: sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==}
     hasBin: true
 
+  joi@17.13.3:
+    resolution: {integrity: sha512-otDA4ldcIx+ZXsKHWmp0YizCweVRZG96J10b0FevjfuncLO1oX59THoAmHkNubYJ+9gWsYsp5k8v4ib6oDv1fA==}
+
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
@@ -4075,6 +4099,9 @@ packages:
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
+
+  lodash@4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -4640,6 +4667,9 @@ packages:
   proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
+
+  proxy-from-env@1.1.0:
+    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
   pump@3.0.2:
     resolution: {integrity: sha512-tUPXtzlGM8FE3P0ZL6DVs/3P58k9nk8/jZeQCurTJylQA8qFYzHFfhBJkuqyE0FifOsQ0uKWekiZ5g8wtr28cw==}
@@ -5290,6 +5320,11 @@ packages:
         optional: true
       terser:
         optional: true
+
+  wait-on@8.0.3:
+    resolution: {integrity: sha512-nQFqAFzZDeRxsu7S3C7LbuxslHhk+gnJZHyethuGKAn2IVleIbTB9I3vJSQiSR+DifUqmdzfPMoMPJfLqMF2vw==}
+    engines: {node: '>=12.0.0'}
+    hasBin: true
 
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
@@ -6265,6 +6300,12 @@ snapshots:
 
   '@google/generative-ai@0.1.3': {}
 
+  '@hapi/hoek@9.3.0': {}
+
+  '@hapi/topo@5.1.0':
+    dependencies:
+      '@hapi/hoek': 9.3.0
+
   '@hookform/resolvers@3.10.0(react-hook-form@7.56.1(react@18.3.1))':
     dependencies:
       react-hook-form: 7.56.1(react@18.3.1)
@@ -6308,7 +6349,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@langchain/community@0.0.32(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)':
+  '@langchain/community@0.0.32(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(lodash@4.17.21)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)':
     dependencies:
       '@langchain/core': 0.1.63(openai@4.96.0(zod@3.24.3))
       '@langchain/openai': 0.0.14
@@ -6320,13 +6361,14 @@ snapshots:
       '@aws-crypto/sha256-js': 5.2.0
       '@aws-sdk/credential-provider-node': 3.797.0
       '@smithy/util-utf8': 2.3.0
+      lodash: 4.17.21
       neo4j-driver: 5.28.1
       pg: 8.15.6
     transitivePeerDependencies:
       - encoding
       - openai
 
-  '@langchain/community@0.0.57(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)':
+  '@langchain/community@0.0.57(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(lodash@4.17.21)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)':
     dependencies:
       '@langchain/core': 0.1.63(openai@4.96.0(zod@3.24.3))
       '@langchain/openai': 0.0.34
@@ -6340,6 +6382,7 @@ snapshots:
       '@aws-crypto/sha256-js': 5.2.0
       '@aws-sdk/credential-provider-node': 3.797.0
       '@smithy/util-utf8': 2.3.0
+      lodash: 4.17.21
       neo4j-driver: 5.28.1
       pg: 8.15.6
     transitivePeerDependencies:
@@ -6932,6 +6975,14 @@ snapshots:
     optional: true
 
   '@rtsao/scc@1.1.0': {}
+
+  '@sideway/address@4.1.5':
+    dependencies:
+      '@hapi/hoek': 9.3.0
+
+  '@sideway/formula@3.0.1': {}
+
+  '@sideway/pinpoint@2.0.0': {}
 
   '@sindresorhus/is@0.14.0': {}
 
@@ -7727,6 +7778,14 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
+
+  axios@1.9.0:
+    dependencies:
+      follow-redirects: 1.15.9(debug@4.4.0)
+      form-data: 4.0.2
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
 
   balanced-match@1.0.2: {}
 
@@ -9018,6 +9077,14 @@ snapshots:
 
   jiti@1.21.7: {}
 
+  joi@17.13.3:
+    dependencies:
+      '@hapi/hoek': 9.3.0
+      '@hapi/topo': 5.1.0
+      '@sideway/address': 4.1.5
+      '@sideway/formula': 3.0.1
+      '@sideway/pinpoint': 2.0.0
+
   joycon@3.1.1: {}
 
   js-tiktoken@1.0.20:
@@ -9060,10 +9127,10 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  langchain@0.1.37(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/client-s3@3.797.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(fast-xml-parser@4.4.1)(ignore@5.3.2)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6):
+  langchain@0.1.37(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/client-s3@3.797.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(axios@1.9.0)(fast-xml-parser@4.4.1)(ignore@5.3.2)(lodash@4.17.21)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6):
     dependencies:
       '@anthropic-ai/sdk': 0.9.1
-      '@langchain/community': 0.0.57(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)
+      '@langchain/community': 0.0.57(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.797.0)(@smithy/util-utf8@2.3.0)(lodash@4.17.21)(neo4j-driver@5.28.1)(openai@4.96.0(zod@3.24.3))(pg@8.15.6)
       '@langchain/core': 0.1.63(openai@4.96.0(zod@3.24.3))
       '@langchain/openai': 0.0.34
       '@langchain/textsplitters': 0.0.3(openai@4.96.0(zod@3.24.3))
@@ -9083,6 +9150,7 @@ snapshots:
     optionalDependencies:
       '@aws-sdk/client-s3': 3.797.0
       '@aws-sdk/credential-provider-node': 3.797.0
+      axios: 1.9.0
       fast-xml-parser: 4.4.1
       ignore: 5.3.2
     transitivePeerDependencies:
@@ -9229,6 +9297,8 @@ snapshots:
   lodash-es@4.17.21: {}
 
   lodash.merge@4.6.2: {}
+
+  lodash@4.17.21: {}
 
   loose-envify@1.4.0:
     dependencies:
@@ -9764,6 +9834,8 @@ snapshots:
     dependencies:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
+
+  proxy-from-env@1.1.0: {}
 
   pump@3.0.2:
     dependencies:
@@ -10496,6 +10568,16 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.15.3
       fsevents: 2.3.3
+
+  wait-on@8.0.3:
+    dependencies:
+      axios: 1.9.0
+      joi: 17.13.3
+      lodash: 4.17.21
+      minimist: 1.2.8
+      rxjs: 7.8.2
+    transitivePeerDependencies:
+      - debug
 
   web-streams-polyfill@3.3.3: {}
 

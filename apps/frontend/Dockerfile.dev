@@ -1,27 +1,17 @@
-############################
-# apps/frontend/Dockerfile.dev
-############################
-
 FROM node:18-alpine
-
-# 1️⃣  Working directory inside the image
 WORKDIR /app
-
-# 2️⃣  Enable Corepack so the exact pnpm version
-#     declared in "packageManager" is used
 RUN corepack enable
 
-# 3️⃣  Copy lockfile + manifest *only* to leverage the cache
-COPY pnpm-lock.yaml package.json ./
+# root manifests
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 
-# 4️⃣  Install all deps (prod + dev)
+# ⬅️ add the app manifest so vite & friends get installed
+COPY apps/frontend/package.json apps/frontend/
+
 RUN pnpm install --frozen-lockfile
 
-# 5️⃣  Copy the remainder of the source tree
-COPY . .
+# now copy the rest of the source
+COPY apps/frontend /app/apps/frontend
 
-# 6️⃣  Expose the Vite dev port
 EXPOSE 5173
-
-# 7️⃣  Start the Vite dev server
-CMD ["pnpm", "dev"]
+CMD ["pnpm","dev"]
