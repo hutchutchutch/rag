@@ -174,18 +174,53 @@ const KnowledgeGraphEditor: React.FC<KnowledgeGraphEditorProps> = ({ onClose, st
             <div className="w-full flex justify-center items-center min-h-[200px]">
               <SampleD3KnowledgeGraph entities={d3Entities} relationships={d3Relationships} />
             </div>
-            {selectedStore.cypher && (
-              <div className="mt-4">
-                <pre className="bg-neutral-900 text-xs p-2 rounded border border-neutral-800 overflow-x-auto">
-                  {selectedStore.cypher}
-                </pre>
+            <div className="mt-4">
+              <div className="text-xs font-semibold mb-2 text-dark-50">Nodes & Relationships</div>
+              <div className="space-y-4">
+                {d3Entities.map(entity => {
+                  const outgoing = d3Relationships.filter(r => r.source === entity.id);
+                  const incoming = d3Relationships.filter(r => r.target === entity.id);
+                  return (
+                    <div key={entity.id} className="bg-muted rounded p-3">
+                      <div className="font-medium text-primary-700 dark:text-primary-200">
+                        {entity.name}
+                        <span className="ml-2 text-xs text-dark-400">({entity.label})</span>
+                      </div>
+                      {(outgoing.length > 0 || incoming.length > 0) ? (
+                        <ul className="ml-4 mt-1 list-disc text-xs">
+                          {outgoing.map(rel => {
+                            const target = d3Entities.find(e => e.id === rel.target);
+                            return (
+                              <li key={rel.id + "-out"} className="text-dark-400">
+                                <span className="font-semibold text-primary-600 dark:text-primary-300">{rel.type}</span>
+                                {" → "}
+                                <span className="text-dark-50">{target?.name || rel.target}</span>
+                              </li>
+                            );
+                          })}
+                          {incoming.map(rel => {
+                            const source = d3Entities.find(e => e.id === rel.source);
+                            return (
+                              <li key={rel.id + "-in"} className="text-dark-400">
+                                <span className="font-semibold text-primary-600 dark:text-primary-300">{rel.type}</span>
+                                {" ← "}
+                                <span className="text-dark-50">{source?.name || rel.source}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : (
+                        <div className="ml-4 text-xs text-dark-300">No relationships</div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            )}
-            {selectedStore.explanation && (
-              <div className="mt-4 whitespace-pre-wrap text-xs text-dark-300">
-                {selectedStore.explanation}
+              <div className="flex gap-2 mt-6">
+                <Button variant="default" size="sm">Add Node</Button>
+                <Button variant="outline" size="sm">Add Relationship</Button>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       </div>
