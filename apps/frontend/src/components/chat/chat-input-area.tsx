@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useState } from "react";
-import { Textarea } from "./textarea";
+import { Textarea } from "../ui/textarea";
 // import { cn } from "@/lib/utils";
 // import the correct styles if there's an issue with absolute imports
 import { cn } from "../../lib/utils";
@@ -99,7 +99,8 @@ export function ChatInputArea({
         resultLimit: 5,
         useHybridSearch: false,
         hybridAlpha: 0.5,
-        preprocessQuery: true
+        preprocessQuery: true,
+        preprocessStrategy: 'chain-of-thought'
     });
     
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({

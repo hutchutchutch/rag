@@ -2,10 +2,11 @@
 
 import * as React from "react"
 import { cn } from "../../lib/utils"
-import { Label } from "./label"
-import { Slider } from "./slider"
-import { Input } from "./input"
-import { Switch } from "./switch"
+import { Label } from "../ui/label"
+import { Slider } from "../ui/slider"
+import { Input } from "../ui/input"
+import { Switch } from "../ui/switch"
+import { Button } from "../ui/button"
 
 interface SearchSettingsProps {
   className?: string
@@ -20,6 +21,7 @@ export interface SearchSettingsValues {
   useHybridSearch: boolean
   hybridAlpha: number
   preprocessQuery: boolean
+  preprocessStrategy: 'chain-of-thought' | 'tree-of-thoughts' | 'react' | 'role' | null
 }
 
 const defaultValues: SearchSettingsValues = {
@@ -28,7 +30,8 @@ const defaultValues: SearchSettingsValues = {
   resultLimit: 5,
   useHybridSearch: false,
   hybridAlpha: 0.5,
-  preprocessQuery: true
+  preprocessQuery: true,
+  preprocessStrategy: 'chain-of-thought'
 }
 
 export function SearchSettings({ 
@@ -107,18 +110,53 @@ export function SearchSettings({
       </div>
       
       {/* Preprocess Query */}
-      <div className="flex items-center justify-between">
-        <div>
-          <Label htmlFor="preprocessQuery" className="block mb-1">Preprocess Query</Label>
-          <p className="text-xs text-dark-400">
-            Apply preprocessing to the query before searching
-          </p>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label htmlFor="preprocessQuery" className="block mb-1">Preprocess Query</Label>
+            <p className="text-xs text-dark-400">
+              Apply preprocessing to the query before searching
+            </p>
+          </div>
+          <Switch
+            id="preprocessQuery"
+            checked={values.preprocessQuery}
+            onCheckedChange={(checked) => handleChange("preprocessQuery", checked)}
+          />
         </div>
-        <Switch
-          id="preprocessQuery"
-          checked={values.preprocessQuery}
-          onCheckedChange={(checked) => handleChange("preprocessQuery", checked)}
-        />
+        
+        {values.preprocessQuery && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={values.preprocessStrategy === 'chain-of-thought' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => handleChange("preprocessStrategy", 'chain-of-thought')}
+            >
+              Chain of Thought
+            </Button>
+            <Button
+              variant={values.preprocessStrategy === 'tree-of-thoughts' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => handleChange("preprocessStrategy", 'tree-of-thoughts')}
+            >
+              Tree of Thoughts
+            </Button>
+            <Button
+              variant={values.preprocessStrategy === 'react' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => handleChange("preprocessStrategy", 'react')}
+            >
+              ReAct
+            </Button>
+            <Button
+              variant={values.preprocessStrategy === 'role' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => handleChange("preprocessStrategy", 'role')}
+            >
+              Role
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* EF Search */}
