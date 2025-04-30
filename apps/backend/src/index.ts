@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import documentRoutes from './routes/document.routes';
-import chatRoutes from './routes/chat.routes';
-import config from './config/index';
-import logger from './utils/logger';
+import documentRoutes from './routes/document.routes.js';
+import chatRoutes from './routes/chat.routes.js';
+import config from './config/index.js';
+import logger from './utils/logger.js';
 import fs from 'fs';
 import path from 'path';
 
