@@ -821,7 +821,66 @@ class ChatService {
     }
   }
 
-  // Chapter 12 specific code removed for cleaner architecture
+  /**
+   * Query the vector store using LangChain and return top chunks with a response
+   */
+  async queryChapter12WithLangChain(query: string): Promise<{
+    response: string;
+    topChunks: Array<{ text: string; score: number; metadata: any }>;
+  }> {
+    try {
+      // 1. Get top chunks from postgres using existing method
+      const chunks = await postgresService.similaritySearch(query, 5);
+      
+      // 2. Format chunks for better context
+      const formattedChunks = chunks
+        .map((chunk, i) => 
+          `[Chunk ${i+1} - Score: ${chunk.score.toFixed(2)}]\n${chunk.text}\n`
+        )
+        .join("\n");
+      
+      // 3. Use LangChain to generate a response based on these chunks
+      const prompt = ChatPromptTemplate.fromTemplate(`
+        You are an assistant that answers questions about Chapter 12 of the book.
+        Use only the information in the provided chunks to answer the question.
+        If you don't know the answer based on the chunks, say so.
+        
+        Here are the relevant chunks from Chapter 12:
+        
+        {context}
+        
+        Question: {question}
+      `);
+      
+      // Create a simple LangChain chain
+      const chain = prompt
+        .pipe(this.llm as any)
+        .pipe((output: any) => {
+          if ('content' in output) {
+            return output.content;
+          }
+          if (Array.isArray(output)) {
+            return output.map(msg => msg.content).join('\n');
+          }
+          return String(output);
+        })
+        .pipe(new StringOutputParser());
+
+      // Run the chain with our chunks as context
+      const chainResult = await chain.invoke({
+        context: formattedChunks,
+        question: query
+      });
+      
+      return {
+        response: chainResult,
+        topChunks: chunks
+      };
+    } catch (error) {
+      console.error("Error querying Chapter 12 with LangChain:", error);
+      throw new Error("Failed to query Chapter 12 with LangChain");
+    }
+  }
 }
 
 export default new ChatService();
