@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --import tsx src/index.ts",
-    "start:docker": "wait-on tcp:neo4j:7687 && tsx src/index.ts",
+    "start:docker": "wait-on tcp:rag-neo4j:7687 && tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "test:api": "newman run ../../docs/postman/ragguide.postman_collection.json -e ../../docs/postman/local.postman_environment.json"

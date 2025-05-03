@@ -1,9 +1,7 @@
-version: "3.8"
-
 services:
   neo4j:
     image: neo4j:5.15
-    container_name: neo4j
+    container_name: rag-neo4j
     ports:
       - "7474:7474"  # Neo4j Browser
       - "7687:7687"  # Bolt protocol
@@ -23,7 +21,7 @@ services:
 
   postgres:
     image: postgres:15
-    container_name: postgres
+    container_name: rag-postgres
     ports:
       - "5432:5432"
     environment:
@@ -40,7 +38,7 @@ services:
 
   localstack:
     image: localstack/localstack:2.3.0
-    container_name: localstack
+    container_name: rag-localstack
     ports:
       - "4566:4566"
     environment:
@@ -62,9 +60,9 @@ services:
 
   backend:
     build:
-      context: ../apps/backend
-      dockerfile: Dockerfile.dev
-    container_name: backend
+      context: ..
+      dockerfile: apps/backend/Dockerfile.dev
+    container_name: rag-backend
     depends_on:
       neo4j:
         condition: service_healthy
@@ -77,25 +75,30 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_URI: bolt://rag-neo4j:7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: testpassword
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: rag-postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
       POSTGRES_DB: ragdb
     volumes:
-      - ../apps/backend:/app
+      - ../apps/backend:/app/apps/backend
       - backend_nm:/app/node_modules
     working_dir: /app
     command: pnpm start:docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   frontend:
     build:
-      context: ../apps/frontend
-      dockerfile: Dockerfile.dev
-    container_name: frontend
+      context: ..
+      dockerfile: apps/frontend/Dockerfile.dev
+    container_name: rag-frontend
     depends_on:
       backend:
         condition: service_healthy
@@ -104,7 +107,7 @@ services:
     environment:
       VITE_API_URL: "http://localhost:3000"
     volumes:
-      - ../apps/frontend:/app
+      - ../apps/frontend:/app/apps/frontend
       - frontend_nm:/app/node_modules
     working_dir: /app
     command: pnpm install --offline && pnpm dev

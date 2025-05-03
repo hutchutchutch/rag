@@ -442,6 +442,30 @@ The frontend application provides an intuitive interface for interacting with th
 
 ---
 
+## Development Best Practices
+
+### Container Naming Convention
+
+This project follows a consistent container naming convention to avoid conflicts with other projects running on the same machine:
+
+- All containers use the `rag-` prefix (e.g., `rag-backend`, `rag-neo4j`)
+- This naming scheme:
+  - Prevents conflicts with containers from other projects
+  - Makes it easier to identify containers related to this project when running `docker ps`
+  - Allows for easier cleanup using `docker rm $(docker ps -a -q --filter name=rag-)`
+
+If you need to start fresh or are encountering container conflicts, you can remove all project containers with:
+
+```bash
+# Stop and remove all rag-prefixed containers
+docker stop $(docker ps -a -q --filter name=rag-) 
+docker rm $(docker ps -a -q --filter name=rag-)
+
+# Or use docker compose
+cd infra
+docker compose -f docker-compose-dev.yml down --volumes --remove-orphans
+```
+
 ## Technology Stack
 
 This RAG system uses:
@@ -518,11 +542,11 @@ This RAG system uses:
    ```
 
    This will start:
-   - Neo4j database with APOC plugin (for graph operations)
-   - PostgreSQL with pgvector extension (for vector embeddings)
-   - LocalStack for S3 emulation
-   - Backend Express server
-   - Frontend Vite server
+   - `rag-neo4j` - Neo4j database with APOC plugin (for graph operations)
+   - `rag-postgres` - PostgreSQL with pgvector extension (for vector embeddings)
+   - `rag-localstack` - LocalStack for S3 emulation
+   - `rag-backend` - Backend Express server
+   - `rag-frontend` - Frontend Vite server
 
    **Option 2: Minimal setup with docker-compose.yml**
    ```bash
@@ -531,6 +555,8 @@ This RAG system uses:
    ```
 
    This starts a more basic version without LocalStack or some plugins.
+   
+   > **Note on Container Naming**: All containers use the "rag-" prefix (e.g., rag-backend, rag-neo4j) to avoid conflicts with other projects on your system.
 
 5. **Testing the frontend with Docker Compose**
 
@@ -564,7 +590,8 @@ This RAG system uses:
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:3000
    - Neo4j Browser: http://localhost:7474 (login with neo4j/testpassword)
-   - PostgreSQL: localhost:5432 (connect with postgres/password or postgres/postgrespassword)
+   - PostgreSQL: localhost:5432 (connect with postgres/postgrespassword)
+   - LocalStack (S3): http://localhost:4566 (AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY can be any value in development)
 
 ## Architecture Highlights
 

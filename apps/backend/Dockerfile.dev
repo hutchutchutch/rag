@@ -15,4 +15,4 @@ RUN pnpm install --frozen-lockfile
 COPY apps/backend /app/apps/backend
 
 EXPOSE 3000
-CMD ["pnpm","exec","wait-on","tcp:neo4j:7687","&&","tsx","src/index.ts"]
+CMD ["pnpm","exec","wait-on","tcp:rag-neo4j:7687","&&","tsx","src/index.ts"]
