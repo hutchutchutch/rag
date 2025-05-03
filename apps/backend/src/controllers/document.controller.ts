@@ -5,6 +5,12 @@ import fs from 'fs';
 
 export const uploadDocument = async (req: Request, res: Response) => {
   try {
+    console.log('Upload request received:', {
+      body: req.body,
+      file: req.file,
+      files: req.files
+    });
+    
     if (!req.file) {
       return res.status(400).json({ 
         success: false,
@@ -13,6 +19,7 @@ export const uploadDocument = async (req: Request, res: Response) => {
     }
     
     const filePath = req.file.path;
+    console.log('File saved at:', filePath);
     
     try {
       // Process document and store in vector stores

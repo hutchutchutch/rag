@@ -56,7 +56,7 @@ services:
       timeout: 5s
       retries: 5
     command: >
-      sh -c "/app/scripts/init-localstack.sh && tail -f /dev/null"
+      sh -c "apk --no-cache add python3 py3-pip && pip3 install awscli && chmod +x /app/scripts/init-localstack.sh && /app/scripts/init-localstack.sh && tail -f /dev/null"
 
   backend:
     build:
@@ -83,16 +83,22 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
       POSTGRES_DB: ragdb
+      AWS_ENDPOINT: http://rag-localstack:4566
+      AWS_REGION: us-west-2
+      AWS_BUCKET_NAME: rag-guide-documents
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
     volumes:
-      - ../apps/backend:/app/apps/backend
+      - ../apps/backend:/app
       - backend_nm:/app/node_modules
     working_dir: /app
-    command: pnpm start:docker
+    command: node --import tsx src/index.ts
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/health || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 15s
 
   frontend:
     build:
@@ -100,17 +106,16 @@ services:
       dockerfile: apps/frontend/Dockerfile.dev
     container_name: rag-frontend
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     ports:
       - "5173:5173"
     environment:
-      VITE_API_URL: "http://localhost:3000"
+      VITE_API_URL: "http://localhost:3000/api"
     volumes:
-      - ../apps/frontend:/app/apps/frontend
+      - ../apps/frontend:/app
       - frontend_nm:/app/node_modules
     working_dir: /app
-    command: pnpm install --offline && pnpm dev
+    command: pnpm dev
 
 volumes:
   neo4j_data:

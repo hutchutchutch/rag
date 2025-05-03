@@ -2,16 +2,19 @@ FROM node:18-alpine
 WORKDIR /app
 RUN corepack enable
 
-# root manifests
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# Install frontend dependencies directly
+COPY apps/frontend/package.json ./
+RUN pnpm install
 
-# ⬅️ add the app manifest so vite & friends get installed
-COPY apps/frontend/package.json apps/frontend/
-
-RUN pnpm install --frozen-lockfile
-
-# now copy the rest of the source
-COPY apps/frontend /app/apps/frontend
+# Copy frontend source code
+COPY apps/frontend/src ./src
+COPY apps/frontend/index.html ./
+COPY apps/frontend/tsconfig.json ./
+COPY apps/frontend/tsconfig.node.json ./
+COPY apps/frontend/vite.config.ts ./
+COPY apps/frontend/postcss.config.js ./
+COPY apps/frontend/tailwind.config.js ./
+COPY apps/frontend/public ./public
 
 EXPOSE 5173
 CMD ["pnpm","dev"]

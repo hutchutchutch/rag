@@ -80,6 +80,9 @@ app.use((req, res, next) => {
     url: req.url,
     ip: req.ip,
     userAgent: req.get('user-agent') || 'unknown',
+    body: req.method === 'POST' ? req.body : undefined, 
+    query: req.query,
+    params: req.params
   }, 'Incoming request');
   next();
 });

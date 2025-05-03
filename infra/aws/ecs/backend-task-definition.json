@@ -1,0 +1,98 @@
+{
+  "family": "rag-guide-backend",
+  "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/rag-guide-ecs-task-role",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "rag-guide-backend",
+      "image": "${ECR_REPOSITORY_URI}:backend-latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "name": "PORT",
+          "value": "3000"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "us-west-2"
+        },
+        {
+          "name": "AWS_BUCKET_NAME",
+          "value": "rag-guide-documents"
+        },
+        {
+          "name": "NEO4J_URI",
+          "value": "${NEO4J_URI}"
+        },
+        {
+          "name": "POSTGRES_HOST",
+          "value": "${POSTGRES_HOST}"
+        },
+        {
+          "name": "POSTGRES_PORT",
+          "value": "5432"
+        },
+        {
+          "name": "POSTGRES_DB",
+          "value": "ragdb"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "NEO4J_USER",
+          "valueFrom": "arn:aws:ssm:us-west-2:${AWS_ACCOUNT_ID}:parameter/rag-guide/neo4j/user"
+        },
+        {
+          "name": "NEO4J_PASSWORD",
+          "valueFrom": "arn:aws:ssm:us-west-2:${AWS_ACCOUNT_ID}:parameter/rag-guide/neo4j/password"
+        },
+        {
+          "name": "POSTGRES_USER",
+          "valueFrom": "arn:aws:ssm:us-west-2:${AWS_ACCOUNT_ID}:parameter/rag-guide/postgres/user"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "valueFrom": "arn:aws:ssm:us-west-2:${AWS_ACCOUNT_ID}:parameter/rag-guide/postgres/password"
+        },
+        {
+          "name": "GOOGLE_API_KEY",
+          "valueFrom": "arn:aws:ssm:us-west-2:${AWS_ACCOUNT_ID}:parameter/rag-guide/google/api-key"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:ssm:us-west-2:${AWS_ACCOUNT_ID}:parameter/rag-guide/openai/api-key"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/rag-guide-backend",
+          "awslogs-region": "us-west-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "wget -q --spider http://localhost:3000/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048"
+}

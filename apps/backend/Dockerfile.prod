@@ -1,0 +1,47 @@
+FROM node:18-alpine as build
+WORKDIR /app
+RUN corepack enable
+
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/backend/package.json ./apps/backend/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy application code
+COPY apps/backend ./apps/backend
+
+# Build TypeScript code
+WORKDIR /app/apps/backend
+RUN pnpm build
+
+# Create production image
+FROM node:18-alpine
+WORKDIR /app
+RUN corepack enable
+
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/backend/package.json ./apps/backend/
+
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy built application 
+COPY --from=build /app/apps/backend/dist ./apps/backend/dist
+COPY --from=build /app/apps/backend/package.json ./apps/backend/
+
+# Create uploads directory
+RUN mkdir -p /app/apps/backend/uploads
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Expose port
+EXPOSE 3000
+
+# Run the application
+WORKDIR /app/apps/backend
+CMD ["node", "dist/index.js"]

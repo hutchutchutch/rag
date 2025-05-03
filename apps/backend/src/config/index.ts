@@ -16,7 +16,7 @@ const config = {
   // AWS S3
   aws: {
     region: process.env.AWS_REGION || 'us-west-2',
-    bucketName: process.env.AWS_BUCKET_NAME || 'rag-documents',
+    bucketName: process.env.AWS_BUCKET_NAME || 'rag-guide-documents',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     endpoint: process.env.AWS_ENDPOINT,

@@ -82,7 +82,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
  */
 export async function uploadDocument(file: File): Promise<Document> {
   const formData = new FormData();
-  formData.append('document', file);
+  formData.append('file', file);
   
   const response = await fetch(`${API_URL}/documents/upload`, {
     method: 'POST',

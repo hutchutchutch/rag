@@ -1,18 +1,15 @@
 FROM node:18-alpine
 WORKDIR /app
 RUN corepack enable
+RUN apk --no-cache add curl wget
 
-# ① copy root manifests + workspace file for lock-layer cache
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# Install backend dependencies directly
+COPY apps/backend/package.json ./
+RUN pnpm install
 
-# ② ALSO copy the backend manifest so its deps get installed
-COPY apps/backend/package.json apps/backend/ 
-
-# ③ install every workspace package (backend deps incl. wait-on)
-RUN pnpm install --frozen-lockfile
-
-# ④ now copy the full source tree
-COPY apps/backend /app/apps/backend
+# Copy backend source code
+COPY apps/backend/src ./src
+COPY apps/backend/tsconfig.json ./
 
 EXPOSE 3000
-CMD ["pnpm","exec","wait-on","tcp:rag-neo4j:7687","&&","tsx","src/index.ts"]
+CMD ["node", "--import", "tsx", "src/index.ts"]
