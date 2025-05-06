@@ -18,6 +18,8 @@ export default defineConfig({
       '@lib': path.resolve(__dirname, './src/lib'),
       '@shared': path.resolve(__dirname, './src/shared'),
       '@ui': path.resolve(__dirname, './src/components/ui'),
+      '@store': path.resolve(__dirname, './src/store'),
+      '@mocks': path.resolve(__dirname, './src/mocks'),
     },
   },
   server: {

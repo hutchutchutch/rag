@@ -1,7 +1,7 @@
 
-import { cn } from "../../lib/utils";
-import { Avatar } from "../ui/avatar";
-import { Card, CardContent } from "../ui/card";
+import { cn } from "@lib/utils";
+import { Avatar } from "@ui/avatar";
+import { Card, CardContent } from "@ui/card";
 
 interface ChatMessageProps {
   message: string;

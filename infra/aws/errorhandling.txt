@@ -1,0 +1,20 @@
+Try the following steps to resolve your error:
+
+
+Navigate to the IAM console in the AWS Management Console
+
+In the left navigation pane, select 'Roles'
+
+In the search bar, enter 'AWSServiceRoleForECS' to find the ECS service-linked role
+
+If the role doesn't exist, follow these sub-steps:
+
+Click on 'Create role'
+Choose 'AWS service' as the trusted entity
+Select 'Elastic Container Service' from the list of services
+Choose 'Elastic Container Service - Service-Linked Role' use case
+Review and create the role
+If the role exists but there might be an issue with its permissions:
+
+Click on the 'AWSServiceRoleForECS' role
+Review the attached policies, ensuring 'AWSServiceRoleForECSPolicy' is attached

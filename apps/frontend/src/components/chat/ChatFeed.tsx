@@ -1,11 +1,11 @@
 import * as React from "react";
-import { cn } from "../../lib/utils";
+import { cn } from "@lib/utils";
 import { RefreshCw } from "lucide-react";
 import { Button } from "../ui/button";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { ScrollArea } from "../ui/scroll-area";
-import { useRagPipeline } from "../../hooks/use-rag-pipeline";
+import { useRagPipeline } from "@hooks/use-rag-pipeline";
 
 interface ChatFeedProps {
   className?: string;
