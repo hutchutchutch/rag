@@ -9,6 +9,7 @@ services:
       - "3000:3000"
     volumes:
       - ../apps/backend:/app
+      - backend_nm:/app/node_modules  
     working_dir: /app
     depends_on:
       neo4j:
@@ -35,7 +36,9 @@ services:
     container_name: rag-frontend
     ports:
       - "5173:5173"
-    volumes: []
+    volumes: 
+      - ../apps/frontend:/app
+      - frontend_nm:/app/node_modules
     working_dir: /app/apps/frontend
     depends_on:
       - backend
@@ -64,7 +67,7 @@ services:
       retries: 10
 
   postgres:
-    image: postgres:15
+    image: pgvector/pgvector:pg15
     container_name: rag-postgres
     ports:
       - "5432:5432"
@@ -86,4 +89,6 @@ volumes:
   neo4j_logs:
   neo4j_import:
   neo4j_plugins:
+  backend_nm:
+  frontend_nm:
 
