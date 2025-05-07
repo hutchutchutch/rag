@@ -6,7 +6,7 @@ import {
   addRelationship,
   updateRelationship,
   deleteRelationship
-} from '../controllers/knowledgeGraph.controller';
+} from '../controllers/knowledgeGraph.controller.js';
 
 const router = Router();
 
