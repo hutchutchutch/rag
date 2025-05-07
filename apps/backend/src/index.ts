@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import documentRoutes from './routes/document.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import knowledgeGraphRoutes from './routes/knowledgeGraph.routes.js';
 import config from './config/index.js';
 import logger from './utils/logger.js';
 import fs from 'fs';
@@ -90,6 +91,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/documents', documentRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/graph', knowledgeGraphRoutes);
 
 // Health check endpoints at multiple paths for diagnostics
 // Standard API health check
@@ -153,7 +155,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // Start server
-app.listen(port, config.host, () => {
+app.listen(Number(port), config.host, () => {
   logger.info(`Server running on ${config.host}:${port} in ${config.nodeEnv} mode`);
   logger.info(`Health check available at http://${config.host}:${port}/api/health`);
 });

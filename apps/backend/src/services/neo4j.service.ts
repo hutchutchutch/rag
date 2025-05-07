@@ -1,11 +1,11 @@
 import neo4j, { Driver, Session } from 'neo4j-driver';
-import config from '../config/index';
+import config from '../config/index.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { v4 as uuidv4 } from 'uuid';
 
 class Neo4jService {
-  driver: Driver;
-  private genAI: GoogleGenerativeAI;
+  driver!: Driver;
+  private genAI!: GoogleGenerativeAI;
   private embeddingModel: string = 'embedding-001';
   
   constructor() {
@@ -65,7 +65,8 @@ class Neo4jService {
             );
             console.log('Neo4j vector search capabilities are working correctly 👍');
           } catch (testError) {
-            console.warn('Vector search test failed, but basic connectivity is working:', testError.message);
+            const msg = testError instanceof Error ? testError.message : String(testError);
+            console.warn('Vector search test failed, but basic connectivity is working:', msg);
             console.warn('Check Neo4j version compatibility and vector index creation');
           } finally {
             await testSession.close();
@@ -87,7 +88,8 @@ class Neo4jService {
       });
     } catch (error) {
       console.log(error, 'error')
-      console.warn('Failed to initialize Neo4j service:', error.message);
+      const msg = error instanceof Error ? error.message : String(error);
+      console.warn('Failed to initialize Neo4j service:', msg);
       console.warn('Operating in mock mode without Neo4j connection');
     }
   }
@@ -101,7 +103,8 @@ class Neo4jService {
       const result = await session.run('RETURN 1 AS n');
       console.log('Successfully connected to Neo4j');
     } catch (error) {
-      console.error('Failed to connect to Neo4j:', error.message);
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('Failed to connect to Neo4j:', msg);
       throw error;
     } finally {
       await session.close();
@@ -123,7 +126,8 @@ class Neo4jService {
           console.log(`Detected Neo4j version: ${neo4jVersion}`);
         }
       } catch (versionError) {
-        console.warn('Could not determine Neo4j version:', versionError.message);
+        const msg = versionError instanceof Error ? versionError.message : String(versionError);
+        console.warn('Could not determine Neo4j version:', msg);
       }
       
       // Check if the index already exists
@@ -138,7 +142,8 @@ class Neo4jService {
           return;
         }
       } catch (showIndexError) {
-        console.warn('Error checking for existing index:', showIndexError.message);
+        const msg = showIndexError instanceof Error ? showIndexError.message : String(showIndexError);
+        console.warn('Error checking for existing index:', msg);
         // Older Neo4j versions don't support SHOW INDEXES syntax
         // We'll try to create the index directly with each method
       }
@@ -163,7 +168,8 @@ class Neo4jService {
           await this.verifyVectorIndex(session);
           return;
         } catch (modernIndexError) {
-          console.warn('Error creating vector index with modern syntax:', modernIndexError.message);
+          const msg = modernIndexError instanceof Error ? modernIndexError.message : String(modernIndexError);
+          console.warn('Error creating vector index with modern syntax:', msg);
         }
       }
       
@@ -186,7 +192,8 @@ class Neo4jService {
           await this.verifyVectorIndex(session);
           return;
         } catch (intermediateError) {
-          console.warn('Intermediate vector index creation failed:', intermediateError.message);
+          const msg = intermediateError instanceof Error ? intermediateError.message : String(intermediateError);
+          console.warn('Intermediate vector index creation failed:', msg);
         }
       }
       
@@ -200,7 +207,8 @@ class Neo4jService {
           console.log('Created basic index on embedding field as fallback');
           console.warn('Vector similarity search may be slower without proper vector index');
         } catch (basicIndexError) {
-          console.error('All vector index creation methods failed:', basicIndexError.message);
+          const msg = basicIndexError instanceof Error ? basicIndexError.message : String(basicIndexError);
+          console.error('All vector index creation methods failed:', msg);
           console.warn('Will operate without vector index. Vector search will be substantially slower.');
         }
       }
@@ -238,7 +246,8 @@ class Neo4jService {
         );
         return true;
       } catch (vectorQueryError) {
-        console.warn('Vector index verification failed:', vectorQueryError.message);
+        const msg = vectorQueryError instanceof Error ? vectorQueryError.message : String(vectorQueryError);
+        console.warn('Vector index verification failed:', msg);
         return false;
       }
     } catch (error) {
@@ -280,8 +289,9 @@ class Neo4jService {
         
         return result.embedding.values;
       } catch (error) {
-        console.warn(`Embedding generation attempt ${attempt}/${retries} failed:`, error.message);
-        lastError = error;
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn(`Embedding generation attempt ${attempt}/${retries} failed:`, msg);
+        lastError = error instanceof Error ? error : new Error(String(error));
         
         // On last attempt, check if we need to generate a mock embedding
         if (attempt === retries) {
@@ -343,7 +353,7 @@ class Neo4jService {
       console.warn('No chunks provided for document', documentId);
       return;
     }
-    
+  
     const session = this.driver.session();
     const txTimeout = 60000; // 60 seconds transaction timeout
     
@@ -388,7 +398,8 @@ class Neo4jService {
             try {
               embedding = await this.getEmbedding(chunk.text);
             } catch (embeddingError) {
-              console.warn(`Failed to generate embedding for chunk ${chunkIndex}, using fallback:`, embeddingError.message);
+              const msg = embeddingError instanceof Error ? embeddingError.message : String(embeddingError);
+              console.warn(`Failed to generate embedding for chunk ${chunkIndex}, using fallback:`, msg);
               // Use a fallback embedding if generation fails
               embedding = Array(768).fill(0).map(() => Math.random() * 0.01);
             }
@@ -498,7 +509,8 @@ class Neo4jService {
         console.warn('This may indicate an issue with the vector index or embedding storage');
       }
     } catch (error) {
-      console.warn('Error verifying vector search with new data:', error.message);
+      const msg = error instanceof Error ? error.message : String(error);
+      console.warn('Error verifying vector search with new data:', msg);
     }
   }
   
@@ -556,7 +568,8 @@ class Neo4jService {
           }));
         }
       } catch (modernError) {
-        console.warn('Modern vector search unavailable:', modernError.message);
+        const msg = modernError instanceof Error ? modernError.message : String(modernError);
+        console.warn('Modern vector search unavailable:', msg);
       }
       
       // 2. Alternative index-based search
@@ -587,7 +600,8 @@ class Neo4jService {
           }));
         }
       } catch (alternativeError) {
-        console.warn('Alternative vector search unavailable:', alternativeError.message);
+        const msg = alternativeError instanceof Error ? alternativeError.message : String(alternativeError);
+        console.warn('Alternative vector search unavailable:', msg);
       }
       
       // 3. Last resort: basic keyword search if vector search fails
@@ -627,7 +641,8 @@ class Neo4jService {
           }
         }
       } catch (fallbackError) {
-        console.warn('Keyword fallback search failed:', fallbackError.message);
+        const msg = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+        console.warn('Keyword fallback search failed:', msg);
       }
       
       // If all searches fail or return no results, return mock data
