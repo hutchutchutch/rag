@@ -6,6 +6,7 @@ RUN apk --no-cache add curl wget
 # Copy workspace files for proper dependency resolution
 COPY ../../pnpm-workspace.yaml ./
 COPY ../../pnpm-lock.yaml ./
+COPY ../../package.json ./
 
 # Install backend dependencies directly
 COPY apps/backend/package.json ./
