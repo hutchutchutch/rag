@@ -46,7 +46,7 @@ export const SampleD3KnowledgeGraph: React.FC<SampleD3KnowledgeGraphProps> = ({
     // Draw links
     const svg = d3.select(svgRef.current);
     svg.append('g')
-      .attr('stroke', 'var(--color-primary-400, #818cf8)')
+      .attr('stroke', '#5E30DA')
       .attr('stroke-width', 2)
       .selectAll('line')
       .data(relationships)
@@ -77,20 +77,22 @@ export const SampleD3KnowledgeGraph: React.FC<SampleD3KnowledgeGraphProps> = ({
 
     node.append('circle')
       .attr('r', NODE_RADIUS)
-      .attr('fill', 'var(--color-primary-100, #e0e7ff)')
-      .attr('stroke', 'var(--color-primary-500, #6366f1)')
+      .attr('fill', '#5E30DA')
+      .attr('stroke', '#5E30DA')
       .attr('stroke-width', 2);
 
     node.append('text')
       .attr('text-anchor', 'middle')
       .attr('y', 6)
+      .attr('fill', '#FFFFFF')
       .attr('class', 'font-semibold text-xs')
       .text(d => d.label);
 
     node.append('text')
       .attr('text-anchor', 'middle')
       .attr('y', 22)
-      .attr('class', 'text-[10px] text-dark-400')
+      .attr('fill', '#FFFFFF')
+      .attr('class', 'text-[10px]')
       .text(d => d.name);
 
     // Draw relationship labels
@@ -98,7 +100,8 @@ export const SampleD3KnowledgeGraph: React.FC<SampleD3KnowledgeGraphProps> = ({
       .selectAll('text')
       .data(relationships)
       .join('text')
-      .attr('class', 'text-[10px] text-primary-500 bg-white')
+      .attr('fill', '#FFFFFF')
+      .attr('class', 'text-[10px]')
       .attr('text-anchor', 'middle')
       .text(d => d.type);
 
@@ -113,7 +116,7 @@ export const SampleD3KnowledgeGraph: React.FC<SampleD3KnowledgeGraphProps> = ({
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M0,-5L10,0L0,5')
-      .attr('fill', 'var(--color-primary-400, #818cf8)');
+      .attr('fill', '#5E30DA');
 
     simulation.on('tick', () => {
       svg.selectAll('line')

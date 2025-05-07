@@ -1,44 +1,134 @@
 export const vectorStores = [
   {
     id: "1",
-    name: "Missing Dog Trial",
-    chunks: 42,
+    name: "Function Health Graph",
+    chunks: 60,
     tokensPerChunk: 512,
     embeddingModel: "text-embedding-3-small",
     vectorDim: 1536,
-    indexType: "pgvector / cosine",
-    created: "2025-04-23 08:14",
-    sizeMB: 1.6,
+    indexType: "neo4j / cosine",
+    created: "2025-05-07 12:30",
+    sizeMB: 2.4,
     knowledgeGraph: {
       entities: [
-        { id: "s1", name: "Alex Carter", label: "Suspect", alias: "Ace" },
-        { id: "d1", name: "Buddy", label: "Dog", breed: "Beagle", age: 4 },
-        { id: "w1", name: "Sam Lee", label: "Witness", statementDate: "2025-04-20" },
-        { id: "e1", id2: "CCTV-17", name: "CCTV-17", label: "Evidence", type: "Video", desc: "Camera shows Carter carrying dog" },
-        { id: "m1", name: "Ransom", label: "Motive", category: "Ransom", details: "Text demanding $2 000" }
+        // Users
+        { id: "u001", type: "User", name: "Alice Smith", date_of_birth: "1985-06-15", gender: "Female", membership_start_date: "2024-01-01", membership_status: "active" },
+        { id: "u002", type: "User", name: "Bob Johnson", date_of_birth: "1978-11-03", gender: "Male", membership_start_date: "2024-02-01", membership_status: "active" },
+        { id: "u003", type: "User", name: "Carol Davis", date_of_birth: "1990-03-22", gender: "Female", membership_start_date: "2024-03-01", membership_status: "active" },
+        // Physicians
+        { id: "p001", type: "Physician", name: "Dr. Eva Lee", specialty: "Functional Medicine", affiliated_since: "2023-05-01" },
+        { id: "p002", type: "Physician", name: "Dr. Amir Nassar", specialty: "Preventive Diagnostics", affiliated_since: "2024-01-12" },
+        // Admin
+        { id: "a001", type: "Admin", name: "Maya Chen", role: "Health Program Admin", permissions: ["read", "write", "manage-users"] },
+        // Tests
+        { id: "t001", type: "Test", name: "Vitamin D", category: "Nutrients", description: "Measures the level of vitamin D in blood", units: "ng/mL", reference_range: "20–50" },
+        { id: "t002", type: "Test", name: "LDL Cholesterol", category: "Cardiovascular", description: "Low-density lipoprotein cholesterol level", units: "mg/dL", reference_range: "<100" },
+        { id: "t003", type: "Test", name: "Hemoglobin A1c", category: "Metabolic", description: "Average blood sugar level over 3 months", units: "%", reference_range: "<5.7" },
+        { id: "t004", type: "Test", name: "TSH", category: "Hormones", description: "Thyroid Stimulating Hormone", units: "mIU/L", reference_range: "0.4–4.0" },
+        { id: "t005", type: "Test", name: "hs-CRP", category: "Inflammation", description: "High-sensitivity C-reactive protein", units: "mg/L", reference_range: "<3.0" },
+        { id: "t006", type: "Test", name: "Lead", category: "Toxins", description: "Measures lead in blood", units: "µg/dL", reference_range: "<5" },
+        // TestResults
+        { id: "r001", type: "TestResult", value: 30, date: "2025-01-15", status: "In Range", user_id: "u001", test_id: "t001" },
+        { id: "r002", type: "TestResult", value: 160, date: "2025-01-15", status: "Out of Range", user_id: "u001", test_id: "t002" },
+        { id: "r003", type: "TestResult", value: 5.8, date: "2025-02-20", status: "In Range", user_id: "u002", test_id: "t003" },
+        { id: "r004", type: "TestResult", value: 6.5, date: "2025-02-20", status: "Out of Range", user_id: "u002", test_id: "t004" },
+        { id: "r005", type: "TestResult", value: 2.0, date: "2025-03-10", status: "In Range", user_id: "u003", test_id: "t005" },
+        { id: "r006", type: "TestResult", value: 5, date: "2025-03-10", status: "Out of Range", user_id: "u003", test_id: "t006" }
       ],
       relationships: [
-        { id: "r1", source: "w1", target: "e1", type: "OBSERVED" },
-        { id: "r2", source: "e1", target: "s1", type: "SHOWS_IN_POSSESSION" },
-        { id: "r3", source: "e1", target: "d1", type: "OF_DOG" },
-        { id: "r4", source: "e1", target: "m1", type: "SUPPORTS" },
-        { id: "r5", source: "s1", target: "m1", type: "SEEKING_RANSOM" }
+        { id: "rel1", source: "u001", target: "p001", type: "CLIENT_OF" },
+        { id: "rel2", source: "u002", target: "p001", type: "CLIENT_OF" },
+        { id: "rel3", source: "u003", target: "p002", type: "CLIENT_OF" },
+        { id: "rel4", source: "a001", target: "u001", type: "MANAGES" },
+        { id: "rel5", source: "a001", target: "u002", type: "MANAGES" },
+        { id: "rel6", source: "a001", target: "p001", type: "MANAGES" },
+        { id: "rel7", source: "r001", target: "t001", type: "OF_TEST" },
+        { id: "rel8", source: "r002", target: "t002", type: "OF_TEST" },
+        { id: "rel9", source: "r003", target: "t003", type: "OF_TEST" },
+        { id: "rel10", source: "r004", target: "t004", type: "OF_TEST" },
+        { id: "rel11", source: "r005", target: "t005", type: "OF_TEST" },
+        { id: "rel12", source: "r006", target: "t006", type: "OF_TEST" },
+        { id: "rel13", source: "u001", target: "r001", type: "HAS_RESULT" },
+        { id: "rel14", source: "u001", target: "r002", type: "HAS_RESULT" },
+        { id: "rel15", source: "u002", target: "r003", type: "HAS_RESULT" },
+        { id: "rel16", source: "u002", target: "r004", type: "HAS_RESULT" },
+        { id: "rel17", source: "u003", target: "r005", type: "HAS_RESULT" },
+        { id: "rel18", source: "u003", target: "r006", type: "HAS_RESULT" }
       ],
       newSchemaElements: [
-        { type: "entity_label", value: "Suspect" },
-        { type: "entity_label", value: "Dog" },
-        { type: "entity_label", value: "Witness" },
-        { type: "entity_label", value: "Evidence" },
-        { type: "entity_label", value: "Motive" },
-        { type: "relationship_type", value: "OBSERVED" },
-        { type: "relationship_type", value: "SHOWS_IN_POSSESSION" },
-        { type: "relationship_type", value: "OF_DOG" },
-        { type: "relationship_type", value: "SUPPORTS" },
-        { type: "relationship_type", value: "SEEKING_RANSOM" }
+        { type: "entity_label", value: "User" },
+        { type: "entity_label", value: "Physician" },
+        { type: "entity_label", value: "Admin" },
+        { type: "entity_label", value: "Test" },
+        { type: "entity_label", value: "TestResult" },
+        { type: "relationship_type", value: "CLIENT_OF" },
+        { type: "relationship_type", value: "MANAGES" },
+        { type: "relationship_type", value: "OF_TEST" },
+        { type: "relationship_type", value: "HAS_RESULT" }
       ]
     },
-    cypher: `// ❶  Nodes\nCREATE (s:Suspect  {name:\"Alex Carter\", alias:\"Ace\"});\nCREATE (d:Dog      {name:\"Buddy\", breed:\"Beagle\", age:4});\nCREATE (w:Witness  {name:\"Sam Lee\", statementDate:\"2025-04-20\"});\nCREATE (e:Evidence {id:\"CCTV-17\", type:\"Video\", desc:\"Camera shows Carter carrying dog\"});\nCREATE (m:Motive   {category:\"Ransom\", details:\"Text demanding $2 000\"});\n\n// ❷  Relationships\nMATCH (s:Suspect {name:\"Alex Carter\"}),\n      (d:Dog     {name:\"Buddy\"}),\n      (w:Witness {name:\"Sam Lee\"}),\n      (e:Evidence {id:\"CCTV-17\"}),\n      (m:Motive   {category:\"Ransom\"})\nCREATE (w)-[:OBSERVED]->(e)\nCREATE (e)-[:SHOWS_IN_POSSESSION]->(s)\nCREATE (e)-[:OF_DOG]->(d)\nCREATE (e)-[:SUPPORTS]->(m)\nCREATE (s)-[:SEEKING_RANSOM]->(m);`,
-    explanation: `Below is a refreshed five-node knowledge-graph framed around a missing-dog investigation. It preserves the same object/relationship pattern as before so you can reuse the multi-hop reasoning examples.\n\n1 Objects (nodes)\n\nNode label\tWhat it represents\tExample instance\nSuspect (formerly Defendant)\tPerson believed to have taken the dog\t(:Suspect {name:\"Alex Carter\"})\nDog (Victim)\tThe missing animal\t(:Dog {name:\"Buddy\",breed:\"Beagle\"})\nWitness\tPerson who saw or heard something\t(:Witness {name:\"Sam Lee\"})\nEvidence\tAny digital/physical clue\t(:Evidence {id:\"CCTV-17\",type:\"Video\",desc:\"Alley camera\"})\nMotive\tReason the dog was taken\t(:Motive {category:\"Ransom\",details:\"$2 000 demand\"})\n2 Relationship types\n\nRelationship\tDirection\tSemantics\nOBSERVED\tWitness → Evidence\tWitness attests to evidence\nSHOWS_IN_POSSESSION\tEvidence → Suspect\tEvidence depicts suspect with dog\nOF_DOG\tEvidence → Dog\tEvidence concerns the missing dog\nSUPPORTS\tEvidence → Motive\tEvidence backs up motive theory\nSEEKING_RANSOM\tSuspect → Motive\tSuspect benefits from motive\n(Rename edges to suit your own ontology if desired.)\n\n3 Sample Cypher to build the graph\n...\n\n4 Multi-hop reasoning in action\nA. "Why is Alex Carter a suspect?"\nMATCH (s:Suspect {name:\"Alex Carter\"})<-[:SHOWS_IN_POSSESSION]-(e)\nRETURN s.name AS Suspect, e.id AS EvidenceID, e.desc AS Details;\nOne-hop: Evidence directly links suspect to dog.\n\nB. "Connect suspect to dog."\nMATCH (s:Suspect {name:\"Alex Carter\"})\n      <-[:SHOWS_IN_POSSESSION]-(e)-[:OF_DOG]->(d:Dog)\nRETURN s.name, e.id, d.name;\nTwo-hop chain: Suspect ← Evidence → Dog.\n\nC. "Show the witness-backed motive trail."\nMATCH (s:Suspect {name:\"Alex Carter\"})-[:SEEKING_RANSOM]->(m)<-[:SUPPORTS]-\n      (e)<-[:OBSERVED]-(w:Witness)\nRETURN w.name AS Witness,\n       e.id   AS EvidenceID,\n       m.details AS RansomDemand,\n       s.name AS Suspect;\nThree-hop reasoning:\n\nWitness Sam Lee saw CCTV-17\nCCTV-17 backs the ransom motive\nAlex Carter is linked to that motive\n\nThis path lets investigators articulate a clear, explainable line from eyewitness to motive to suspect—​exactly the kind of multi-hop insight knowledge graphs excel at.`
+    cypher: `// Nodes
+CREATE (a:Admin {admin_id:"a001", name:"Maya Chen", role:"Health Program Admin", permissions:["read","write","manage-users"]});
+CREATE (u1:User {user_id:"u001", name:"Alice Smith", date_of_birth:"1985-06-15", gender:"Female", membership_start_date:"2024-01-01", membership_status:"active"});
+CREATE (u2:User {user_id:"u002", name:"Bob Johnson", date_of_birth:"1978-11-03", gender:"Male", membership_start_date:"2024-02-01", membership_status:"active"});
+CREATE (u3:User {user_id:"u003", name:"Carol Davis", date_of_birth:"1990-03-22", gender:"Female", membership_start_date:"2024-03-01", membership_status:"active"});
+CREATE (p1:Physician {physician_id:"p001", name:"Dr. Eva Lee", specialty:"Functional Medicine", affiliated_since:"2023-05-01"});
+CREATE (p2:Physician {physician_id:"p002", name:"Dr. Amir Nassar", specialty:"Preventive Diagnostics", affiliated_since:"2024-01-12"});
+CREATE (t1:Test {test_id:"t001", name:"Vitamin D", category:"Nutrients", description:"Measures the level of vitamin D in blood", units:"ng/mL", reference_range:"20–50"});
+CREATE (t2:Test {test_id:"t002", name:"LDL Cholesterol", category:"Cardiovascular", description:"Low-density lipoprotein cholesterol level", units:"mg/dL", reference_range:"<100"});
+CREATE (t3:Test {test_id:"t003", name:"Hemoglobin A1c", category:"Metabolic", description:"Average blood sugar level over 3 months", units:"%", reference_range:"<5.7"});
+CREATE (t4:Test {test_id:"t004", name:"TSH", category:"Hormones", description:"Thyroid Stimulating Hormone", units:"mIU/L", reference_range:"0.4–4.0"});
+CREATE (t5:Test {test_id:"t005", name:"hs-CRP", category:"Inflammation", description:"High-sensitivity C-reactive protein", units:"mg/L", reference_range:"<3.0"});
+CREATE (t6:Test {test_id:"t006", name:"Lead", category:"Toxins", description:"Measures lead in blood", units:"µg/dL", reference_range:"<5"});
+CREATE (r1:TestResult {result_id:"r001", value:30, date:"2025-01-15", status:"In Range"});
+CREATE (r2:TestResult {result_id:"r002", value:160, date:"2025-01-15", status:"Out of Range"});
+CREATE (r3:TestResult {result_id:"r003", value:5.8, date:"2025-02-20", status:"In Range"});
+CREATE (r4:TestResult {result_id:"r004", value:6.5, date:"2025-02-20", status:"Out of Range"});
+CREATE (r5:TestResult {result_id:"r005", value:2.0, date:"2025-03-10", status:"In Range"});
+CREATE (r6:TestResult {result_id:"r006", value:5, date:"2025-03-10", status:"Out of Range"});
+
+// Relationships
+MATCH (a:Admin {admin_id:"a001"}),
+      (u1:User {user_id:"u001"}),
+      (u2:User {user_id:"u002"}),
+      (u3:User {user_id:"u003"}),
+      (p1:Physician {physician_id:"p001"}),
+      (p2:Physician {physician_id:"p002"}),
+      (t1:Test {test_id:"t001"}),
+      (t2:Test {test_id:"t002"}),
+      (t3:Test {test_id:"t003"}),
+      (t4:Test {test_id:"t004"}),
+      (t5:Test {test_id:"t005"}),
+      (t6:Test {test_id:"t006"}),
+      (r1:TestResult {result_id:"r001"}),
+      (r2:TestResult {result_id:"r002"}),
+      (r3:TestResult {result_id:"r003"}),
+      (r4:TestResult {result_id:"r004"}),
+      (r5:TestResult {result_id:"r005"}),
+      (r6:TestResult {result_id:"r006"})
+CREATE (u1)-[:CLIENT_OF]->(p1)
+CREATE (u2)-[:CLIENT_OF]->(p1)
+CREATE (u3)-[:CLIENT_OF]->(p2)
+CREATE (a)-[:MANAGES]->(u1)
+CREATE (a)-[:MANAGES]->(u2)
+CREATE (a)-[:MANAGES]->(p1)
+CREATE (r1)-[:OF_TEST]->(t1)
+CREATE (r2)-[:OF_TEST]->(t2)
+CREATE (r3)-[:OF_TEST]->(t3)
+CREATE (r4)-[:OF_TEST]->(t4)
+CREATE (r5)-[:OF_TEST]->(t5)
+CREATE (r6)-[:OF_TEST]->(t6)
+CREATE (u1)-[:HAS_RESULT]->(r1)
+CREATE (u1)-[:HAS_RESULT]->(r2)
+CREATE (u2)-[:HAS_RESULT]->(r3)
+CREATE (u2)-[:HAS_RESULT]->(r4)
+CREATE (u3)-[:HAS_RESULT]->(r5)
+CREATE (u3)-[:HAS_RESULT]->(r6);`,
+    explanation: `This Function Health knowledge graph models the relationships between Admin, Physician, Users (Clients), Tests, and TestResults.
+- Users are linked to Physicians via CLIENT_OF, and to their TestResults via HAS_RESULT.
+- Admin manages Users and Physicians.
+- TestResults are linked to their corresponding Test via OF_TEST.
+This structure enables multi-hop queries such as "Which clients managed by a given admin have out-of-range test results for a specific test?" or "Which physician's clients have the most in-range results for metabolic tests?".`
   },
   {
     id: "2",

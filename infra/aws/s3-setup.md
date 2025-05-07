@@ -8,8 +8,8 @@ This document outlines the steps to create and configure an S3 bucket for storin
 
 ```bash
 aws s3api create-bucket \
-    --bucket your-rag-documents-bucket \
-    --region us-east-1
+    --bucket rag-guide-documents \
+    --region us-west-2
 ```
 
 ### Using AWS Console

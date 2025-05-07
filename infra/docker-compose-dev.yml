@@ -1,23 +1,6 @@
 services:
-  neo4j:
-    image: neo4j:5.15
-    container_name: rag-neo4j
-    ports:
-      - "7474:7474"  # Neo4j Browser
-      - "7687:7687"  # Bolt protocol
-    environment:
-      NEO4J_AUTH: "neo4j/testpassword"
-    volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-      - neo4j_import:/var/lib/neo4j/import
-      - neo4j_plugins:/plugins
-      - ./neo4j/plugins:/var/lib/neo4j/plugins
-    healthcheck:
-      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/7687"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+# Neo4j service removed for Aura mode.
+# To use local Neo4j, restore this block.
 
   postgres:
     image: postgres:15
@@ -64,8 +47,6 @@ services:
       dockerfile: apps/backend/Dockerfile.dev
     container_name: rag-backend
     depends_on:
-      neo4j:
-        condition: service_healthy
       postgres:
         condition: service_healthy
       localstack:
@@ -75,9 +56,8 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      NEO4J_URI: bolt://rag-neo4j:7687
-      NEO4J_USER: neo4j
-      NEO4J_PASSWORD: testpassword
+      # Neo4j environment variables removed for Aura mode.
+      # The backend will use values from .env.
       POSTGRES_HOST: rag-postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
